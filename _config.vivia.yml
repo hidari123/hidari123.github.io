@@ -12,8 +12,8 @@ favicon: # Path to the custom favicon relative to /source (e.g. "/favicon.png" i
 
 # Banner
 banner:
-  enable: false # Display banner
-  url: # Path to the banner image relative to /source. Web url is also supported
+  enable: true # Display banner
+  url: /banner.png # Path to the banner image relative to /source. Web url is also supported
   position: center # Specifies the alignment of the image, see the "object-position" property in CSS
   onAllPages: true # Display banner on all pages instead of only the home page
 
@@ -23,9 +23,9 @@ hue:
   # Visit `saicaca.github.io/vivia-preview` to preview the theme color
 
 # Personal info
-avatar: /_imgs/WechatIMG444.jpg # Path to the avatar image relative to /source
+avatar: /avatar.jpg # Path to the avatar image relative to /source
 author: Hitari
-subtitle: Hitari Demo
+subtitle: Non-conventional INTJ
 links:
   - name: Twitter
     icon: fa-brands fa-twitter # Find icon codes at https://fontawesome.com/search
