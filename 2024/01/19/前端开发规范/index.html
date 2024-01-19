@@ -20,16 +20,17 @@
   <link rel="preload" href="/css/fonts/Roboto-Regular.ttf" as="font" type="font/ttf" crossorigin="anonymous">
   <link rel="preload" href="/css/fonts/Roboto-Bold.ttf" as="font" type="font/ttf" crossorigin="anonymous">
 
-  <meta name="description" content="俗话说“没有规矩，不成方圆”。自由是建立在规则之上的，没有了规则，就没有真正的自由。 本规范旨在减少团队协作成本和维护成本，让代码阅读起来更容易，使开发流程更加规范化。 环境配置本地环境配置 node.js 版本：20.10.0   建议使用 vscode   eslint + prettier   配置 prettier format on save  安装 Prettier  点击 VS Co">
+  <meta name="description" content="俗话说“没有规矩，不成方圆”。自由是建立在规则之上的，没有了规则，就没有真正的自由。   本规范旨在减少团队协作成本和维护成本，让代码阅读起来更容易，使开发流程更加规范化。  环境配置本地环境配置 node.js 版本：20.10.0   建议使用 vscode   eslint + prettier   配置 prettier format on save  安装 Prettier  点击 V">
 <meta property="og:type" content="article">
 <meta property="og:title" content="前端开发规范">
 <meta property="og:url" content="https://hidari123.github.io/2024/01/19/%E5%89%8D%E7%AB%AF%E5%BC%80%E5%8F%91%E8%A7%84%E8%8C%83/index.html">
 <meta property="og:site_name" content="Hitari">
-<meta property="og:description" content="俗话说“没有规矩，不成方圆”。自由是建立在规则之上的，没有了规则，就没有真正的自由。 本规范旨在减少团队协作成本和维护成本，让代码阅读起来更容易，使开发流程更加规范化。 环境配置本地环境配置 node.js 版本：20.10.0   建议使用 vscode   eslint + prettier   配置 prettier format on save  安装 Prettier  点击 VS Co">
+<meta property="og:description" content="俗话说“没有规矩，不成方圆”。自由是建立在规则之上的，没有了规则，就没有真正的自由。   本规范旨在减少团队协作成本和维护成本，让代码阅读起来更容易，使开发流程更加规范化。  环境配置本地环境配置 node.js 版本：20.10.0   建议使用 vscode   eslint + prettier   配置 prettier format on save  安装 Prettier  点击 V">
 <meta property="og:locale" content="en_US">
 <meta property="article:published_time" content="2024-01-19T03:14:51.191Z">
-<meta property="article:modified_time" content="2024-01-19T03:14:59.386Z">
+<meta property="article:modified_time" content="2024-01-19T05:59:26.706Z">
 <meta property="article:author" content="John Doe">
+<meta property="article:tag" content="前端、规范">
 <meta name="twitter:card" content="summary">
   
     <link rel="alternate" href="/atom.xml" title="Hitari" type="application/atom+xml">
@@ -156,6 +157,13 @@
 
     
       
+  <div class="widget-wrap">
+    <div class="widget">
+      <h3 class="widget-title">Tags</h3>
+      <ul class="widget-tag-list" itemprop="keywords"><li class="widget-tag-list-item"><a class="widget-tag-list-link" href="/tags/%E5%89%8D%E7%AB%AF%E3%80%81%E8%A7%84%E8%8C%83/" rel="tag">前端、规范</a></li></ul>
+    </div>
+  </div>
+
 
     
   </div>
@@ -201,11 +209,17 @@
           </div>
         </div>
         
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E5%89%8D%E7%AB%AF%E3%80%81%E8%A7%84%E8%8C%83/" rel="tag">前端、规范</a></li></ul>
+
       </header>
       <div class="e-content article-entry" itemprop="articleBody">
         
-          <p>俗话说“没有规矩，不成方圆”。自由是建立在规则之上的，没有了规则，就没有真正的自由。</p>
+          <blockquote>
+<p>俗话说“没有规矩，不成方圆”。自由是建立在规则之上的，没有了规则，就没有真正的自由。</p>
+</blockquote>
+<blockquote>
 <p>本规范旨在减少团队协作成本和维护成本，让代码阅读起来更容易，使开发流程更加规范化。</p>
+</blockquote>
 <h2 id="环境配置"><a href="#环境配置" class="headerlink" title="环境配置"></a>环境配置</h2><h3 id="本地环境配置"><a href="#本地环境配置" class="headerlink" title="本地环境配置"></a>本地环境配置</h3><blockquote>
 <p>node.js 版本：20.10.0</p>
 </blockquote>
@@ -256,7 +270,7 @@
 </li>
 </ol>
 </li>
-<li><p>.prettierrc</p>
+<li><p>.prettierrc.cjs</p>
 </li>
 </ol>
 <figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line"><span class="variable language_">module</span>.<span class="property">exports</span> = &#123;</span><br><span class="line">  <span class="comment">// (x)=&gt;&#123;&#125;,单个参数箭头函数是否显示小括号。(always:始终显示;avoid:省略括号。默认:always)</span></span><br><span class="line">  <span class="attr">arrowParens</span>: <span class="string">&quot;always&quot;</span>,</span><br><span class="line">  <span class="comment">// 开始标签的右尖括号是否跟随在最后一行属性末尾，默认false</span></span><br><span class="line">  <span class="attr">bracketSameLine</span>: <span class="literal">false</span>,</span><br><span class="line">  <span class="comment">// 对象字面量的括号之间打印空格 (true - Example: &#123; foo: bar &#125; ; false - Example: &#123;foo:bar&#125;)</span></span><br><span class="line">  <span class="attr">bracketSpacing</span>: <span class="literal">true</span>,</span><br><span class="line">  <span class="comment">// 是否格式化一些文件中被嵌入的代码片段的风格(auto|off;默认auto)</span></span><br><span class="line">  <span class="attr">embeddedLanguageFormatting</span>: <span class="string">&quot;auto&quot;</span>,</span><br><span class="line">  <span class="comment">// 指定 HTML 文件的空格敏感度 (css|strict|ignore;默认css)</span></span><br><span class="line">  <span class="attr">htmlWhitespaceSensitivity</span>: <span class="string">&quot;css&quot;</span>,</span><br><span class="line">  <span class="comment">// 当文件已经被 Prettier 格式化之后，是否会在文件顶部插入一个特殊的 @format 标记，默认false</span></span><br><span class="line">  <span class="attr">insertPragma</span>: <span class="literal">false</span>,</span><br><span class="line">  <span class="comment">// 在 JSX 中使用单引号替代双引号，默认false</span></span><br><span class="line">  <span class="attr">jsxSingleQuote</span>: <span class="literal">false</span>,</span><br><span class="line">  <span class="comment">// 每行最多字符数量，超出换行(默认80)</span></span><br><span class="line">  <span class="attr">printWidth</span>: <span class="number">120</span>,</span><br><span class="line">  <span class="comment">// 超出打印宽度 (always | never | preserve )</span></span><br><span class="line">  <span class="attr">proseWrap</span>: <span class="string">&quot;preserve&quot;</span>,</span><br><span class="line">  <span class="comment">// 对象属性是否使用引号(as-needed | consistent | preserve;默认as-needed:对象的属性需要加引号才添加;)</span></span><br><span class="line">  <span class="attr">quoteProps</span>: <span class="string">&quot;as-needed&quot;</span>,</span><br><span class="line">  <span class="comment">// 是否只格式化在文件顶部包含特定注释(@prettier| @format)的文件，默认false</span></span><br><span class="line">  <span class="attr">requirePragma</span>: <span class="literal">false</span>,</span><br><span class="line">  <span class="comment">// 结尾添加分号</span></span><br><span class="line">  <span class="attr">semi</span>: <span class="literal">true</span>,</span><br><span class="line">  <span class="comment">// 使用单引号 (true:单引号;false:双引号)</span></span><br><span class="line">  <span class="attr">singleQuote</span>: <span class="literal">false</span>,</span><br><span class="line">  <span class="comment">// 缩进空格数，默认2个空格</span></span><br><span class="line">  <span class="attr">tabWidth</span>: <span class="number">2</span>,</span><br><span class="line">  <span class="comment">// 元素末尾是否加逗号，默认es5: ES5中的 objects, arrays 等会添加逗号，TypeScript 中的 type 后不加逗号</span></span><br><span class="line">  <span class="attr">trailingComma</span>: <span class="string">&quot;es5&quot;</span>,</span><br><span class="line">  <span class="comment">// 指定缩进方式，空格或tab，默认false，即使用空格</span></span><br><span class="line">  <span class="attr">useTabs</span>: <span class="literal">false</span>,</span><br><span class="line">  <span class="comment">// vue 文件中是否缩进 &lt;style&gt; 和 &lt;script&gt; 标签，默认 false</span></span><br><span class="line">  <span class="attr">vueIndentScriptAndStyle</span>: <span class="literal">false</span>,</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
