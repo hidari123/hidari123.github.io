@@ -1,0 +1,23 @@
+---
+// src/components/Mermaid.astro
+const { diagram } = Astro.props
+---
+
+<div class="mermaid" data-diagram={diagram}>
+  {diagram}
+</div>
+
+<script is:inline>
+if (typeof window !== 'undefined') {
+  // 动态加载避免SSR问题
+  import('mermaid').then(m => {
+    m.default.initialize({
+      startOnLoad: false, // 手动控制渲染
+      theme: 'default',
+      securityLevel: 'loose'
+    });
+    // 只渲染当前图表（避免重复渲染）
+    m.default.init(undefined, document.querySelector('[data-diagram]'));
+  });
+}
+</script>
