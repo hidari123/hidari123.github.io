@@ -2,7 +2,7 @@
  * @Author: hidari
  * @Date: 2026-05-13 15:35
  * @LastEditors: hidari
- * @LastEditTime: 2026-05-14 10:06:50
+ * @LastEditTime: 2026-05-14 15:58:09
  * Copyright (c) 2026 by hidari, All Rights Reserved.
  */
 
@@ -12,6 +12,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Calendar, Tag } from "lucide-react";
 import { getAllPosts, type Post } from "@/services/blogService";
 import { ImageOff } from "lucide-react";
+import { Ghost } from "react-kawaii";
 
 // 默认封面图片
 const DEFAULT_COVER = "https://images.unsplash.com/photo-1677442136019-21780ecad995?w=800&q=80";
@@ -31,15 +32,21 @@ const PostCardSkeleton = () => (
   </div>
 );
 
-// 空状态组件
+// 空状态组件 - 使用 react-kawaii Ghost
 const EmptyState = () => (
   <motion.div
     initial={{ opacity: 0, y: 20 }}
     animate={{ opacity: 1, y: 0 }}
     className="text-center py-20"
   >
-    <div className="text-6xl mb-4">📝</div>
-    <h2 className="text-2xl font-semibold mb-4">暂无文章</h2>
+    <motion.div
+      animate={{ y: [0, -10, 0] }}
+      transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+      className="mb-6"
+    >
+      <Ghost mood="sad" size={120} color="#a78bfa" />
+    </motion.div>
+    <h2 className="text-2xl font-semibold mb-4">这里空空如也 👻</h2>
     <p className="text-[var(--text-secondary)]">还没有发布任何文章，敬请期待...</p>
   </motion.div>
 );

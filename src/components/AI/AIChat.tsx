@@ -2,7 +2,7 @@
  * @Author: hidari
  * @Date: 2026-05-14 09:54
  * @LastEditors: hidari
- * @LastEditTime: 2026-05-14 13:48:43
+ * @LastEditTime: 2026-05-14 16:04:28
  * Copyright (c) 2026 by hidari, All Rights Reserved.
  */
 import { useState, useRef, useEffect, useCallback } from "react";
@@ -28,7 +28,7 @@ interface AIChatProps {
 // 项目信息
 const PROJECT_INFO = `
 项目信息：
-- 项目名称：AI Blog（一个现代化的博客系统）
+- 项目名称：Hitari's Blog（一个现代化的博客系统）
 - 作者 GitHub：https://github.com/hidari123
 - 技术栈：React + TypeScript + Vite + Tailwind CSS
 - 功能：支持博客文章展示、Markdown 渲染、评论系统、AI 增强功能

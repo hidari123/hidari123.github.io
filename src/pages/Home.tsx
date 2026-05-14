@@ -2,24 +2,68 @@
  * @Author: hidari
  * @Date: 2026-05-13 14:56:30
  * @LastEditors: hidari
- * @LastEditTime: 2026-05-14 14:11:02
+ * @LastEditTime: 2026-05-14 16:24:44
  * Copyright (c) 2026 by hidari, All Rights Reserved.
  */
 import { useState, useMemo, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Bot, Sparkles, Plus } from "lucide-react";
+import { Bot, Sparkles, Plus, Zap } from "lucide-react";
 import { Link } from "react-router-dom";
 import { ToolCard } from "../components/Home/ToolCard";
 import { ToolFilter } from "../components/Home/ToolFilter";
 import { SearchBar } from "../components/Home/SearchBar";
 import { SubmitToolModal } from "../components/Home/SubmitToolModal";
 import { getAllTools, type ToolCategory } from "../data/tools";
+import { Mug, Cat, Ghost, Planet } from "react-kawaii";
+
+// 打字机效果 hook
+const useTypewriter = (
+  words: string[],
+  typingSpeed = 100,
+  deletingSpeed = 50,
+  pauseTime = 2000,
+) => {
+  const [text, setText] = useState("");
+  const [wordIndex, setWordIndex] = useState(0);
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  useEffect(() => {
+    const currentWord = words[wordIndex];
+
+    const timeout = setTimeout(
+      () => {
+        if (!isDeleting) {
+          setText(currentWord.substring(0, text.length + 1));
+          if (text.length === currentWord.length) {
+            setTimeout(() => setIsDeleting(true), pauseTime);
+            return;
+          }
+        } else {
+          setText(currentWord.substring(0, text.length - 1));
+          if (text.length === 0) {
+            setIsDeleting(false);
+            setWordIndex((prev) => (prev + 1) % words.length);
+          }
+        }
+      },
+      isDeleting ? deletingSpeed : typingSpeed,
+    );
+
+    return () => clearTimeout(timeout);
+  }, [text, isDeleting, wordIndex, words, typingSpeed, deletingSpeed, pauseTime]);
+
+  return text;
+};
 
 export const Home = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [activeCategory, setActiveCategory] = useState<ToolCategory>("all");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
+
+  // 打字机效果
+  const typewriterWords = ["你好呀 ✨", "欢迎来看我 ✨", "喜欢您来 ✨"];
+  const typewriterText = useTypewriter(typewriterWords);
 
   // 刷新工具列表
   const handleRefresh = () => {
@@ -91,16 +135,19 @@ export const Home = () => {
           transition={{ duration: 0.5 }}
           className="text-center max-w-3xl mx-auto mb-16"
         >
-          {/* Hero Icon */}
+          {/* react-kawaii 可爱星球 */}
           <motion.div
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
+            initial={{ scale: 0, rotate: -180 }}
+            animate={{ scale: 1, rotate: 0 }}
             transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
-            className="mb-8"
+            className="mb-8 flex justify-center"
           >
-            <div className="inline-flex items-center justify-center w-24 h-24 rounded-full gradient-bg">
-              <Bot className="w-12 h-12 text-white" />
-            </div>
+            <motion.div
+              animate={{ y: [0, -15, 0] }}
+              transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+            >
+              <Planet mood="blissful" color="#a78bfa" size={120} />
+            </motion.div>
           </motion.div>
 
           {/* Title */}
@@ -110,18 +157,21 @@ export const Home = () => {
             transition={{ delay: 0.3 }}
             className="text-5xl md:text-6xl font-bold mb-6 gradient-text"
           >
-            AI Blog
+            Hitari's Blog
           </motion.h1>
 
-          {/* Subtitle */}
-          <motion.p
+          {/* 打字机效果 */}
+          <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.4 }}
-            className="text-xl md:text-2xl text-[var(--text-secondary)] mb-8"
+            className="h-10 mb-6"
           >
-            探索人工智能的无限可能，分享机器学习与深度学习的最新见解
-          </motion.p>
+            <span className="text-2xl md:text-3xl text-[var(--text-primary)] font-medium">
+              {typewriterText}
+            </span>
+            <span className="inline-block w-0.5 h-8 bg-[var(--accent)] ml-1 animate-pulse" />
+          </motion.div>
 
           {/* CTA Buttons */}
           <motion.div
@@ -130,10 +180,53 @@ export const Home = () => {
             transition={{ delay: 0.5 }}
             className="flex flex-col sm:flex-row items-center justify-center gap-4"
           >
-            <Link to="/blog" className="btn flex items-center space-x-2 px-8 py-3 text-lg">
+            <Link
+              to="/blog"
+              className="btn flex items-center space-x-2 px-8 py-3 text-lg shadow-lg shadow-blue-500/25"
+            >
               <Sparkles className="w-5 h-5" />
-              <span>开始阅读</span>
+              <span>浏览文章</span>
             </Link>
+            <Link
+              to="/ai"
+              className="px-8 py-3 text-lg font-medium rounded-lg border-2 border-[var(--accent)] text-[var(--accent)] hover:bg-[var(--accent)] hover:text-white transition-all duration-300 flex items-center space-x-2"
+            >
+              <Zap className="w-5 h-5" />
+              <span>体验 AI</span>
+            </Link>
+          </motion.div>
+
+          {/* 装饰性可爱角色云 */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.6 }}
+            className="mt-8 flex justify-center gap-6 items-center"
+          >
+            {[
+              { Component: Cat, color: "#FFB6C1" },
+              { Component: Mug, color: "#87CEEB" },
+              { Component: Ghost, color: "#DDA0DD" },
+              { Component: Cat, color: "#FFA07A" },
+              { Component: Ghost, color: "#98FB98" },
+              { Component: Mug, color: "#FF69B4" },
+            ].map(({ Component, color }, i) => (
+              <motion.div
+                key={i}
+                animate={{
+                  y: [0, -12, 0],
+                  rotate: [0, 8, -8, 0],
+                }}
+                transition={{
+                  duration: 2.5,
+                  repeat: Infinity,
+                  delay: i * 0.15,
+                  ease: "easeInOut",
+                }}
+              >
+                <Component size={70} mood="happy" color={color} />
+              </motion.div>
+            ))}
           </motion.div>
 
           {/* Features */}

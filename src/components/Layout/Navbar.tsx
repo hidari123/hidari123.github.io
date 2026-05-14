@@ -2,13 +2,13 @@
  * @Author: hidari
  * @Date: 2026-05-13 14:55:00
  * @LastEditors: hidari
- * @LastEditTime: 2026-05-14 10:41:17
+ * @LastEditTime: 2026-05-14 16:02:10
  * Copyright (c) 2026 by hidari, All Rights Reserved.
  */
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { ThemeToggle } from "@/components/Common/ThemeToggle";
-import { Bot, PenLine, Settings } from "lucide-react";
+import { Bot, Settings, Home, BookOpen, Bot as Robot } from "lucide-react";
 import { useAIProvider } from "@/hooks/useAIProvider";
 import { AISettingsModal } from "@/components/AI/AISettingsModal";
 
@@ -42,10 +42,11 @@ export const Navbar = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  // 使用 lucide-react 图标
   const navLinks = [
-    { name: "首页", path: "/" },
-    { name: "博客", path: "/blog" },
-    { name: "关于", path: "/about" },
+    { name: "首页", path: "/", icon: Home },
+    { name: "博客", path: "/blog", icon: BookOpen },
+    { name: "AI", path: "/ai", icon: Robot },
   ];
 
   return (
@@ -63,12 +64,9 @@ export const Navbar = () => {
             to="/"
             className="flex items-center space-x-2 text-[var(--text-primary)] hover:text-[var(--accent)] transition-colors duration-300 group"
           >
-            <div className="relative">
-              <Bot className="w-8 h-8 text-[var(--accent)] group-hover:scale-110 transition-transform" />
-              <PenLine className="w-3 h-3 absolute -bottom-1 -right-1 text-[var(--accent)]" />
-            </div>
+            <Bot className="w-8 h-8 text-[var(--accent)] group-hover:scale-110 transition-transform" />
             <span className="text-xl font-bold bg-gradient-to-r from-[var(--accent)] to-purple-500 bg-clip-text text-transparent">
-              我的博客
+              Hitari's Blog
             </span>
           </Link>
 
@@ -78,13 +76,18 @@ export const Navbar = () => {
               <Link
                 key={link.path}
                 to={link.path}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 ${
+                className={`relative flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 ${
                   location.pathname === link.path
                     ? "bg-[var(--accent)] text-white shadow-lg shadow-[var(--accent)]/25"
                     : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-secondary)]"
                 }`}
               >
+                <link.icon className="w-4 h-4" />
                 {link.name}
+                {/* 下划线动画 */}
+                {location.pathname === link.path && (
+                  <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-white/80" />
+                )}
               </Link>
             ))}
           </div>

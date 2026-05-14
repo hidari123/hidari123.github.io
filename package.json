@@ -1,10 +1,12 @@
 {
-  "name": "ai-blog",
+  "name": "hitari's-blog",
   "private": true,
   "version": "0.0.1",
   "type": "module",
+  "homepage": "https://hidari123.github.io",
   "scripts": {
     "dev": "vite",
+    "deploy": "gh-pages -d dist",
     "build": "tsc && vite build",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
@@ -12,6 +14,7 @@
   },
   "dependencies": {
     "@giscus/react": "^3.1.0",
+    "@iconify/react": "^6.0.2",
     "@types/prismjs": "^1.26.6",
     "framer-motion": "^10.18.0",
     "gray-matter": "^4.0.3",
@@ -19,6 +22,7 @@
     "prismjs": "^1.30.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "react-kawaii": "^1.6.0",
     "react-markdown": "^9.0.1",
     "react-router-dom": "^6.21.0",
     "remark-frontmatter": "^5.0.0",
@@ -30,6 +34,7 @@
     "@types/react-dom": "^18.2.17",
     "@vitejs/plugin-react": "^4.2.1",
     "autoprefixer": "^10.4.16",
+    "gh-pages": "^6.3.0",
     "postcss": "^8.4.32",
     "tailwindcss": "^3.4.0",
     "typescript": "^5.3.3",

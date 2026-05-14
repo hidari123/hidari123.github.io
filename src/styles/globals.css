@@ -169,29 +169,38 @@ body::before {
   box-shadow: 0 20px 40px var(--shadow);
 }
 
-/* 自定义滚动条 */
+/* 自定义滚动条 - 圆润粉色可爱风格 */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 10px;
+  height: 10px;
 }
 
 ::-webkit-scrollbar-track {
   background: var(--bg-secondary);
+  border-radius: 10px;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--text-secondary);
-  border-radius: 4px;
+  background: linear-gradient(180deg, #f9a8d4 0%, #f472b6 100%);
+  border-radius: 10px;
+  border: 2px solid var(--bg-secondary);
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--accent);
+  background: linear-gradient(180deg, #fbcfe8 0%, #f9a8d4 100%);
 }
 
 /* Firefox 滚动条 */
 * {
   scrollbar-width: thin;
-  scrollbar-color: var(--text-secondary) var(--bg-secondary);
+  scrollbar-color: #f9a8d4 var(--bg-secondary);
+}
+
+/* 卡片蜜桃色光晕效果 */
+.card-hover:hover {
+  box-shadow:
+    0 20px 40px var(--shadow),
+    0 0 30px rgba(251, 207, 232, 0.15);
 }
 
 /* 链接样式 */
@@ -222,7 +231,8 @@ a:hover {
   background-color: var(--bg-card);
   border: 1px solid var(--border);
   border-radius: 12px;
-  padding: 1.5rem;
+  padding: 1.75rem;
+  box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.05);
 }
 
 /* 标题样式 */
@@ -725,4 +735,250 @@ p {
 [data-theme="dark"] .token.important,
 [data-theme="dark"] .token.variable {
   color: #ffa657;
+}
+
+/* ========================================
+   可爱背景设计 - 新版
+   ======================================== */
+
+/* 亮色主题：暖白到浅粉渐变 + 爱心星星 */
+body {
+  background: linear-gradient(
+    135deg,
+    #fff9f5 0%,
+    #fff5f0 20%,
+    #ffeff5 40%,
+    #ffe8f0 60%,
+    #fff0fa 80%,
+    #f8f0ff 100%
+  );
+}
+
+/* 暗色主题：深紫到暖黑渐变 + 星星光点 */
+[data-theme="dark"] body {
+  background: linear-gradient(
+    135deg,
+    #1a1020 0%,
+    #1f1530 25%,
+    #251a35 50%,
+    #1a1025 75%,
+    #150a18 100%
+  );
+}
+
+/* ========================================
+   爱心和星星装饰层
+   ======================================== */
+.cute-decoration {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: -1;
+  overflow: hidden;
+}
+
+/* 亮色主题的爱心/星星 */
+.cute-decoration::before {
+  content: "✦ · ✦ · ✦ · ✦ · ✦ · ✦ · ✦ · ✦ · ✦ · ✦ · ✦ · ✦ · ✦ · ✦ · ✦ · ✦ · ✦ · ✦";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 200%;
+  height: 200%;
+  font-size: 14px;
+  color: rgba(255, 182, 193, 0.3);
+  letter-spacing: 20px;
+  line-height: 80px;
+  word-spacing: 30px;
+  animation: starDrift 120s linear infinite;
+}
+
+/* 暗色主题的星星光点 */
+[data-theme="dark"] .cute-decoration::before {
+  content: "✦ ✧ · ✦ ✧ · ✦ ✧ · ✦ ✧ · ✦ ✧ · ✦ ✧ · ✦ ✧ · ✦ ✧ · ✦ ✧ · ✦ ✧ · ✦ ✧ · ✦ ✧";
+  color: rgba(199, 175, 255, 0.25);
+  font-size: 12px;
+  letter-spacing: 25px;
+  line-height: 60px;
+}
+
+@keyframes starDrift {
+  0% {
+    transform: translate(0, 0);
+  }
+  100% {
+    transform: translate(-50%, -50%);
+  }
+}
+
+/* ========================================
+   三个漂浮毛绒球
+   ======================================== */
+.fluffy-ball {
+  position: fixed;
+  border-radius: 50%;
+  filter: blur(60px);
+  opacity: 0.5;
+  pointer-events: none;
+  z-index: -1;
+  will-change: transform;
+}
+
+/* 粉色毛绒球 */
+.fluffy-ball-1 {
+  width: 400px;
+  height: 400px;
+  background: radial-gradient(
+    circle,
+    rgba(255, 182, 193, 0.8) 0%,
+    rgba(255, 192, 203, 0.4) 50%,
+    transparent 70%
+  );
+  top: 10%;
+  left: -10%;
+  animation: floatBall1 25s ease-in-out infinite;
+}
+
+/* 淡紫色毛绒球 */
+.fluffy-ball-2 {
+  width: 350px;
+  height: 350px;
+  background: radial-gradient(
+    circle,
+    rgba(216, 180, 254, 0.7) 0%,
+    rgba(221, 214, 254, 0.35) 50%,
+    transparent 70%
+  );
+  top: 50%;
+  right: -5%;
+  animation: floatBall2 30s ease-in-out infinite;
+}
+
+/* 淡黄色毛绒球 */
+.fluffy-ball-3 {
+  width: 300px;
+  height: 300px;
+  background: radial-gradient(
+    circle,
+    rgba(253, 224, 71, 0.5) 0%,
+    rgba(254, 240, 138, 0.25) 50%,
+    transparent 70%
+  );
+  bottom: 5%;
+  left: 30%;
+  animation: floatBall3 20s ease-in-out infinite;
+}
+
+/* 暗色主题毛绒球 - 更柔和 */
+[data-theme="dark"] .fluffy-ball-1 {
+  background: radial-gradient(
+    circle,
+    rgba(255, 182, 193, 0.3) 0%,
+    rgba(255, 192, 203, 0.15) 50%,
+    transparent 70%
+  );
+  opacity: 0.4;
+}
+
+[data-theme="dark"] .fluffy-ball-2 {
+  background: radial-gradient(
+    circle,
+    rgba(167, 139, 250, 0.35) 0%,
+    rgba(139, 92, 246, 0.15) 50%,
+    transparent 70%
+  );
+  opacity: 0.35;
+}
+
+[data-theme="dark"] .fluffy-ball-3 {
+  background: radial-gradient(
+    circle,
+    rgba(253, 224, 71, 0.25) 0%,
+    rgba(253, 230, 138, 0.1) 50%,
+    transparent 70%
+  );
+  opacity: 0.3;
+}
+
+/* 毛绒球动画 - 漂浮效果 */
+@keyframes floatBall1 {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+  25% {
+    transform: translate(50px, -30px) scale(1.05);
+  }
+  50% {
+    transform: translate(30px, 40px) scale(0.95);
+  }
+  75% {
+    transform: translate(-20px, 20px) scale(1.02);
+  }
+}
+
+@keyframes floatBall2 {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+  33% {
+    transform: translate(-40px, 50px) scale(1.08);
+  }
+  66% {
+    transform: translate(30px, -20px) scale(0.92);
+  }
+}
+
+@keyframes floatBall3 {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+  20% {
+    transform: translate(60px, -40px) scale(1.1);
+  }
+  40% {
+    transform: translate(40px, 30px) scale(0.9);
+  }
+  60% {
+    transform: translate(-30px, -20px) scale(1.05);
+  }
+  80% {
+    transform: translate(-20px, 40px) scale(0.95);
+  }
+}
+
+/* ========================================
+   响应式调整 - 移动端减少模糊
+   ======================================== */
+@media (max-width: 768px) {
+  .fluffy-ball {
+    filter: blur(40px);
+    opacity: 0.35;
+  }
+
+  .fluffy-ball-1 {
+    width: 250px;
+    height: 250px;
+  }
+
+  .fluffy-ball-2 {
+    width: 200px;
+    height: 200px;
+  }
+
+  .fluffy-ball-3 {
+    width: 180px;
+    height: 180px;
+  }
+
+  .cute-decoration::before {
+    font-size: 10px;
+    letter-spacing: 15px;
+    line-height: 50px;
+  }
 }
