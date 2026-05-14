@@ -2,7 +2,7 @@
  * @Author: hidari
  * @Date: 2026-05-13 15:35
  * @LastEditors: hidari
- * @LastEditTime: 2026-05-14 09:27:42
+ * @LastEditTime: 2026-05-14 13:43:17
  * Copyright (c) 2026 by hidari, All Rights Reserved.
  */
 
@@ -25,6 +25,8 @@ import {
 } from "lucide-react";
 import { getPostBySlug, getAllPosts, type Post } from "@/services/blogService";
 import { GiscusComments } from "@/components/Blog/GiscusComments";
+import { AISummary } from "@/components/AI/AISummary";
+import { useAIContext } from "@/context/AIContext";
 import Prism from "prismjs";
 import "prismjs/components/prism-python";
 import "prismjs/components/prism-javascript";
@@ -106,6 +108,7 @@ const NotFound = () => {
 
 export const BlogPost = () => {
   const { slug } = useParams<{ slug: string }>();
+  const { setCurrentArticle } = useAIContext();
   const [post, setPost] = useState<Post | null>(null);
   const [loading, setLoading] = useState(true);
   const [allPosts, setAllPosts] = useState<Post[]>([]);
@@ -125,6 +128,8 @@ export const BlogPost = () => {
 
         if (postData) {
           setToc(extractToc(postData.content));
+          // 设置当前文章到全局上下文
+          setCurrentArticle(postData.content, postData.title);
         }
       } catch (error) {
         console.error("加载文章失败:", error);
@@ -152,6 +157,8 @@ export const BlogPost = () => {
   }
 
   if (!post) {
+    // 清除当前文章
+    setCurrentArticle(null, null);
     return (
       <div className="min-h-[calc(100vh-8rem)] py-12">
         <div className="container">
@@ -279,6 +286,9 @@ export const BlogPost = () => {
                   ))}
                 </motion.div>
               )}
+
+              {/* AI 摘要 */}
+              <AISummary content={post.content} onApiKeyRequired={() => {}} />
 
               {/* 文章内容 */}
               <motion.div

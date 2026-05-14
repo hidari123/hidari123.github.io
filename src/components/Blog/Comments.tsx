@@ -2,7 +2,7 @@
  * @Author: hidari
  * @Date: 2026-05-13 16:30
  * @LastEditors: hidari
- * @LastEditTime: 2026-05-13 16:46:37
+ * @LastEditTime: 2026-05-14 10:22:35
  * Copyright (c) 2026 by hidari, All Rights Reserved.
  */
 
@@ -139,7 +139,7 @@ const ErrorState = ({ message, onRetry }: { message: string; onRetry: () => void
   </motion.div>
 );
 
-export const Comments = ({ issueNumber, onRefresh }: CommentsProps) => {
+export const Comments = ({ issueNumber, onRefresh: _onRefresh }: CommentsProps) => {
   const [comments, setComments] = useState<CommentData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

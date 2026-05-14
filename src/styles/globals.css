@@ -362,7 +362,7 @@ p {
 .markdown-body .copy-button {
   position: absolute;
   top: 0.5rem;
-  right: 3rem;
+  right: 5rem;
   padding: 0.35rem 0.5rem;
   font-size: 0.75rem;
   color: #888;
@@ -383,6 +383,40 @@ p {
 .markdown-body .copy-button:hover {
   color: #fff;
   background: rgba(99, 102, 241, 0.8);
+}
+
+/* AI 解释按钮 */
+.markdown-body .ai-explain-button {
+  position: absolute;
+  top: 0.5rem;
+  right: 2.5rem;
+  padding: 0.35rem 0.5rem;
+  font-size: 0.75rem;
+  color: #888;
+  background: rgba(45, 45, 45, 0.9);
+  backdrop-filter: blur(4px);
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  opacity: 0;
+  transition: all 0.2s ease;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.markdown-body .code-block-wrapper:hover .ai-explain-button {
+  opacity: 1;
+}
+
+.markdown-body .ai-explain-button:hover {
+  color: #fff;
+  background: rgba(99, 102, 241, 0.8);
+}
+
+.markdown-body .ai-explain-button:disabled {
+  cursor: not-allowed;
 }
 
 /* 代码块样式 */

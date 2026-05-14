@@ -2,14 +2,13 @@
  * @Author: hidari
  * @Date: 2026-05-13 16:30
  * @LastEditors: hidari
- * @LastEditTime: 2026-05-13 16:48:27
+ * @LastEditTime: 2026-05-14 10:17:31
  * Copyright (c) 2026 by hidari, All Rights Reserved.
  */
 
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Settings, Github, Eye, EyeOff, Check, AlertCircle, ExternalLink } from "lucide-react";
-import { getConfigStatus } from "@/services/commentService";
 
 export const SettingsPage = () => {
   const [githubToken, setGithubToken] = useState("");
