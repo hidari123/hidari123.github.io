@@ -2,7 +2,7 @@
  * @Author: hidari
  * @Date: 2026-05-13 15:35
  * @LastEditors: hidari
- * @LastEditTime: 2026-05-13 16:50:23
+ * @LastEditTime: 2026-05-14 09:27:42
  * Copyright (c) 2026 by hidari, All Rights Reserved.
  */
 
@@ -22,12 +22,9 @@ import {
   Check,
   User,
   List,
-  MessageCircle,
 } from "lucide-react";
 import { getPostBySlug, getAllPosts, type Post } from "@/services/blogService";
-import { Comments } from "@/components/Blog/Comments";
-import { CommentForm } from "@/components/Blog/CommentForm";
-import { findOrCreateIssue, getConfigStatus } from "@/services/commentService";
+import { GiscusComments } from "@/components/Blog/GiscusComments";
 import Prism from "prismjs";
 import "prismjs/components/prism-python";
 import "prismjs/components/prism-javascript";
@@ -114,26 +111,6 @@ export const BlogPost = () => {
   const [allPosts, setAllPosts] = useState<Post[]>([]);
   const [toc, setToc] = useState<TocItem[]>([]);
   const [showToc, setShowToc] = useState(true);
-  const [issueNumber, setIssueNumber] = useState<number | null>(null);
-  const [commentsEnabled, setCommentsEnabled] = useState(false);
-  const configStatus = getConfigStatus();
-
-  // 初始化评论区
-  useEffect(() => {
-    const initComments = async () => {
-      if (!slug || !configStatus.isComplete) return;
-
-      try {
-        const issue = await findOrCreateIssue(slug, post?.title || slug);
-        setIssueNumber(issue.number);
-        setCommentsEnabled(true);
-      } catch (error) {
-        console.error("初始化评论失败:", error);
-      }
-    };
-
-    initComments();
-  }, [slug, post?.title, configStatus.isComplete]);
 
   useEffect(() => {
     const loadPost = async () => {
@@ -443,39 +420,8 @@ export const BlogPost = () => {
             )}
           </div>
 
-          {/* 评论区 */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.6 }}
-            className="mt-12 max-w-3xl"
-          >
-            <div className="flex items-center gap-2 mb-6">
-              <MessageCircle className="w-5 h-5 text-[var(--accent)]" />
-              <h2 className="text-xl font-bold">评论</h2>
-            </div>
-
-            {/* 评论表单和列表 */}
-            {issueNumber ? (
-              <>
-                <CommentForm issueNumber={issueNumber} />
-                <Comments issueNumber={issueNumber} />
-              </>
-            ) : (
-              <div className="text-center py-8 text-[var(--text-secondary)]">
-                {configStatus.isComplete ? (
-                  <p>正在初始化评论区...</p>
-                ) : (
-                  <div>
-                    <p className="mb-2">评论区功能需要配置 GitHub 设置</p>
-                    <Link to="/settings" className="text-[var(--accent)] hover:underline">
-                      前往设置 →
-                    </Link>
-                  </div>
-                )}
-              </div>
-            )}
-          </motion.div>
+          {/* 评论区 - Giscus */}
+          {slug && <GiscusComments slug={slug} />}
         </div>
       </div>
     </div>
