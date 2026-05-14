@@ -2,13 +2,13 @@
  * @Author: hidari
  * @Date: 2026-05-13 14:55:01
  * @LastEditors: hidari
- * @LastEditTime: 2026-05-14 15:48:50
+ * @LastEditTime: 2026-05-14 16:54:14
  * Copyright (c) 2026 by hidari, All Rights Reserved.
  */
 /**
  * 页脚组件 - 可爱风格
  */
-import { Github, Twitter, Mail, Rss, Heart } from "lucide-react";
+import { Github, Twitter, Mail, Rss } from "lucide-react";
 import { motion } from "framer-motion";
 
 export const Footer = () => {

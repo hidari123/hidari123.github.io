@@ -6,8 +6,10 @@
   "homepage": "https://hidari123.github.io",
   "scripts": {
     "dev": "vite",
-    "deploy": "gh-pages -d dist",
-    "build": "tsc && vite build",
+    "deploy": "vite build --mode production; gh-pages -d dist",
+    "tsc": "tsc --noEmit",
+    "vite-build": "vite build",
+    "build": "npm run tsc; npm run vite-build",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
     "new-post": "node scripts/new-post.js"
@@ -38,6 +40,7 @@
     "postcss": "^8.4.32",
     "tailwindcss": "^3.4.0",
     "typescript": "^5.3.3",
-    "vite": "^5.0.10"
+    "vite": "^5.0.10",
+    "vite-plugin-gh-pages": "^1.0.1"
   }
 }

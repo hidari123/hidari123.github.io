@@ -2,12 +2,12 @@
  * @Author: hidari
  * @Date: 2026-05-13 14:56:30
  * @LastEditors: hidari
- * @LastEditTime: 2026-05-14 16:24:44
+ * @LastEditTime: 2026-05-14 16:54:08
  * Copyright (c) 2026 by hidari, All Rights Reserved.
  */
 import { useState, useMemo, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Bot, Sparkles, Plus, Zap } from "lucide-react";
+import { Sparkles, Plus, Zap } from "lucide-react";
 import { Link } from "react-router-dom";
 import { ToolCard } from "../components/Home/ToolCard";
 import { ToolFilter } from "../components/Home/ToolFilter";

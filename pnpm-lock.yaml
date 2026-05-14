@@ -79,6 +79,9 @@ devDependencies:
   vite:
     specifier: ^5.0.10
     version: 5.4.21(@types/node@20.19.41)
+  vite-plugin-gh-pages:
+    specifier: ^1.0.1
+    version: 1.0.1
 
 packages:
 
@@ -2726,6 +2729,12 @@ packages:
       '@types/unist': 3.0.3
       vfile-message: 4.0.3
     dev: false
+
+  /vite-plugin-gh-pages@1.0.1:
+    resolution: {integrity: sha512-BL83oPZINfCr/XcKXDAPtZR/zRKH4JyAdg5fHadOz2DxLnNYhHDKfWNdelHy+b4EYd/IGw7D85+p7lUuZJIVCg==}
+    dependencies:
+      gh-pages: 6.3.0
+    dev: true
 
   /vite@5.4.21(@types/node@20.19.41):
     resolution: {integrity: sha512-o5a9xKjbtuhY6Bi5S3+HvbRERmouabWbyUcpXXUA1u+GNUKoROi9byOJ8M0nHbHYHkYICiMlqxkg1KkYmm25Sw==}
