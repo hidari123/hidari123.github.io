@@ -2,7 +2,7 @@
  * @Author: hidari
  * @Date: 2026-05-13 14:58:00
  * @LastEditors: hidari
- * @LastEditTime: 2026-05-14 13:41:37
+ * @LastEditTime: 2026-05-14 13:50:58
  * Copyright (c) 2026 by hidari, All Rights Reserved.
  */
 import { BrowserRouter, Routes, Route } from "react-router-dom";
