@@ -2,7 +2,7 @@
  * @Author: hidari
  * @Date: 2026-05-13 14:52:17
  * @LastEditors: hidari
- * @LastEditTime: 2026-05-13 15:32:47
+ * @LastEditTime: 2026-05-14 16:35:21
  * Copyright (c) 2026 by hidari, All Rights Reserved.
  */
 import { defineConfig } from "vite";
@@ -12,6 +12,7 @@ import path from "path";
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react()],
+  base: "/", // 如果用户名.github.io 仓库，用 '/'
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
