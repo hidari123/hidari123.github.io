@@ -77,10 +77,10 @@ export const ToolCard = ({ tool, searchQuery = "" }: ToolCardProps) => {
       onClick={handleClick}
       className="card card-hover cursor-pointer group relative overflow-hidden "
     >
-      {/* 边框发光效果 */}
-      <div className="absolute inset-0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
-        <div className="absolute inset-0 rounded-lg bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 p-px">
-          <div className="w-full h-full rounded-lg bg-white dark:bg-gray-900" />
+      {/* 边框发光效果 - 使用 accent-glow */}
+      <div className="absolute inset-0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none shadow-[0_0_20px_var(--accent-glow)]">
+        <div className="absolute inset-0 rounded-lg bg-gradient-to-r from-[#a78bfa] via-[#8b5cf6] to-[#7c3aed] p-px">
+          <div className="w-full h-full rounded-lg bg-[var(--bg-card)]" />
         </div>
       </div>
 

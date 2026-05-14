@@ -8,32 +8,74 @@
 @tailwind components;
 @tailwind utilities;
 
-/* 亮色主题变量 */
+/* ========================================
+   亮色主题变量 - 优化版
+   ======================================== */
 :root {
+  /* 背景色系 - 更干净 */
   --bg-primary: #ffffff;
-  --bg-secondary: #f8fafc;
+  --bg-secondary: #fafafa;
   --bg-card: #ffffff;
-  --text-primary: #1a1a1a;
-  --text-secondary: #64748b;
+  --bg-code: #f6f8fa;
+
+  /* 文字色系 - 层次更分明 */
+  --text-primary: #18181b;
+  --text-secondary: #52525b;
+  --text-muted: #a1a1aa;
+
+  /* 强调色 - 更柔和 */
   --accent: #6366f1;
-  --border: #e2e8f0;
-  --shadow: rgba(0, 0, 0, 0.1);
-  --glass-bg: rgba(255, 255, 255, 0.8);
-  --glass-border: rgba(255, 255, 255, 0.3);
+  --accent-light: #a5b4fc;
+  --accent-glow: rgba(99, 102, 241, 0.15);
+
+  /* 边框 - 更细腻 */
+  --border: #e4e4e7;
+  --border-light: #f4f4f5;
+
+  /* 阴影 - 更轻盈 */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.03);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.05);
+
+  /* 毛玻璃 */
+  --glass-bg: rgba(255, 255, 255, 0.85);
+  --glass-border: rgba(255, 255, 255, 0.2);
 }
 
-/* 暗色主题变量 */
+/* ========================================
+   暗色主题变量 - fuwari 风格
+   ======================================== */
 [data-theme="dark"] {
-  --bg-primary: #0a0a0a;
-  --bg-secondary: #111111;
-  --bg-card: #1a1a1a;
-  --text-primary: #ededed;
+  /* 背景色系 - 更深的 #050505 */
+  --bg-primary: #050505;
+  --bg-secondary: #0a0a0a;
+  --bg-card: #141414;
+  --bg-code: #1a1a1a;
+
+  /* 文字色系 - 柔和 */
+  --text-primary: #fafafa;
   --text-secondary: #a1a1aa;
-  --accent: #6366f1;
+  --text-muted: #71717a;
+
+  /* 强调色 - 紫罗兰色渐变 #a78bfa */
+  --accent: #a78bfa;
+  --accent-light: #c4b5fd;
+  --accent-glow: rgba(167, 139, 250, 0.25);
+
+  /* 边框 - 低调 */
   --border: #27272a;
-  --shadow: rgba(0, 0, 0, 0.5);
-  --glass-bg: rgba(26, 26, 26, 0.8);
-  --glass-border: rgba(255, 255, 255, 0.1);
+  --border-light: #3f3f46;
+
+  /* 阴影 - 更重 */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.5);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.6);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.7);
+
+  /* 毛玻璃 */
+  --glass-bg: rgba(20, 20, 20, 0.9);
+  --glass-border: rgba(255, 255, 255, 0.05);
 }
 
 * {
