@@ -2,7 +2,7 @@
  * @Author: hidari
  * @Date: 2026-05-13 14:56:00
  * @LastEditors: hidari
- * @LastEditTime: 2026-05-15 16:18:36
+ * @LastEditTime: 2026-05-15 16:25:32
  * Copyright (c) 2026 by hidari, All Rights Reserved.
  */
 import { useState, useEffect, useCallback, useRef } from "react";
@@ -14,6 +14,7 @@ import { BackToTop, ScrollProgress } from "@/components/Common/BackToTop";
 import { CustomCursor } from "@/components/Common/CustomCursor";
 import { ShortcutsHelp } from "@/components/Common/ShortcutsHelp";
 import { ToastProvider } from "@/components/Common/Toast";
+import { PerformancePanel } from "@/components/Common/PerformancePanel";
 import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 import { useTheme } from "@/hooks/useTheme";
 import { Lightbulb } from "lucide-react";
@@ -134,6 +135,9 @@ export const Layout = ({ children }: LayoutProps) => {
 
       {/* 返回顶部按钮 */}
       <BackToTop />
+
+      {/* 性能监控面板 */}
+      <PerformancePanel />
     </div>
   );
 };
