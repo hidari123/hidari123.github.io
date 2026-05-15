@@ -2,7 +2,7 @@
  * @Author: hidari
  * @Date: 2026-05-13 15:35
  * @LastEditors: hidari
- * @LastEditTime: 2026-05-15 15:53:10
+ * @LastEditTime: 2026-05-15 16:20:17
  * Copyright (c) 2026 by hidari, All Rights Reserved.
  */
 
@@ -29,6 +29,7 @@ import { AISummary } from "@/components/AI/AISummary";
 import { AudioReader } from "@/components/Blog/AudioReader";
 import { ReadingCat } from "@/components/Blog/ReadingCat";
 import { useAIContext } from "@/context/AIContext";
+import { showToast } from "@/components/Common/Toast";
 import Prism from "prismjs";
 import "prismjs/components/prism-python";
 import "prismjs/components/prism-javascript";
@@ -110,6 +111,7 @@ const NotFound = () => {
 
 export const BlogPost = () => {
   const { slug } = useParams<{ slug: string }>();
+  const navigate = useNavigate();
   const { setCurrentArticle } = useAIContext();
   const [post, setPost] = useState<Post | null>(null);
   const [loading, setLoading] = useState(true);
@@ -117,6 +119,7 @@ export const BlogPost = () => {
   const [toc, setToc] = useState<TocItem[]>([]);
   const [showToc, setShowToc] = useState(true);
 
+  // 加载文章
   useEffect(() => {
     const loadPost = async () => {
       if (!slug) return;
@@ -141,12 +144,41 @@ export const BlogPost = () => {
     };
 
     loadPost();
-  }, [slug]);
+  }, [slug, setCurrentArticle]);
 
   // 获取上一篇和下一篇文章
   const currentIndex = allPosts.findIndex((p) => p.slug === slug);
   const prevPost = currentIndex < allPosts.length - 1 ? allPosts[currentIndex + 1] : null;
   const nextPost = currentIndex > 0 ? allPosts[currentIndex - 1] : null;
+
+  // 监听快捷键事件
+  useEffect(() => {
+    const handleNextPost = () => {
+      if (nextPost) {
+        navigate(`/blog/${nextPost.slug}`);
+        showToast(`正在跳转到: ${nextPost.title}`, "info");
+      } else {
+        showToast("已经是最后一篇文章了", "warning");
+      }
+    };
+
+    const handlePrevPost = () => {
+      if (prevPost) {
+        navigate(`/blog/${prevPost.slug}`);
+        showToast(`正在跳转到: ${prevPost.title}`, "info");
+      } else {
+        showToast("已经是第一篇文章了", "warning");
+      }
+    };
+
+    window.addEventListener("shortcut-next-post", handleNextPost);
+    window.addEventListener("shortcut-prev-post", handlePrevPost);
+
+    return () => {
+      window.removeEventListener("shortcut-next-post", handleNextPost);
+      window.removeEventListener("shortcut-prev-post", handlePrevPost);
+    };
+  }, [nextPost, prevPost, navigate]);
 
   if (loading) {
     return (
@@ -190,7 +222,7 @@ export const BlogPost = () => {
             <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
             返回博客列表
           </Link>
-          <AudioReader content={post.content} title={post.title} />
+          <AudioReader content={post.content} />
         </motion.div>
 
         <div className="relative">
@@ -295,7 +327,7 @@ export const BlogPost = () => {
 
               {/* 语音朗读 */}
               <div className="flex items-center gap-3 mb-8">
-                <AudioReader content={post.content} title={post.title} />
+                <AudioReader content={post.content} />
               </div>
 
               {/* 文章内容 */}
@@ -385,10 +417,13 @@ export const BlogPost = () => {
                     </div>
                   </Link>
                 ) : (
-                  <div className="flex-1"></div>
+                  <div className="flex-1 p-4 rounded-xl bg-[var(--bg-secondary)] border border-[var(--border)] opacity-50">
+                    <div className="text-xs text-[var(--text-secondary)] mb-1">上一篇</div>
+                    <div className="text-sm text-[var(--text-secondary)]">没有更多文章了</div>
+                  </div>
                 )}
 
-                {nextPost && (
+                {nextPost ? (
                   <Link
                     to={`/blog/${nextPost.slug}`}
                     className="flex-1 p-4 rounded-xl bg-[var(--bg-card)] border border-[var(--border)] hover:border-[var(--accent)] hover:shadow-lg hover:shadow-[var(--accent)]/10 transition-all group text-right"
@@ -401,6 +436,11 @@ export const BlogPost = () => {
                       <ChevronRight className="w-4 h-4 text-[var(--accent)] group-hover:translate-x-1 transition-transform" />
                     </div>
                   </Link>
+                ) : (
+                  <div className="flex-1 p-4 rounded-xl bg-[var(--bg-secondary)] border border-[var(--border)] opacity-50 text-right">
+                    <div className="text-xs text-[var(--text-secondary)] mb-1">下一篇</div>
+                    <div className="text-sm text-[var(--text-secondary)]">没有更多文章了</div>
+                  </div>
                 )}
               </div>
             </motion.article>

@@ -2,7 +2,7 @@
  * @Author: hidari
  * @Date: 2026-05-14 09:54
  * @LastEditors: hidari
- * @LastEditTime: 2026-05-14 16:04:28
+ * @LastEditTime: 2026-05-15 16:09:07
  * Copyright (c) 2026 by hidari, All Rights Reserved.
  */
 import { useState, useRef, useEffect, useCallback } from "react";
@@ -55,6 +55,56 @@ export const AIChat = ({ content }: AIChatProps) => {
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const lastPathRef = useRef(location.pathname);
 
+  // 获取欢迎消息
+  const getWelcomeMessage = useCallback(() => {
+    if (articleContent) {
+      const title = currentArticleTitle || "当前文章";
+      return `👋 你好！我是 AI 助手，当前正在阅读《${title}》。
+
+你可以：\n
+• 询问文章相关的问题\n
+• 让我解释代码或概念\n
+• 讨论文章中的观点\n
+• 或者随便聊聊\n
+有什么我可以帮助你的吗？`;
+    }
+    return `👋 你好！我是这个博客的 AI 助手，可以回答关于项目的问题，也可以闲聊！
+
+我可以帮助你了解：\n
+• 项目的基本信息\n
+• 作者的相关信息\n
+• 技术实现细节\n
+• 或者其他任何问题\n
+有什么我可以帮助你的吗？`;
+  }, [articleContent, currentArticleTitle]);
+
+  // 监听外部打开/关闭事件（用于键盘快捷键控制）
+  useEffect(() => {
+    const handleOpenAIChat = () => {
+      if (!checkConfig()) return;
+      setIsOpen(true);
+      setMessages([
+        {
+          id: "welcome",
+          role: "assistant",
+          content: getWelcomeMessage(),
+        },
+      ]);
+    };
+
+    const handleCloseAIChat = () => {
+      setIsOpen(false);
+    };
+
+    window.addEventListener("open-ai-chat", handleOpenAIChat);
+    window.addEventListener("close-ai-chat", handleCloseAIChat);
+
+    return () => {
+      window.removeEventListener("open-ai-chat", handleOpenAIChat);
+      window.removeEventListener("close-ai-chat", handleCloseAIChat);
+    };
+  }, [checkConfig, getWelcomeMessage]);
+
   // 滚动到底部
   const scrollToBottom = useCallback(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -86,31 +136,7 @@ export const AIChat = ({ content }: AIChatProps) => {
       ]);
     }
     lastPathRef.current = location.pathname;
-  }, [location.pathname, isOpen]);
-
-  const getWelcomeMessage = () => {
-    if (articleContent) {
-      const title = currentArticleTitle || "当前文章";
-      return `👋 你好！我是 AI 助手，当前正在阅读《${title}》。
-
-你可以：\n
-• 询问文章相关的问题\n
-• 让我解释代码或概念\n
-• 讨论文章中的观点\n
-• 或者随便聊聊\n
-
-有什么我可以帮助你的吗？`;
-    }
-    return `👋 你好！我是这个博客的 AI 助手，可以回答关于项目的问题，也可以闲聊！
-
-我可以帮助你了解：\n
-• 项目的基本信息\n
-• 作者的相关信息\n
-• 技术实现细节\n
-• 或者其他任何问题\n
-
-有什么我可以帮助你的吗？`;
-  };
+  }, [location.pathname, isOpen, getWelcomeMessage]);
 
   const handleOpen = () => {
     // 检查配置

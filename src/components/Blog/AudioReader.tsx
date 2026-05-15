@@ -2,7 +2,7 @@
  * @Author: hidari
  * @Date: 2026-05-15 15:40:00
  * @LastEditors: hidari
- * @LastEditTime: 2026-05-15 15:47:27
+ * @LastEditTime: 2026-05-15 16:14:02
  * Copyright (c) 2026 by hidari, All Rights Reserved.
  */
 
@@ -17,7 +17,7 @@ interface AudioReaderProps {
   title?: string;
 }
 
-export const AudioReader = ({ content, title }: AudioReaderProps) => {
+export const AudioReader = ({ content }: AudioReaderProps) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
   const [isSupported, setIsSupported] = useState(true);
