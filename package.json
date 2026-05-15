@@ -6,7 +6,7 @@
   "homepage": "https://hidari123.github.io",
   "scripts": {
     "dev": "vite",
-    "deploy": "vite build --mode production; gh-pages -d dist",
+    "deploy": "gh-pages -d dist",
     "tsc": "tsc --noEmit",
     "vite-build": "vite build",
     "build": "npm run tsc; npm run vite-build",
