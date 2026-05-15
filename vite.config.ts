@@ -10,7 +10,7 @@ export default defineConfig({
       branch: "gh-pages",
     }),
   ],
-  base: "/hidari123.github.io/",
+  base: "/",
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),

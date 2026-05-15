@@ -953,8 +953,216 @@ body {
 }
 
 /* ========================================
-   响应式调整 - 移动端减少模糊
+   亮色主题漂浮爱心效果
    ======================================== */
+.floating-hearts {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: -1;
+  overflow: hidden;
+}
+
+/* 爱心容器 - 两层叠加 */
+.floating-hearts::before,
+.floating-hearts::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+/* 浅色主题第一层爱心 - 较大，带晕染 */
+.floating-hearts::before {
+  background-image:
+    radial-gradient(ellipse 8px 6px at 15% 25%, rgba(255, 182, 193, 0.6), transparent),
+    radial-gradient(ellipse 6px 5px at 35% 60%, rgba(255, 192, 203, 0.5), transparent),
+    radial-gradient(ellipse 7px 5px at 55% 15%, rgba(255, 218, 233, 0.55), transparent),
+    radial-gradient(ellipse 5px 4px at 75% 45%, rgba(255, 182, 193, 0.5), transparent),
+    radial-gradient(ellipse 6px 5px at 90% 80%, rgba(255, 192, 203, 0.6), transparent),
+    radial-gradient(ellipse 8px 6px at 25% 85%, rgba(255, 218, 233, 0.45), transparent),
+    radial-gradient(ellipse 5px 4px at 45% 35%, rgba(255, 182, 193, 0.55), transparent),
+    radial-gradient(ellipse 7px 5px at 65% 70%, rgba(255, 192, 203, 0.5), transparent),
+    radial-gradient(ellipse 6px 5px at 85% 20%, rgba(255, 218, 233, 0.6), transparent),
+    radial-gradient(ellipse 5px 4px at 10% 50%, rgba(255, 182, 193, 0.45), transparent);
+  background-repeat: repeat;
+  background-size: 400px 300px;
+  animation: floatHearts1 20s ease-in-out infinite;
+  opacity: 0.7;
+}
+
+/* 浅色主题第二层爱心 - 较小，错开位置，带晕染 */
+.floating-hearts::after {
+  background-image:
+    radial-gradient(ellipse 4px 3px at 20% 40%, rgba(255, 182, 193, 0.4), transparent),
+    radial-gradient(ellipse 5px 4px at 40% 80%, rgba(255, 192, 203, 0.35), transparent),
+    radial-gradient(ellipse 4px 3px at 60% 30%, rgba(255, 218, 233, 0.4), transparent),
+    radial-gradient(ellipse 5px 4px at 80% 55%, rgba(255, 182, 193, 0.35), transparent),
+    radial-gradient(ellipse 4px 3px at 30% 10%, rgba(255, 192, 203, 0.4), transparent),
+    radial-gradient(ellipse 5px 4px at 50% 65%, rgba(255, 218, 233, 0.35), transparent),
+    radial-gradient(ellipse 4px 3px at 70% 85%, rgba(255, 182, 193, 0.4), transparent),
+    radial-gradient(ellipse 5px 4px at 90% 35%, rgba(255, 192, 203, 0.35), transparent);
+  background-repeat: repeat;
+  background-size: 350px 280px;
+  animation: floatHearts2 25s ease-in-out infinite;
+  animation-delay: -8s;
+  opacity: 0.6;
+}
+
+/* 暗色主题隐藏爱心 */
+[data-theme="dark"] .floating-hearts {
+  display: none;
+}
+
+/* 爱心漂浮动画 - 轻柔上下浮动 */
+@keyframes floatHearts1 {
+  0%,
+  100% {
+    transform: translateY(0) translateX(0) scale(1);
+    opacity: 0.7;
+  }
+  25% {
+    transform: translateY(-20px) translateX(15px) scale(1.02);
+    opacity: 0.85;
+  }
+  50% {
+    transform: translateY(-10px) translateX(-10px) scale(0.98);
+    opacity: 0.65;
+  }
+  75% {
+    transform: translateY(-25px) translateX(5px) scale(1.01);
+    opacity: 0.8;
+  }
+}
+
+@keyframes floatHearts2 {
+  0%,
+  100% {
+    transform: translateY(0) translateX(0) scale(0.95);
+    opacity: 0.6;
+  }
+  33% {
+    transform: translateY(-15px) translateX(-20px) scale(1.05);
+    opacity: 0.75;
+  }
+  66% {
+    transform: translateY(-30px) translateX(10px) scale(0.92);
+    opacity: 0.55;
+  }
+}
+
+[data-theme="dark"] .twinkle-stars {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: -1;
+  overflow: hidden;
+}
+
+/* 星星容器 */
+[data-theme="dark"] .twinkle-stars::before,
+[data-theme="dark"] .twinkle-stars::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+/* 第一层星星 - 较大较亮 */
+[data-theme="dark"] .twinkle-stars::before {
+  background-image:
+    radial-gradient(2px 2px at 20px 30px, rgba(255, 255, 255, 0.9), transparent),
+    radial-gradient(2px 2px at 40px 70px, rgba(199, 175, 255, 0.8), transparent),
+    radial-gradient(1.5px 1.5px at 90px 40px, rgba(255, 255, 255, 0.8), transparent),
+    radial-gradient(2px 2px at 130px 80px, rgba(255, 182, 193, 0.7), transparent),
+    radial-gradient(1.5px 1.5px at 160px 120px, rgba(255, 255, 255, 0.9), transparent),
+    radial-gradient(2px 2px at 200px 50px, rgba(167, 139, 250, 0.8), transparent),
+    radial-gradient(1.5px 1.5px at 250px 150px, rgba(255, 255, 255, 0.7), transparent),
+    radial-gradient(2px 2px at 300px 100px, rgba(199, 175, 255, 0.9), transparent),
+    radial-gradient(1.5px 1.5px at 350px 200px, rgba(255, 255, 255, 0.8), transparent),
+    radial-gradient(2px 2px at 400px 60px, rgba(255, 182, 193, 0.7), transparent),
+    radial-gradient(1.5px 1.5px at 450px 180px, rgba(255, 255, 255, 0.9), transparent),
+    radial-gradient(2px 2px at 500px 120px, rgba(167, 139, 250, 0.8), transparent),
+    radial-gradient(1.5px 1.5px at 550px 250px, rgba(255, 255, 255, 0.7), transparent),
+    radial-gradient(2px 2px at 600px 80px, rgba(199, 175, 255, 0.9), transparent),
+    radial-gradient(1.5px 1.5px at 650px 300px, rgba(255, 255, 255, 0.8), transparent);
+  background-repeat: repeat;
+  background-size: 700px 350px;
+  animation: twinkle1 4s ease-in-out infinite;
+}
+
+/* 第二层星星 - 较小较暗，错开位置 */
+[data-theme="dark"] .twinkle-stars::after {
+  background-image:
+    radial-gradient(1px 1px at 50px 100px, rgba(255, 255, 255, 0.6), transparent),
+    radial-gradient(1px 1px at 100px 50px, rgba(199, 175, 255, 0.5), transparent),
+    radial-gradient(1px 1px at 150px 180px, rgba(255, 255, 255, 0.6), transparent),
+    radial-gradient(1px 1px at 200px 140px, rgba(167, 139, 250, 0.5), transparent),
+    radial-gradient(1px 1px at 280px 220px, rgba(255, 255, 255, 0.6), transparent),
+    radial-gradient(1px 1px at 320px 80px, rgba(199, 175, 255, 0.5), transparent),
+    radial-gradient(1px 1px at 380px 160px, rgba(255, 255, 255, 0.6), transparent),
+    radial-gradient(1px 1px at 420px 280px, rgba(167, 139, 250, 0.5), transparent),
+    radial-gradient(1px 1px at 480px 40px, rgba(255, 255, 255, 0.6), transparent),
+    radial-gradient(1px 1px at 540px 200px, rgba(199, 175, 255, 0.5), transparent),
+    radial-gradient(1px 1px at 580px 120px, rgba(255, 255, 255, 0.6), transparent),
+    radial-gradient(1px 1px at 620px 260px, rgba(167, 139, 250, 0.5), transparent);
+  background-repeat: repeat;
+  background-size: 650px 320px;
+  animation: twinkle2 6s ease-in-out infinite;
+  animation-delay: -2s;
+}
+
+/* 星星闪烁动画 */
+@keyframes twinkle1 {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.5;
+    transform: scale(0.98);
+  }
+}
+
+@keyframes twinkle2 {
+  0%,
+  100% {
+    opacity: 0.6;
+    transform: scale(0.95);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.02);
+  }
+}
+
+/* 暗色主题星星装饰层也闪烁 */
+[data-theme="dark"] .cute-decoration {
+  animation: decorationPulse 8s ease-in-out infinite;
+}
+
+@keyframes decorationPulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+/* 响应式调整 - 移动端减少模糊 */
 @media (max-width: 768px) {
   .fluffy-ball {
     filter: blur(40px);
@@ -980,5 +1188,50 @@ body {
     font-size: 10px;
     letter-spacing: 15px;
     line-height: 50px;
+  }
+
+  /* 移动端星星更少更小 */
+  [data-theme="dark"] .twinkle-stars::before {
+    background-size: 500px 250px;
+  }
+
+  [data-theme="dark"] .twinkle-stars::after {
+    background-size: 450px 220px;
+  }
+}
+
+/* ========================================
+   隐藏默认鼠标 + 自定义光标
+   ======================================== */
+
+/* 亮色和暗色主题都隐藏默认鼠标 */
+html,
+body,
+a,
+button,
+.card,
+.btn,
+[role="button"],
+input,
+textarea,
+select {
+  cursor: none !important;
+}
+
+/* 移动端恢复默认鼠标（触摸屏不需要自定义光标） */
+@media (max-width: 768px) {
+  html,
+  body,
+  a,
+  button,
+  .card,
+  .btn,
+  [role="button"] {
+    cursor: auto !important;
+  }
+
+  /* 移动端隐藏自定义光标组件 */
+  .custom-cursor {
+    display: none !important;
   }
 }
