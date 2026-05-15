@@ -1205,7 +1205,7 @@ body {
    ======================================== */
 
 /* 亮色和暗色主题都隐藏默认鼠标 */
-html,
+/* html,
 body,
 a,
 button,
@@ -1216,10 +1216,10 @@ input,
 textarea,
 select {
   cursor: none !important;
-}
+} */
 
 /* 移动端恢复默认鼠标（触摸屏不需要自定义光标） */
-@media (max-width: 768px) {
+/* @media (max-width: 768px) {
   html,
   body,
   a,
@@ -1228,10 +1228,10 @@ select {
   .btn,
   [role="button"] {
     cursor: auto !important;
-  }
+  } */
 
-  /* 移动端隐藏自定义光标组件 */
-  .custom-cursor {
+/* 移动端隐藏自定义光标组件 */
+/* .custom-cursor {
     display: none !important;
   }
-}
+} */

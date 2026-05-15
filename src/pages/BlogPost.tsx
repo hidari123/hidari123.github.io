@@ -2,7 +2,7 @@
  * @Author: hidari
  * @Date: 2026-05-13 15:35
  * @LastEditors: hidari
- * @LastEditTime: 2026-05-14 13:43:17
+ * @LastEditTime: 2026-05-15 15:53:10
  * Copyright (c) 2026 by hidari, All Rights Reserved.
  */
 
@@ -26,6 +26,8 @@ import {
 import { getPostBySlug, getAllPosts, type Post } from "@/services/blogService";
 import { GiscusComments } from "@/components/Blog/GiscusComments";
 import { AISummary } from "@/components/AI/AISummary";
+import { AudioReader } from "@/components/Blog/AudioReader";
+import { ReadingCat } from "@/components/Blog/ReadingCat";
 import { useAIContext } from "@/context/AIContext";
 import Prism from "prismjs";
 import "prismjs/components/prism-python";
@@ -175,11 +177,11 @@ export const BlogPost = () => {
   return (
     <div className="min-h-[calc(100vh-8rem)] py-12">
       <div className="container">
-        {/* 返回按钮 */}
+        {/* 返回按钮和朗读 */}
         <motion.div
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
-          className="w-full mx-auto mb-8"
+          className="w-full mx-auto mb-8 flex items-center justify-between"
         >
           <Link
             to="/blog"
@@ -188,6 +190,7 @@ export const BlogPost = () => {
             <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
             返回博客列表
           </Link>
+          <AudioReader content={post.content} title={post.title} />
         </motion.div>
 
         <div className="relative">
@@ -289,6 +292,11 @@ export const BlogPost = () => {
 
               {/* AI 摘要 */}
               <AISummary content={post.content} onApiKeyRequired={() => {}} />
+
+              {/* 语音朗读 */}
+              <div className="flex items-center gap-3 mb-8">
+                <AudioReader content={post.content} title={post.title} />
+              </div>
 
               {/* 文章内容 */}
               <motion.div
@@ -432,6 +440,9 @@ export const BlogPost = () => {
 
           {/* 评论区 - Giscus */}
           {slug && <GiscusComments slug={slug} />}
+
+          {/* 阅读进度猫 */}
+          <ReadingCat />
         </div>
       </div>
     </div>

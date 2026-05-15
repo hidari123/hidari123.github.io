@@ -2,7 +2,7 @@
  * @Author: hidari
  * @Date: 2026-05-13 15:35
  * @LastEditors: hidari
- * @LastEditTime: 2026-05-14 15:58:09
+ * @LastEditTime: 2026-05-15 16:00:41
  * Copyright (c) 2026 by hidari, All Rights Reserved.
  */
 
@@ -176,10 +176,10 @@ export const BlogList = () => {
           <div className="text-center mb-12">
             <h1 className="text-4xl md:text-5xl font-bold mb-4">
               <span className="bg-gradient-to-r from-[var(--accent)] via-purple-500 to-pink-500 bg-clip-text text-transparent">
-                博客文章
+                碎碎念
               </span>
             </h1>
-            <p className="text-[var(--text-secondary)] text-lg">分享技术见解，记录成长历程</p>
+            <p className="text-[var(--text-secondary)] text-lg">技术甜度：★★★★★</p>
           </div>
 
           {/* 标签筛选 */}

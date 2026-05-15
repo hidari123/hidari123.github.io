@@ -62,7 +62,7 @@ export const Home = () => {
   const [refreshKey, setRefreshKey] = useState(0);
 
   // 打字机效果
-  const typewriterWords = ["你好呀 ✨", "欢迎来看我 ✨", "喜欢您来 ✨"];
+  const typewriterWords = ["你好呀 ✨", "欢迎来到我的小花园 ✨"];
   const typewriterText = useTypewriter(typewriterWords);
 
   // 刷新工具列表
