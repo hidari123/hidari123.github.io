@@ -2,7 +2,7 @@
  * @Author: hidari
  * @Date: 2026-05-20
  * @LastEditors: hidari
- * @LastEditTime: 2026-05-27 14:56:43
+ * @LastEditTime: 2026-05-27 16:32:47
  * Copyright (c) 2026 by hidari, All Rights Reserved.
  *
  * 使用 ONNX Runtime Web 加载本地模型生成向量嵌入
@@ -35,9 +35,11 @@ let chunks: Chunk[] = [];
 let chunkVectors: number[][] = [];
 let isReady = false;
 let isLoading = false;
-let vocab: Map<number, string> = new Map();
+let vocab: Map<string, number> = new Map();
+let unkTokenId = 100;
+let padTokenId = 0;
 
-// 简单的 BERT 分词器实现
+// 正确的 BERT WordPiece 分词器
 async function loadTokenizer() {
   try {
     const vocabResponse = await fetch(
@@ -46,12 +48,17 @@ async function loadTokenizer() {
     const vocabText = await vocabResponse.text();
 
     vocab.clear();
-    vocabText.split("\n").forEach((line, index) => {
-      const token = line.trim();
+    const lines = vocabText.split("\n");
+    for (let i = 0; i < lines.length; i++) {
+      const token = lines[i].trim();
       if (token) {
-        vocab.set(index, token);
+        vocab.set(token, i);
       }
-    });
+    }
+
+    // 查找特殊 token ID
+    unkTokenId = vocab.get("[UNK]") ?? 100;
+    padTokenId = vocab.get("[PAD]") ?? 0;
 
     console.log("分词器加载完成，词汇量:", vocab.size);
     return true;
@@ -61,42 +68,69 @@ async function loadTokenizer() {
   }
 }
 
-// 简单的分词函数
-function tokenize(text: string): { inputIds: number[]; attentionMask: number[] } {
-  // 简单分词：按空格和标点符号分割
-  const cleaned = text.toLowerCase().replace(/[^\w\s]/g, " ");
-  const tokens = cleaned.split(/\s+/).filter((t) => t.length > 0);
+// WordPiece 分词：将单个词拆分为 subword tokens
+function wordPieceTokenize(word: string): string[] {
+  const tokens: string[] = [];
+  let start = 0;
 
-  // 转换为 token IDs
-  const inputIds: number[] = [101]; // [CLS]
-
-  for (const token of tokens) {
-    // 简单匹配：如果 vocab 中有完全匹配的，就用那个 ID
+  while (start < word.length) {
+    let end = word.length;
     let found = false;
-    for (const [id, vocabToken] of vocab) {
-      if (vocabToken === token) {
-        inputIds.push(id);
+
+    // 从最长子串开始匹配
+    while (start < end) {
+      const sub = (start === 0 ? "" : "##") + word.slice(start, end).toLowerCase();
+      if (vocab.has(sub)) {
+        tokens.push(sub);
         found = true;
         break;
       }
+      end--;
     }
+
     if (!found) {
-      // 如果没找到，尝试 subword
-      for (let i = 0; i < token.length; i++) {
-        inputIds.push(100); // [UNK]
-      }
+      // 无法匹配，使用 [UNK]
+      return ["[UNK]"];
     }
+
+    start = end;
   }
 
-  inputIds.push(102); // [SEP]
+  return tokens;
+}
 
-  // 填充到固定长度
+// 完整的分词函数
+function tokenize(text: string): { inputIds: number[]; attentionMask: number[] } {
   const maxLength = 256;
-  while (inputIds.length < maxLength) {
-    inputIds.push(0);
+
+  // 按空格和标点分割
+  const words = text
+    .toLowerCase()
+    .split(/(\s+|[.,!?;:'"()\[\]{}])/)
+    .filter((t) => t.trim().length > 0);
+
+  const tokens: string[] = ["[CLS]"];
+
+  for (const word of words) {
+    const subTokens = wordPieceTokenize(word);
+    for (const st of subTokens) {
+      tokens.push(st);
+      if (tokens.length >= maxLength - 1) break;
+    }
+    if (tokens.length >= maxLength - 1) break;
   }
 
-  const attentionMask = inputIds.map((id) => (id > 0 ? 1 : 0));
+  tokens.push("[SEP]");
+
+  // 转换为 token IDs
+  const inputIds = tokens.map((t) => vocab.get(t) ?? unkTokenId);
+
+  // 填充
+  while (inputIds.length < maxLength) {
+    inputIds.push(padTokenId);
+  }
+
+  const attentionMask = inputIds.map((id) => (id !== padTokenId ? 1 : 0));
 
   return {
     inputIds: inputIds.slice(0, maxLength),
@@ -180,8 +214,9 @@ async function getEmbedding(text: string): Promise<number[]> {
   const dims = lastHiddenState.dims;
 
   // Mean pooling
-  const seqLen = dims[2];
-  const hiddenSize = dims[3];
+  // dims = [batch_size, seq_len, hidden_size]
+  const seqLen = dims[1];
+  const hiddenSize = dims[2];
   const embeddings: number[] = [];
 
   for (let i = 0; i < hiddenSize; i++) {
@@ -193,11 +228,16 @@ async function getEmbedding(text: string): Promise<number[]> {
         count++;
       }
     }
-    embeddings.push(count > 0 ? sum / count : 0);
+    const value = count > 0 ? sum / count : 0;
+    embeddings.push(isNaN(value) ? 0 : value);
   }
 
   // L2 归一化
   const norm = Math.sqrt(embeddings.reduce((sum, v) => sum + v * v, 0));
+  if (norm === 0 || isNaN(norm)) {
+    // 如果向量全为零，返回零向量（避免 NaN）
+    return embeddings.map(() => 0);
+  }
   return embeddings.map((v) => v / norm);
 }
 
@@ -225,7 +265,12 @@ async function getEmbeddings(
 }
 
 // 切分文本为块
-function splitIntoChunks(content: string, source: string, maxChunkSize = 300): Chunk[] {
+function splitIntoChunks(
+  content: string,
+  source: string,
+  title?: string,
+  maxChunkSize = 300,
+): Chunk[] {
   const paragraphs = content.split(/\n\s*\n/);
   const result: Chunk[] = [];
   let currentChunk = "";
@@ -243,6 +288,7 @@ function splitIntoChunks(content: string, source: string, maxChunkSize = 300): C
       result.push({
         text: currentChunk.trim(),
         source,
+        title,
         index: chunkIndex++,
       });
       currentChunk = trimmed;
@@ -255,6 +301,7 @@ function splitIntoChunks(content: string, source: string, maxChunkSize = 300): C
     result.push({
       text: currentChunk.trim(),
       source,
+      title,
       index: chunkIndex,
     });
   }
@@ -275,7 +322,7 @@ export async function indexBlogPosts(
 
   chunks = [];
   for (const blog of blogContents) {
-    const newChunks = splitIntoChunks(blog.content, blog.path);
+    const newChunks = splitIntoChunks(blog.content, blog.path, blog.title);
     chunks.push(...newChunks);
   }
   console.log(`✂️ 切分成 ${chunks.length} 个文本块`);
@@ -313,7 +360,10 @@ function cosineSimilarity(a: number[], b: number[]): number {
     normA += a[i] * a[i];
     normB += b[i] * b[i];
   }
-  return dot / (Math.sqrt(normA) * Math.sqrt(normB));
+  const denominator = Math.sqrt(normA) * Math.sqrt(normB);
+  if (denominator === 0 || isNaN(denominator)) return 0;
+  const result = dot / denominator;
+  return isNaN(result) ? 0 : result;
 }
 
 // 检索相关片段
@@ -358,7 +408,6 @@ export async function askWithRAG(
 
   console.log(`📚 检索到 ${retrieved.length} 个相关片段`);
 
-  const context = retrieved.map((r) => r.chunk.text).join("\n\n---\n\n");
   const sources: RAGSource[] = retrieved.map((r) => ({
     text: r.chunk.text.slice(0, 200),
     source: r.chunk.source,
@@ -366,12 +415,18 @@ export async function askWithRAG(
     similarity: r.similarity,
   }));
 
+  const contextWithRefs = retrieved
+    .map((r, i) => `[${i + 1}] (来源: ${r.chunk.title || r.chunk.source})\n${r.chunk.text}`)
+    .join("\n\n---\n\n");
+
   const systemPrompt = `你是一个严谨的博客问答助手。请严格依据下面的【参考资料】回答问题。
 如果参考资料中没有相关信息，请说"根据现有博客文章，无法回答这个问题"。
 不要编造任何信息，不要使用参考资料之外的知识。
 
+重要：回答时必须在引用资料的地方标注来源编号，例如 [1]、[2]。在回答的末尾，请列出实际使用的参考来源。
+
 【参考资料】
-${context}`;
+${contextWithRefs}`;
 
   try {
     const response = await fetch(`${apiUrl}/chat/completions`, {
@@ -437,7 +492,9 @@ export async function askWithRAGStream(
 
   console.log(`📚 检索到 ${retrieved.length} 个相关片段`);
 
-  const context = retrieved.map((r) => r.chunk.text).join("\n\n---\n\n");
+  const contextWithRefs = retrieved
+    .map((r, i) => `[${i + 1}] (来源: ${r.chunk.title || r.chunk.source})\n${r.chunk.text}`)
+    .join("\n\n---\n\n");
   const sources: RAGSource[] = retrieved.map((r) => ({
     text: r.chunk.text.slice(0, 200),
     source: r.chunk.source,
@@ -449,8 +506,10 @@ export async function askWithRAGStream(
 如果参考资料中没有相关信息，请说"根据现有博客文章，无法回答这个问题"。
 不要编造任何信息，不要使用参考资料之外的知识。
 
+重要：回答时必须在引用资料的地方标注来源编号，例如 [1]、[2]。在回答的末尾，请列出实际使用的参考来源。
+
 【参考资料】
-${context}`;
+${contextWithRefs}`;
 
   try {
     const response = await fetch(`${apiUrl}/chat/completions`, {

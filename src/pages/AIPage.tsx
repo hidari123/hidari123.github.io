@@ -2,7 +2,7 @@
  * @Author: hidari
  * @Date: 2026-05-19
  * @LastEditors: hidari
- * @LastEditTime: 2026-05-27 15:19:26
+ * @LastEditTime: 2026-05-27 16:17:12
  * Copyright (c) 2026 by hidari, All Rights Reserved.
  */
 import { useState, useRef, useEffect, useCallback } from "react";
@@ -146,7 +146,7 @@ export const AIPage = () => {
       setIndexStatus("加载博客文章...");
       console.log("开始索引博客文章...");
       await indexBlogPosts(
-        blogs.map((b) => ({ path: b.path, content: b.content })),
+        blogs.map((b) => ({ path: b.path, title: b.title, content: b.content })),
         (current: number, total: number, status: string) => {
           console.log(`进度更新: ${current}/${total} - ${status}`);
           // 使用 setTimeout 确保状态更新被处理
@@ -611,7 +611,7 @@ export const AIPage = () => {
                                 >
                                   <div className="flex items-center justify-between mb-1">
                                     <span className="text-[var(--text-secondary)] font-medium">
-                                      来源 {idx + 1}: {source.source}
+                                      来源 {idx + 1}: {source.title || source.source}
                                     </span>
                                     <span className="text-green-500">
                                       {(source.similarity * 100).toFixed(1)}% 相似
