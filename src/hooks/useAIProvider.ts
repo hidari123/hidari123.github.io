@@ -2,7 +2,7 @@
  * @Author: hidari
  * @Date: 2026-05-14 10:07
  * @LastEditors: hidari
- * @LastEditTime: 2026-05-14 10:40:53
+ * @LastEditTime: 2026-05-20 15:17:20
  * Copyright (c) 2026 by hidari, All Rights Reserved.
  */
 import { useState, useCallback, useEffect } from "react";
@@ -27,8 +27,8 @@ export interface UseAIProviderReturn {
   getCurrentConfig: () => {
     provider: AIProvider;
     apiKey: string | null;
-    baseURL?: string;
-    model?: string;
+    apiUrl: string;
+    model: string;
   };
 }
 
@@ -128,11 +128,19 @@ export function useAIProvider(): UseAIProviderReturn {
   }, [currentProvider, currentProviderId, apiKey, customBaseURL, customModel]);
 
   const getCurrentConfig = useCallback(() => {
+    // 确定 API URL：自定义用户输入的，或 provider 自带的
+    const apiUrl =
+      currentProviderId === "custom" ? customBaseURL || "" : currentProvider.baseURL || "";
+
+    // 确定 model：自定义用户输入的，或 provider 的默认 model
+    const model =
+      currentProviderId === "custom" ? customModel || "" : currentProvider.defaultModel || "";
+
     return {
       provider: currentProvider,
       apiKey,
-      baseURL: currentProviderId === "custom" ? customBaseURL || undefined : undefined,
-      model: currentProviderId === "custom" ? customModel || undefined : undefined,
+      apiUrl,
+      model,
     };
   }, [currentProvider, currentProviderId, apiKey, customBaseURL, customModel]);
 

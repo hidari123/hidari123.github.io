@@ -6,5 +6,45 @@
     "tags": ["AI", "LLM", "深度学习", "教程"],
     "cover": "",
     "description": "全面介绍大语言模型的基本原理、架构设计和实际应用，带你从零开始理解 LLM 的奥秘"
+  },
+  {
+    "slug": "前端面试题完全指南",
+    "title": "2026年前端面试题完全指南：高频考点深度解析",
+    "date": "2026-05-14",
+    "tags": ["前端", "面试", "JavaScript", "TypeScript", "React"],
+    "cover": "",
+    "description": "涵盖 JavaScript 核心原理、TypeScript 进阶用法、React 源码解读等高频面试题，助你拿下心仪的 Offer"
+  },
+  {
+    "slug": "深入理解RAG检索增强生成技术",
+    "title": "深入理解 RAG：检索增强生成技术从原理到实战",
+    "date": "2026-05-15",
+    "tags": ["AI", "RAG", "大语言模型", "向量数据库", "实战"],
+    "cover": "",
+    "description": "详细介绍 RAG 技术的核心原理、架构设计、检索策略，以及如何构建企业级 RAG 应用系统"
+  },
+  {
+    "slug": "AI-Agents-构建智能助手实战",
+    "title": "AI Agents 实战：从零构建智能助手应用",
+    "date": "2026-05-16",
+    "tags": ["AI", "Agent", "大语言模型", "LangChain", "实战"],
+    "cover": "",
+    "description": "深入讲解 AI Agent 的核心概念、架构设计，以及如何使用 LangChain 和 AutoGPT 构建智能助手"
+  },
+  {
+    "slug": "前端性能优化实战指南",
+    "title": "前端性能优化实战：让你的应用快如闪电",
+    "date": "2026-05-17",
+    "tags": ["前端", "性能优化", "React", "JavaScript", "工程化"],
+    "cover": "",
+    "description": "从渲染优化、网络优化、构建优化等多个维度，系统讲解前端性能优化的核心技巧与最佳实践"
+  },
+  {
+    "slug": "TypeScript高级技巧与设计模式",
+    "title": "TypeScript 高级技巧与设计模式实战",
+    "date": "2026-05-18",
+    "tags": ["TypeScript", "设计模式", "类型编程", "最佳实践"],
+    "cover": "",
+    "description": "深入讲解 TypeScript 高级类型系统、装饰器、声明文件编写，以及常见设计模式的 TypeScript 实现"
   }
 ]

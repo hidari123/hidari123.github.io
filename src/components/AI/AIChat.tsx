@@ -2,7 +2,7 @@
  * @Author: hidari
  * @Date: 2026-05-14 09:54
  * @LastEditors: hidari
- * @LastEditTime: 2026-05-15 16:09:07
+ * @LastEditTime: 2026-05-27 14:58:11
  * Copyright (c) 2026 by hidari, All Rights Reserved.
  */
 import { useState, useRef, useEffect, useCallback } from "react";
@@ -185,17 +185,42 @@ export const AIChat = ({ content }: AIChatProps) => {
       // 获取实际的文章内容
       const effectiveContent = articleContent || PROJECT_INFO;
 
-      const response = await askQuestion(trimmedInput, effectiveContent, {
-        ...config,
-        apiKey: config.apiKey,
-      });
+      const assistantId = (Date.now() + 1).toString();
 
+      // 先添加一个空的 assistant 消息占位
       const assistantMessage: Message = {
-        id: (Date.now() + 1).toString(),
+        id: assistantId,
         role: "assistant",
-        content: response,
+        content: "",
       };
       setMessages((prev) => [...prev, assistantMessage]);
+
+      const response = await askQuestion(
+        trimmedInput,
+        effectiveContent,
+        {
+          ...config,
+          apiKey: config.apiKey,
+        },
+        {
+          onChunk: (chunk) => {
+            setMessages((prev) =>
+              prev.map((m) => (m.id === assistantId ? { ...m, content: m.content + chunk } : m)),
+            );
+          },
+          onComplete: () => {
+            // 流式完成
+          },
+          onError: (err) => {
+            setError(err.message);
+          },
+        },
+      );
+
+      // 确保最终内容完整
+      setMessages((prev) =>
+        prev.map((m) => (m.id === assistantId ? { ...m, content: response } : m)),
+      );
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : "回答生成失败，请重试";
       setError(errorMessage);

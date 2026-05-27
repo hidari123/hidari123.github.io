@@ -2,15 +2,14 @@
  * @Author: hidari
  * @Date: 2026-05-14 09:54
  * @LastEditors: hidari
- * @LastEditTime: 2026-05-14 09:54
+ * @LastEditTime: 2026-05-27 14:59:44
  * Copyright (c) 2026 by hidari, All Rights Reserved.
  */
 import { useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Copy, Check, Loader2, X, Bot, AlertCircle } from "lucide-react";
-import { useOpenAIKey } from "@/hooks/useOpenAIKey";
-import { getOpenAIService } from "@/services/openaiService";
-import { ApiKeyModal } from "../AI/ApiKeyModal";
+import { useAIProvider } from "@/hooks/useAIProvider";
+import { explainCode } from "@/services/aiService";
 
 interface CodeBlockProps {
   code: string;
@@ -18,7 +17,7 @@ interface CodeBlockProps {
 }
 
 export const CodeBlock = ({ code, language }: CodeBlockProps) => {
-  const { apiKey, saveApiKey, showApiKeyModal, setShowApiKeyModal } = useOpenAIKey();
+  const { checkConfig, getCurrentConfig } = useAIProvider();
   const [copied, setCopied] = useState(false);
   const [explaining, setExplaining] = useState(false);
   const [explanation, setExplanation] = useState<string | null>(null);
@@ -36,18 +35,40 @@ export const CodeBlock = ({ code, language }: CodeBlockProps) => {
   }, [code]);
 
   const handleExplain = async () => {
-    if (!apiKey) {
-      setShowApiKeyModal(true);
+    if (!checkConfig()) {
+      return;
+    }
+
+    const config = getCurrentConfig();
+    if (!config.apiKey) {
       return;
     }
 
     setExplaining(true);
     setError(null);
     setShowExplanation(true);
+    setExplanation("");
 
     try {
-      const service = getOpenAIService(apiKey);
-      const result = await service.explainCode(code);
+      const result = await explainCode(
+        code,
+        {
+          ...config,
+          apiKey: config.apiKey,
+        },
+        {
+          onChunk: (chunk) => {
+            setExplanation((prev) => (prev || "") + chunk);
+          },
+          onComplete: () => {
+            // 流式完成
+          },
+          onError: (err) => {
+            setError(err.message);
+          },
+        },
+      );
+      // 确保最终内容完整
       setExplanation(result);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : "解释生成失败，请重试";
@@ -55,25 +76,6 @@ export const CodeBlock = ({ code, language }: CodeBlockProps) => {
     } finally {
       setExplaining(false);
     }
-  };
-
-  const handleSaveApiKey = (key: string) => {
-    saveApiKey(key);
-    setTimeout(() => {
-      setExplaining(true);
-      setError(null);
-      const service = getOpenAIService(key);
-      service
-        .explainCode(code)
-        .then((result) => {
-          setExplanation(result);
-          setShowExplanation(true);
-        })
-        .catch((err) => {
-          setError(err instanceof Error ? err.message : "解释生成失败");
-        })
-        .finally(() => setExplaining(false));
-    }, 100);
   };
 
   return (
@@ -168,12 +170,6 @@ export const CodeBlock = ({ code, language }: CodeBlockProps) => {
           </>
         )}
       </AnimatePresence>
-
-      <ApiKeyModal
-        isOpen={showApiKeyModal}
-        onClose={() => setShowApiKeyModal(false)}
-        onSave={handleSaveApiKey}
-      />
     </>
   );
 };

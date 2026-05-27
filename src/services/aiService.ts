@@ -2,7 +2,7 @@
  * @Author: hidari
  * @Date: 2026-05-14 10:07
  * @LastEditors: hidari
- * @LastEditTime: 2026-05-14 10:35:16
+ * @LastEditTime: 2026-05-27 14:44:27
  * Copyright (c) 2026 by hidari, All Rights Reserved.
  */
 
@@ -20,6 +20,7 @@ export interface AIConfig {
   };
   apiKey: string;
   baseURL?: string;
+  apiUrl?: string; // 兼容旧配置
   model?: string;
 }
 
@@ -35,8 +36,9 @@ export async function callAI(
   options?: StreamOptions,
 ): Promise<string> {
   const { provider, apiKey } = config;
-  const baseURL = config.baseURL || provider.baseURL;
+  const baseURL = config.baseURL || provider.baseURL || config.apiUrl;
   const model = config.model || provider.defaultModel;
+  console.log(1111, baseURL, config);
 
   const url = `${baseURL}/chat/completions`;
 

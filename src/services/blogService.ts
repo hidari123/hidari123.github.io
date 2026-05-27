@@ -2,7 +2,7 @@
  * @Author: hidari
  * @Date: 2026-05-13 15:59
  * @LastEditors: hidari
- * @LastEditTime: 2026-05-13 16:23:29
+ * @LastEditTime: 2026-05-20 15:12:40
  * Copyright (c) 2026 by hidari, All Rights Reserved.
  */
 
@@ -18,7 +18,7 @@ export interface Post {
 }
 
 // 文章索引接口
-interface PostIndex {
+export interface PostIndex {
   slug: string;
   title: string;
   date: string;
@@ -54,7 +54,7 @@ function generateExcerpt(content: string, maxLength: number = 160): string {
 /**
  * 获取所有博客文章索引
  */
-async function getPostIndex(): Promise<PostIndex[]> {
+export async function getPostIndex(): Promise<PostIndex[]> {
   try {
     const response = await fetch("/posts/index.json");
     if (!response.ok) {

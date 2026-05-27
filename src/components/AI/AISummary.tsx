@@ -2,7 +2,7 @@
  * @Author: hidari
  * @Date: 2026-05-14 09:54
  * @LastEditors: hidari
- * @LastEditTime: 2026-05-14 10:28:20
+ * @LastEditTime: 2026-05-27 14:59:07
  * Copyright (c) 2026 by hidari, All Rights Reserved.
  */
 import { useState, useCallback } from "react";
@@ -37,12 +37,30 @@ export const AISummary = ({ content }: AISummaryProps) => {
       if (!config.apiKey) {
         throw new Error("请先配置 API Key");
       }
-      const result = await generateSummary(content, {
-        ...config,
-        apiKey: config.apiKey,
-      });
-      setSummary(result);
+      // 先设置空摘要占位
+      setSummary("");
       setShowSummary(true);
+
+      const result = await generateSummary(
+        content,
+        {
+          ...config,
+          apiKey: config.apiKey,
+        },
+        {
+          onChunk: (chunk) => {
+            setSummary((prev) => (prev || "") + chunk);
+          },
+          onComplete: () => {
+            // 流式完成
+          },
+          onError: (err) => {
+            setError(err.message);
+          },
+        },
+      );
+      // 确保最终内容完整
+      setSummary(result);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : "生成摘要失败，请重试";
       setError(errorMessage);
