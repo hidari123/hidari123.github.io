@@ -2,7 +2,7 @@
  * @Author: hidari
  * @Date: 2026-05-19
  * @LastEditors: hidari
- * @LastEditTime: 2026-05-27 15:00:39
+ * @LastEditTime: 2026-05-27 15:19:26
  * Copyright (c) 2026 by hidari, All Rights Reserved.
  */
 import { useState, useRef, useEffect, useCallback } from "react";
@@ -29,7 +29,8 @@ import {
   RefreshCw,
 } from "lucide-react";
 import { useAIProvider } from "@/hooks/useAIProvider";
-import { askQuestion } from "@/services/aiService";
+import { chatMessage } from "@/services/aiService";
+import type { Message as AIMessage } from "@/services/aiService";
 import { indexBlogPosts, askWithRAGStream, isRAGReady, getRAGStats } from "@/services/ragService";
 import { getAllBlogContents } from "@/services/blogContentService";
 
@@ -48,16 +49,6 @@ interface Message {
   timestamp: number;
   sources?: RAGSource[];
 }
-
-const PROJECT_INFO = `
-项目信息：
-- 项目名称：Hitari's Blog（一个现代化的博客系统）
-- 作者 GitHub：https://github.com/hidari123
-- 技术栈：React + TypeScript + Vite + Tailwind CSS
-- 功能：支持博客文章展示、Markdown 渲染、评论系统、AI 增强功能
-- AI 功能：支持 AI 摘要、AI 问答、代码解释
-- AI 服务商：支持 DeepSeek（推荐）、OpenAI、自定义 API
-`;
 
 const WELCOME_MESSAGE = `👋 你好！我是这个博客的 AI 助手。
 
@@ -218,15 +209,7 @@ export const AIPage = () => {
 
       const assistantId = (Date.now() + 1).toString();
       let sources: RAGSource[] | undefined;
-
-      // 先添加一个空的 assistant 消息占位
-      const assistantMessage: Message = {
-        id: assistantId,
-        role: "assistant",
-        content: "",
-        timestamp: Date.now(),
-      };
-      setMessages((prev) => [...prev, assistantMessage]);
+      let isFirstChunk = true;
 
       // 优先使用 RAG 回答（如果已索引）
       if (ragReady) {
@@ -237,15 +220,31 @@ export const AIPage = () => {
           config.apiUrl,
           config.model,
           (chunk) => {
-            setMessages((prev) =>
-              prev.map((m) => (m.id === assistantId ? { ...m, content: m.content + chunk } : m)),
-            );
+            if (isFirstChunk) {
+              isFirstChunk = false;
+              // 第一个 chunk 到达时才创建消息，替换 loading 状态
+              setMessages((prev) => [
+                ...prev,
+                {
+                  id: assistantId,
+                  role: "assistant",
+                  content: chunk,
+                  timestamp: Date.now(),
+                },
+              ]);
+              setLoading(false);
+            } else {
+              setMessages((prev) =>
+                prev.map((m) => (m.id === assistantId ? { ...m, content: m.content + chunk } : m)),
+              );
+            }
           },
           () => {
             // 流式完成
           },
           (err) => {
             setError(err.message);
+            setLoading(false);
           },
         );
         sources = ragResult.sources;
@@ -261,27 +260,57 @@ export const AIPage = () => {
               : m,
           ),
         );
+        setLoading(false);
       } else {
-        // 使用项目信息作为上下文（流式）
-        console.log("📝 使用项目信息回答（流式）...");
-        const response = await askQuestion(
-          trimmedInput,
-          PROJECT_INFO,
+        // 通用聊天模式（支持多轮对话）
+        console.log("💬 通用聊天模式（流式）...");
+        // 构建对话历史（最近10轮）
+        const conversationHistory: AIMessage[] = [];
+        const recentMessages = messages.filter((m) => m.id !== "welcome").slice(-20);
+        for (const msg of recentMessages) {
+          conversationHistory.push({
+            role: msg.role as "user" | "assistant",
+            content: msg.content,
+          });
+        }
+        // 添加当前用户消息
+        conversationHistory.push({ role: "user", content: trimmedInput });
+
+        const response = await chatMessage(
+          conversationHistory,
           {
             ...config,
             apiKey: config.apiKey,
           },
           {
             onChunk: (chunk) => {
-              setMessages((prev) =>
-                prev.map((m) => (m.id === assistantId ? { ...m, content: m.content + chunk } : m)),
-              );
+              if (isFirstChunk) {
+                isFirstChunk = false;
+                // 第一个 chunk 到达时才创建消息，替换 loading 状态
+                setMessages((prev) => [
+                  ...prev,
+                  {
+                    id: assistantId,
+                    role: "assistant",
+                    content: chunk,
+                    timestamp: Date.now(),
+                  },
+                ]);
+                setLoading(false);
+              } else {
+                setMessages((prev) =>
+                  prev.map((m) =>
+                    m.id === assistantId ? { ...m, content: m.content + chunk } : m,
+                  ),
+                );
+              }
             },
             onComplete: () => {
               // 流式完成
             },
             onError: (err) => {
               setError(err.message);
+              setLoading(false);
             },
           },
         );
@@ -289,6 +318,7 @@ export const AIPage = () => {
         setMessages((prev) =>
           prev.map((m) => (m.id === assistantId ? { ...m, content: response } : m)),
         );
+        setLoading(false);
       }
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : "回答生成失败，请重试";

@@ -2,7 +2,7 @@
  * @Author: hidari
  * @Date: 2026-05-14 09:54
  * @LastEditors: hidari
- * @LastEditTime: 2026-05-27 14:58:11
+ * @LastEditTime: 2026-05-27 15:25:14
  * Copyright (c) 2026 by hidari, All Rights Reserved.
  */
 import { useState, useRef, useEffect, useCallback } from "react";
@@ -13,7 +13,8 @@ import { useLocation } from "react-router-dom";
 import { MessageCircle, X, Send, Loader2, AlertCircle, Bot, User, Sparkles } from "lucide-react";
 import { useAIProvider } from "@/hooks/useAIProvider";
 import { useAIContext } from "@/context/AIContext";
-import { askQuestion } from "@/services/aiService";
+import { askQuestion, chatMessage } from "@/services/aiService";
+import type { Message as AIMessage } from "@/services/aiService";
 
 interface Message {
   id: string;
@@ -24,17 +25,6 @@ interface Message {
 interface AIChatProps {
   content?: string;
 }
-
-// 项目信息
-const PROJECT_INFO = `
-项目信息：
-- 项目名称：Hitari's Blog（一个现代化的博客系统）
-- 作者 GitHub：https://github.com/hidari123
-- 技术栈：React + TypeScript + Vite + Tailwind CSS
-- 功能：支持博客文章展示、Markdown 渲染、评论系统、AI 增强功能
-- AI 功能：支持 AI 摘要、AI 问答、代码解释
-- AI 服务商：支持 DeepSeek（推荐）、OpenAI、自定义 API
-`;
 
 export const AIChat = ({ content }: AIChatProps) => {
   const { checkConfig, getCurrentConfig } = useAIProvider();
@@ -182,45 +172,103 @@ export const AIChat = ({ content }: AIChatProps) => {
         throw new Error("请先配置 API Key");
       }
 
-      // 获取实际的文章内容
-      const effectiveContent = articleContent || PROJECT_INFO;
-
       const assistantId = (Date.now() + 1).toString();
+      let isFirstChunk = true;
 
-      // 先添加一个空的 assistant 消息占位
-      const assistantMessage: Message = {
-        id: assistantId,
-        role: "assistant",
-        content: "",
-      };
-      setMessages((prev) => [...prev, assistantMessage]);
+      // 如果在文章页，使用文章内容作为上下文
+      if (articleContent) {
+        const response = await askQuestion(
+          trimmedInput,
+          articleContent,
+          {
+            ...config,
+            apiKey: config.apiKey,
+          },
+          {
+            onChunk: (chunk) => {
+              if (isFirstChunk) {
+                isFirstChunk = false;
+                setMessages((prev) => [
+                  ...prev,
+                  {
+                    id: assistantId,
+                    role: "assistant",
+                    content: chunk,
+                  },
+                ]);
+                setLoading(false);
+              } else {
+                setMessages((prev) =>
+                  prev.map((m) =>
+                    m.id === assistantId ? { ...m, content: m.content + chunk } : m,
+                  ),
+                );
+              }
+            },
+            onComplete: () => {},
+            onError: (err) => {
+              setError(err.message);
+              setLoading(false);
+            },
+          },
+        );
+        // 确保最终内容完整
+        setMessages((prev) =>
+          prev.map((m) => (m.id === assistantId ? { ...m, content: response } : m)),
+        );
+        setLoading(false);
+      } else {
+        // 通用聊天模式（支持多轮对话）
+        const conversationHistory: AIMessage[] = [];
+        const recentMessages = messages.filter((m) => m.id !== "welcome").slice(-20);
+        for (const msg of recentMessages) {
+          conversationHistory.push({
+            role: msg.role as "user" | "assistant",
+            content: msg.content,
+          });
+        }
+        conversationHistory.push({ role: "user", content: trimmedInput });
 
-      const response = await askQuestion(
-        trimmedInput,
-        effectiveContent,
-        {
-          ...config,
-          apiKey: config.apiKey,
-        },
-        {
-          onChunk: (chunk) => {
-            setMessages((prev) =>
-              prev.map((m) => (m.id === assistantId ? { ...m, content: m.content + chunk } : m)),
-            );
+        const response = await chatMessage(
+          conversationHistory,
+          {
+            ...config,
+            apiKey: config.apiKey,
           },
-          onComplete: () => {
-            // 流式完成
+          {
+            onChunk: (chunk) => {
+              if (isFirstChunk) {
+                isFirstChunk = false;
+                setMessages((prev) => [
+                  ...prev,
+                  {
+                    id: assistantId,
+                    role: "assistant",
+                    content: chunk,
+                  },
+                ]);
+                setLoading(false);
+              } else {
+                setMessages((prev) =>
+                  prev.map((m) =>
+                    m.id === assistantId ? { ...m, content: m.content + chunk } : m,
+                  ),
+                );
+              }
+            },
+            onComplete: () => {},
+            onError: (err) => {
+              setError(err.message);
+              setLoading(false);
+            },
           },
-          onError: (err) => {
-            setError(err.message);
-          },
-        },
-      );
-
-      // 确保最终内容完整
-      setMessages((prev) =>
-        prev.map((m) => (m.id === assistantId ? { ...m, content: response } : m)),
-      );
+        );
+        // 确保最终内容完整
+        setMessages((prev) =>
+          prev.map((m) => (m.id === assistantId ? { ...m, content: response } : m)),
+        );
+        setLoading(false);
+      }
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : "回答生成失败，请重试";
       setError(errorMessage);

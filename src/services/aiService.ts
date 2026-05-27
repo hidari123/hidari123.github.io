@@ -2,7 +2,7 @@
  * @Author: hidari
  * @Date: 2026-05-14 10:07
  * @LastEditors: hidari
- * @LastEditTime: 2026-05-27 14:44:27
+ * @LastEditTime: 2026-05-27 15:41:20
  * Copyright (c) 2026 by hidari, All Rights Reserved.
  */
 
@@ -38,7 +38,6 @@ export async function callAI(
   const { provider, apiKey } = config;
   const baseURL = config.baseURL || provider.baseURL || config.apiUrl;
   const model = config.model || provider.defaultModel;
-  console.log(1111, baseURL, config);
 
   const url = `${baseURL}/chat/completions`;
 
@@ -159,6 +158,29 @@ export async function askQuestion(
       content: `文章内容：\n${content}\n\n问题：${question}`,
     },
   ];
+
+  return callAI(messages, config, options);
+}
+
+// 通用聊天（支持多轮对话）
+export async function chatMessage(
+  conversationHistory: Message[],
+  config: AIConfig,
+  options?: StreamOptions,
+): Promise<string> {
+  const systemPrompt = `你是 Hitari's Blog 的 AI 助手，一个友好、知识渊博的助手。你可以：
+1. 回答关于博客项目、技术栈（React、TypeScript、Vite、Tailwind CSS）的问题
+2. 讨论编程、前端开发、设计模式等技术话题
+3. 进行日常闲聊，保持友好自然的对话风格
+4. 如果用户问到你不知道的信息，诚实地说不知道
+
+项目基本信息：
+- 项目名称：Hitari's Blog（一个现代化的博客系统）
+- 作者 GitHub：https://github.com/hidari123
+- 技术栈：React + TypeScript + Vite + Tailwind CSS
+- AI 服务商：支持 DeepSeek（推荐）、OpenAI、自定义 API`;
+
+  const messages: Message[] = [{ role: "system", content: systemPrompt }, ...conversationHistory];
 
   return callAI(messages, config, options);
 }
