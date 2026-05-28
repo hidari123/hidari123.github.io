@@ -2,7 +2,7 @@
  * @Author: hidari
  * @Date: 2026-05-20
  * @LastEditors: hidari
- * @LastEditTime: 2026-05-27 16:32:47
+ * @LastEditTime: 2026-05-27 16:56:09
  * Copyright (c) 2026 by hidari, All Rights Reserved.
  *
  * 使用 ONNX Runtime Web 加载本地模型生成向量嵌入
@@ -99,15 +99,26 @@ function wordPieceTokenize(word: string): string[] {
   return tokens;
 }
 
+// 中文按字拆分（模拟 BertTokenizer 的 tokenize_chinese_chars）
+function splitChineseChars(text: string): string {
+  let result = "";
+  for (const ch of text) {
+    if (/[\u4e00-\u9fff\u3400-\u4dbf]/.test(ch)) {
+      result += " " + ch + " ";
+    } else {
+      result += ch;
+    }
+  }
+  return result;
+}
+
 // 完整的分词函数
 function tokenize(text: string): { inputIds: number[]; attentionMask: number[] } {
   const maxLength = 256;
 
-  // 按空格和标点分割
-  const words = text
-    .toLowerCase()
-    .split(/(\s+|[.,!?;:'"()\[\]{}])/)
-    .filter((t) => t.trim().length > 0);
+  // 先对中文按字拆分，再按空格和标点分割
+  const spaced = splitChineseChars(text.toLowerCase());
+  const words = spaced.split(/(\s+|[.,!?;:'"()\[\]{}])/).filter((t) => t.trim().length > 0);
 
   const tokens: string[] = ["[CLS]"];
 
