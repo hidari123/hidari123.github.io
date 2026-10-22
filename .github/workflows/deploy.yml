@@ -25,14 +25,18 @@ jobs:
           # 真拉下来要多下几百 MB，严重拖慢 CI。
           lfs: false
 
+      # pnpm 必须先于 setup-node：setup-node 的 `cache: pnpm`
+      # 要在执行时找到 pnpm 才能算缓存键，否则这一步直接失败。
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: pnpm
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
