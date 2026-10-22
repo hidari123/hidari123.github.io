@@ -8,6 +8,9 @@ build/
 .next/
 out/
 
+# 模型目录里的裸 git 仓库（LFS 对象占了 300MB，绝不能进 dist）
+.git_disabled/
+
 # 环境变量
 .env
 .env.local

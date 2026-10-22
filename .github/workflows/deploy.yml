@@ -1,0 +1,67 @@
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# 只需要一个并发任务，旧的自动取消
+concurrency:
+  group: pages-deploy
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          # 跳过 LFS 拉取：模型文件是指针，构建博客用不到，
+          # 真拉下来要多下几百 MB，严重拖慢 CI。
+          lfs: false
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Type check
+        run: pnpm run tsc
+
+      - name: Build
+        run: pnpm run vite-build
+
+      # 校验关键产物存在，避免"构建通过但产物是空壳"的情况
+      - name: Verify build output
+        run: |
+          test -f dist/index.html || { echo "::error::dist/index.html missing"; exit 1; }
+          test -f dist/posts/index.json || { echo "::error::index.json missing"; exit 1; }
+          test -d dist/blogs || { echo "::error::blogs dir missing"; exit 1; }
+          echo "blog count: $(ls dist/blogs | wc -l)"
+
+      - name: Deploy to gh-pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./dist
+          publish_branch: gh-pages
+          # 保留历史，方便回滚；会累积体积但对博客可接受
+          keep_files: false
+
+      - name: Summary
+        run: |
+          echo "### 🚀 Deployed to gh-pages" >> $GITHUB_STEP_SUMMARY
+          echo "commit: \`${GITHUB_SHA}\`" >> $GITHUB_STEP_SUMMARY
+          echo "articles: $(ls dist/blogs | wc -l)" >> $GITHUB_STEP_SUMMARY
