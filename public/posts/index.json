@@ -1,50 +1,143 @@
 [
-  {
-    "slug": "大语言模型入门指南",
-    "title": "大语言模型入门指南：从原理到实践",
-    "date": "2026-05-13",
-    "tags": ["AI", "LLM", "深度学习", "教程"],
-    "cover": "",
-    "description": "全面介绍大语言模型的基本原理、架构设计和实际应用，带你从零开始理解 LLM 的奥秘"
-  },
-  {
-    "slug": "前端面试题完全指南",
-    "title": "2026年前端面试题完全指南：高频考点深度解析",
-    "date": "2026-05-14",
-    "tags": ["前端", "面试", "JavaScript", "TypeScript", "React"],
-    "cover": "",
-    "description": "涵盖 JavaScript 核心原理、TypeScript 进阶用法、React 源码解读等高频面试题，助你拿下心仪的 Offer"
-  },
-  {
-    "slug": "深入理解RAG检索增强生成技术",
-    "title": "深入理解 RAG：检索增强生成技术从原理到实战",
-    "date": "2026-05-15",
-    "tags": ["AI", "RAG", "大语言模型", "向量数据库", "实战"],
-    "cover": "",
-    "description": "详细介绍 RAG 技术的核心原理、架构设计、检索策略，以及如何构建企业级 RAG 应用系统"
-  },
-  {
-    "slug": "AI-Agents-构建智能助手实战",
-    "title": "AI Agents 实战：从零构建智能助手应用",
-    "date": "2026-05-16",
-    "tags": ["AI", "Agent", "大语言模型", "LangChain", "实战"],
-    "cover": "",
-    "description": "深入讲解 AI Agent 的核心概念、架构设计，以及如何使用 LangChain 和 AutoGPT 构建智能助手"
-  },
-  {
-    "slug": "前端性能优化实战指南",
-    "title": "前端性能优化实战：让你的应用快如闪电",
-    "date": "2026-05-17",
-    "tags": ["前端", "性能优化", "React", "JavaScript", "工程化"],
-    "cover": "",
-    "description": "从渲染优化、网络优化、构建优化等多个维度，系统讲解前端性能优化的核心技巧与最佳实践"
-  },
-  {
-    "slug": "TypeScript高级技巧与设计模式",
-    "title": "TypeScript 高级技巧与设计模式实战",
-    "date": "2026-05-18",
-    "tags": ["TypeScript", "设计模式", "类型编程", "最佳实践"],
-    "cover": "",
-    "description": "深入讲解 TypeScript 高级类型系统、装饰器、声明文件编写，以及常见设计模式的 TypeScript 实现"
-  }
+    {
+        "slug":  "SSE-Web-Worker-流式对话不掉帧",
+        "tags":  [
+                     "Web Worker",
+                     "SSE",
+                     "流式渲染",
+                     "性能优化",
+                     "AI",
+                     "架构设计"
+                 ],
+        "cover":  "",
+        "description":  "AI Agent 时代，流式 token 增量渲染会持续压迫主线程。本文从真实项目出发，把 SSE 连接搬进 Web Worker，附带事件协议设计、取消机制与错误处理的完整实现。",
+        "date":  "2026-10-22",
+        "title":  "把 SSE 塞进 Web Worker：流式对话不掉帧的完整方案"
+    },
+    {
+        "slug":  "PDF选区几何合并算法",
+        "tags":  [
+                     "PDF.js",
+                     "几何算法",
+                     "文本选区",
+                     "前端进阶",
+                     "AI",
+                     "RAG"
+                 ],
+        "cover":  "",
+        "description":  "PDF 页面渲染在 Canvas 上，没有真实 DOM 文本节点，所以 DOM Selection 那套用不了。本文从 Range.getClientRects() 出发，逐步推导矩形排序、去包含与同行合并算法，并解释容差为什么必须随缩放比联动。",
+        "date":  "2026-10-22",
+        "title":  "PDF 高亮有多难：从 getClientRects 到干净选区的几何合并算法"
+    },
+    {
+        "slug":  "IndexedDB-LRU-多模态资料缓存",
+        "tags":  [
+                     "IndexedDB",
+                     "缓存策略",
+                     "LRU",
+                     "离线优先",
+                     "性能优化",
+                     "AI"
+                 ],
+        "cover":  "",
+        "description":  "多模态 AI 产品要处理大量几十 MB 的 PDF 和模型素材，localStorage 完全不够用。本文以 ScholarClub 为例，讲解 IndexedDB 的事务模型、一个手写的 LRU 淘汰实现，以及大文件缓存的工程约束。",
+        "date":  "2026-10-22",
+        "title":  "前端缓存三件套：IndexedDB + LRU 撑起多模态资料缓存"
+    },
+    {
+        "slug":  "前端动态生成学术引用格式",
+        "tags":  [
+                     "Citation.js",
+                     "CSL",
+                     "学术规范",
+                     "工程取舍",
+                     "前端"
+                 ],
+        "cover":  "",
+        "description":  "论文引用导出是学术产品的刚需，但官方 CSL 模板按许可证分发，APA 不能随便打包。本文讲解如何用 citation-js 配合自带模板，动态生成 BibTeX/APA/MLA/Harvard/Chicago 五种格式，以及字段缺失时的降级策略。",
+        "date":  "2026-10-22",
+        "title":  "绕开 APA 模板的版权问题：前端动态生成五种引用格式"
+    },
+    {
+        "slug":  "大语言模型入门指南",
+        "title":  "大语言模型入门指南：从原理到实践",
+        "date":  "2026-05-13",
+        "tags":  [
+                     "AI",
+                     "LLM",
+                     "深度学习",
+                     "教程"
+                 ],
+        "cover":  "",
+        "description":  "全面介绍大语言模型的基本原理、架构设计和实际应用，带你从零开始理解 LLM 的奥秘"
+    },
+    {
+        "slug":  "前端面试题完全指南",
+        "title":  "2026年前端面试题完全指南：高频考点深度解析",
+        "date":  "2026-05-14",
+        "tags":  [
+                     "前端",
+                     "面试",
+                     "JavaScript",
+                     "TypeScript",
+                     "React"
+                 ],
+        "cover":  "",
+        "description":  "涵盖 JavaScript 核心原理、TypeScript 进阶用法、React 源码解读等高频面试题，助你拿下心仪的 Offer"
+    },
+    {
+        "slug":  "深入理解RAG检索增强生成技术",
+        "title":  "深入理解 RAG：检索增强生成技术从原理到实战",
+        "date":  "2026-05-15",
+        "tags":  [
+                     "AI",
+                     "RAG",
+                     "大语言模型",
+                     "向量数据库",
+                     "实战"
+                 ],
+        "cover":  "",
+        "description":  "详细介绍 RAG 技术的核心原理、架构设计、检索策略，以及如何构建企业级 RAG 应用系统"
+    },
+    {
+        "slug":  "AI-Agents-构建智能助手实战",
+        "title":  "AI Agents 实战：从零构建智能助手应用",
+        "date":  "2026-05-16",
+        "tags":  [
+                     "AI",
+                     "Agent",
+                     "大语言模型",
+                     "LangChain",
+                     "实战"
+                 ],
+        "cover":  "",
+        "description":  "深入讲解 AI Agent 的核心概念、架构设计，以及如何使用 LangChain 和 AutoGPT 构建智能助手"
+    },
+    {
+        "slug":  "前端性能优化实战指南",
+        "title":  "前端性能优化实战：让你的应用快如闪电",
+        "date":  "2026-05-17",
+        "tags":  [
+                     "前端",
+                     "性能优化",
+                     "React",
+                     "JavaScript",
+                     "工程化"
+                 ],
+        "cover":  "",
+        "description":  "从渲染优化、网络优化、构建优化等多个维度，系统讲解前端性能优化的核心技巧与最佳实践"
+    },
+    {
+        "slug":  "TypeScript高级技巧与设计模式",
+        "title":  "TypeScript 高级技巧与设计模式实战",
+        "date":  "2026-05-18",
+        "tags":  [
+                     "TypeScript",
+                     "设计模式",
+                     "类型编程",
+                     "最佳实践"
+                 ],
+        "cover":  "",
+        "description":  "深入讲解 TypeScript 高级类型系统、装饰器、声明文件编写，以及常见设计模式的 TypeScript 实现"
+    }
 ]
