@@ -1,6 +1,6 @@
 ---
 title: "PDF 高亮有多难：从 getClientRects 到干净选区的几何合并算法"
-date: "2026-10-22"
+date: "2026-06-09"
 tags: ["PDF.js", "几何算法", "文本选区", "前端进阶", "AI", "RAG"]
 cover: ""
 description: "PDF 页面渲染在 Canvas 上，没有真实 DOM 文本节点，所以 DOM Selection 那套用不了。本文从 Range.getClientRects() 出发，逐步推导矩形排序、去包含与同行合并算法，并解释容差为什么必须随缩放比联动。"
