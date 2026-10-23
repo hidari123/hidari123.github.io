@@ -103,20 +103,39 @@ export const CodeBlock = ({ code, language }: CodeBlockProps) => {
 
   return (
     <>
-      <div className="code-block-wrapper group relative">
-        {language && <span className="code-lang">{language}</span>}
-        <button onClick={handleCopy} className="copy-button" title="复制代码">
-          {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
-        </button>
-        <button
-          onClick={handleExplain}
-          disabled={explaining}
-          className="ai-explain-button"
-          title="AI 解释"
-        >
-          {explaining ? <Loader2 className="w-4 h-4 animate-spin" /> : <Bot className="w-4 h-4" />}
-          <span>解释</span>
-        </button>
+      {/*
+        顶部工具条：语言标签在左，复制/解释按钮在右（ml-auto）。
+
+        为什么不再把三个控件各自 position:absolute 挂在右上角：
+        那样写它们互不知情，实测三个芯片交叠 1142/544/326 px²，
+        且 ai-explain-button 把另外两个盖掉了（z-index 都是 1，靠 DOM 顺序决胜），
+        复制按钮和语言标签实际点不到。
+
+        现在工具条自己占一行，按钮不再压在代码文字上 ——
+        「解释按钮位置偏高、顶到 TS 标识」是同一个问题的表现，一并消失。
+      */}
+      <div className="code-block-wrapper">
+        <div className="code-toolbar">
+          {language && <span className="code-lang">{language}</span>}
+          <div className="code-actions">
+            <button onClick={handleCopy} className="copy-button" title="复制代码">
+              {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+            </button>
+            <button
+              onClick={handleExplain}
+              disabled={explaining}
+              className="ai-explain-button"
+              title="AI 解释"
+            >
+              {explaining ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <Bot className="w-4 h-4" />
+              )}
+              <span>解释</span>
+            </button>
+          </div>
+        </div>
         <pre>
           <code
             className={`language-${language}`}

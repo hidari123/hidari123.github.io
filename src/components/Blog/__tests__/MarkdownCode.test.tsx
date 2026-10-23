@@ -111,4 +111,55 @@ describe("MarkdownCode 结构不变式", () => {
     expect(wrapper?.querySelector("pre > code.language-ts")).not.toBeNull();
     expect(wrapper?.querySelector("pre > code.language-python")).toBeNull();
   });
+
+  /*
+    回归测试：控件抢位。
+
+    线上现象是 hover 代码块时右上角出现一块说不清形状的深灰东西，
+    不知道背后叠了几个按钮。实测根因不是重复渲染，而是三个控件各自
+    position:absolute + 靠 right 反推位置，互不知情：
+
+      .code-lang         right 0        → 96×28
+      .copy-button       right 5rem     → 32×27
+      .ai-explain-button right 2.5rem   → 60×31
+
+    三个 z-index 都是 1，平局靠 DOM 顺序，而 ai-explain-button 排在最后
+    → 它盖住了前两个（交叠 1142 / 544 / 326 px²）。
+
+    jsdom 不做布局，给不出真实坐标，但**结构**可以钉死：
+    三个控件必须处在同一条 flex 工具条里，而不是各自绝对定位。
+    这条测试的价值在于：谁再把按钮改回 position:absolute，这里就红。
+  */
+  it("代码块操作控件都在工具条内，不再各自绝对定位", () => {
+    const { container } = renderMarkdown(MD);
+    const wrapper = container.querySelector(".code-block-wrapper");
+    expect(wrapper).not.toBeNull();
+
+    const toolbar = wrapper?.querySelector(".code-toolbar");
+    expect(toolbar).not.toBeNull();
+
+    // 三个控件全部住在工具条里
+    expect(toolbar?.querySelector(".code-lang")).not.toBeNull();
+    expect(toolbar?.querySelector(".copy-button")).not.toBeNull();
+    expect(toolbar?.querySelector(".ai-explain-button")).not.toBeNull();
+
+    // 每个代码块有且只有一个工具条、一个按钮组
+    expect(wrapper?.querySelectorAll(".code-toolbar").length).toBe(1);
+    expect(wrapper?.querySelectorAll(".code-actions").length).toBe(1);
+    // 每个按钮组里两个按钮各一个
+    const actions = wrapper?.querySelector(".code-actions");
+    expect(actions?.querySelectorAll(".copy-button").length).toBe(1);
+    expect(actions?.querySelectorAll(".ai-explain-button").length).toBe(1);
+  });
+
+  it("工具条在 pre 之前：按钮不再压在代码文字上", () => {
+    const { container } = renderMarkdown(MD);
+    const wrapper = container.querySelector(".code-block-wrapper");
+    const children = [...(wrapper?.children ?? [])];
+    const toolbarIdx = children.findIndex((c) => c.classList.contains("code-toolbar"));
+    const preIdx = children.findIndex((c) => c.tagName.toLowerCase() === "pre");
+    expect(toolbarIdx).toBeGreaterThanOrEqual(0);
+    expect(preIdx).toBeGreaterThanOrEqual(0);
+    expect(toolbarIdx).toBeLessThan(preIdx);
+  });
 });

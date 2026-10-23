@@ -266,7 +266,7 @@ export const AIChatPanel = ({ content, isOpen, onClose, pathname }: AIChatPanelP
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.9, y: 20 }}
             transition={{ duration: 0.2 }}
-            className="fixed bottom-24 right-6 z-40 w-[calc(100%_-_3rem)] sm:w-96 h-[32rem] max-h-[calc(100vh-12rem)] flex flex-col bg-[var(--bg-card)] rounded-2xl shadow-2xl border border-[var(--border)] overflow-hidden"
+            className="fixed bottom-24 right-6 z-50 w-[calc(100%_-_3rem)] sm:w-96 h-[32rem] max-h-[calc(100vh-12rem)] flex flex-col bg-[var(--bg-card)] rounded-2xl shadow-2xl border border-[var(--border)] overflow-hidden"
           >
             {/* 头部 */}
             <div className="flex items-center justify-between px-4 py-3 bg-gradient-to-r from-[#6366f1] to-[#8b5cf6] text-white">

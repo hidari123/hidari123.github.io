@@ -102,16 +102,19 @@ export const Toc = ({
 
   if (variant === "collapsible") {
     return (
-      <nav ref={navRef} className="space-y-1" aria-label="文章目录">
+      <nav ref={navRef} className="space-y-1 min-w-0" aria-label="文章目录">
         {items.map((item) => (
           <button
             key={item.id}
             onClick={() => scrollToId(item.id)}
-            className={`block w-full text-left text-sm py-1 transition-colors ${levelClass(item.level)} ${
+            className={`block w-full min-w-0 truncate text-left text-sm py-1 transition-colors ${levelClass(
+              item.level,
+            )} ${
               activeId === item.id
                 ? "text-[var(--accent)] font-medium"
                 : "text-[var(--text-secondary)] hover:text-[var(--accent)]"
             }`}
+            title={item.text}
           >
             {item.text}
           </button>
@@ -123,20 +126,27 @@ export const Toc = ({
   return (
     <nav
       ref={navRef}
-      className={`space-y-1 ${scroll ? "max-h-[calc(100vh-8rem)] overflow-y-auto" : ""}`}
+      // min-w-0：flex/grid 子项默认 min-width:auto，不加的话长标题会擑宽
+      // nav 本身，导致即使父级写了 overflow-x-hidden 也拦不住。
+      className={`space-y-1 min-w-0 ${
+        scroll ? "max-h-[calc(100vh-8rem)] overflow-y-auto overflow-x-hidden" : ""
+      }`}
       aria-label="文章目录"
     >
       {items.map((item) => (
         <button
           key={item.id}
           onClick={() => scrollToId(item.id)}
-          className={`block w-full text-left text-sm py-1.5 border-l-2 pl-3 transition-colors ${
-            levelClass(item.level)
-          } ${
+          // truncate 而不是 wrap：目录是一条纵向索引，标题占多行会把面板
+          // 推得很长，而这里本来就要内部滚动。省略号比堆三行标题实用。
+          className={`block w-full min-w-0 truncate text-left text-sm py-1.5 border-l-2 pl-3 transition-colors ${levelClass(
+            item.level,
+          )} ${
             activeId === item.id
               ? "text-[var(--accent)] border-[var(--accent)] font-medium"
               : "border-transparent text-[var(--text-secondary)] hover:text-[var(--accent)] hover:border-[var(--accent)]/40"
           }`}
+          title={item.text}
         >
           {item.text}
         </button>
@@ -208,16 +218,23 @@ export const TocSidebar = ({ items }: { items: TocItem[] }) => {
       )}
 
       {/* 展开态：右侧悬浮面板
-          top-28 + bottom-6 双边定位，面板高度随视口自适应，
-          不会在矮屏上超出下沿。内层 Toc 传scroll={false} 避免
-          内外两层滚动条（滚到内层尽头会卡住）。 */}
+
+          max-h-[60vh] 取代原来的 `top-28 bottom-6` 双边定位。
+
+          原来双边定位 = 高度完全由视口决定，实测 asideHeight 864 / viewportH
+          1000 = 0.864，目录占了视口近九成，看着很压迫。
+
+          用 max-h 而不是固定 h：短文章目录本来就短，条目少时面板跟着收缩，
+          比留一大块空框子好看；长文章顶满 60vh 后内部滚动。
+          注意去掉了 bottom-6 —— 同时写 max-h 和 bottom 会变成「两者取小」，
+          max-h 就永远不生效（这正是之前拖不到预期高度的原因之一）。 */}
       {!collapsed && (
         <aside
           aria-label="目录侧边栏"
-          className="fixed right-6 top-28 bottom-6 z-40 w-60 hidden lg:block"
+          className="fixed right-6 top-28 z-40 w-60 max-h-[60vh] hidden lg:flex lg:flex-col"
         >
           <div className="h-full p-4 bg-[var(--bg-card)]/95 backdrop-blur-sm rounded-xl border border-[var(--border)] shadow-lg flex flex-col overflow-hidden">
-            <div className="flex items-center gap-2 mb-3 text-[var(--text-primary)]">
+            <div className="flex items-center gap-2 mb-3 text-[var(--text-primary)] shrink-0">
               <List className="w-4 h-4 text-[var(--accent)]" />
               <h2 className="text-sm font-semibold">目录</h2>
               <span className="ml-auto text-xs font-normal text-[var(--text-secondary)]">
@@ -232,7 +249,17 @@ export const TocSidebar = ({ items }: { items: TocItem[] }) => {
                 <PanelRightClose className="w-3.5 h-3.5" />
               </button>
             </div>
-            <div className="overflow-y-auto min-h-0 flex-1">
+            {/* overflow-x-hidden 不能省。
+
+                CSS 规范：overflow-y 一旦不是 visible，overflow-x 的
+                visible 会被**计算成 auto**。所以只写 overflow-y-auto 的话，
+                一个字没多的也会凭空长出横向滚动条 —— 实测 nav 的
+                scrollWidth 218 > clientWidth 206，溢出 12px。
+
+                配 min-w-0 是因为 flex 子项默认 min-width:auto，
+                不加的话里面的长标题会把 flex 容器擑宽，让
+                overflow-x-hidden 也拦不住。滚动条只留纵向。 */}
+            <div className="overflow-y-auto overflow-x-hidden min-h-0 min-w-0 flex-1">
               <Toc items={items} scroll={false} />
             </div>
           </div>

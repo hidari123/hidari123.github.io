@@ -41,6 +41,11 @@
   /* 毛玻璃 */
   --glass-bg: rgba(255, 255, 255, 0.85);
   --glass-border: rgba(255, 255, 255, 0.2);
+
+  /* 表格：表头比 hover 深一档，两层都用浅紫，都远离白底 */
+  --table-border: #e9e7f3;
+  --table-head-bg: #f1f0fb;
+  --table-row-hover: #f7f5fd;
 }
 
 /* ========================================
@@ -76,6 +81,13 @@
   /* 毛玻璃 */
   --glass-bg: rgba(20, 20, 20, 0.9);
   --glass-border: rgba(255, 255, 255, 0.05);
+
+  /* 表格：同样是「表头深、hover 浅」，但暗色下深浅是反过来的 ——
+     表头稍亮（#1a1726）才算分隔得开，hover 更贴近背景（#16141f）才够轻。
+     两值都带紫调，避免和暗色代码块背景 #0d1117 糊成一片。 */
+  --table-border: #2a2438;
+  --table-head-bg: #1a1726;
+  --table-row-hover: #16141f;
 }
 
 * {
@@ -416,90 +428,120 @@ p {
   opacity: 0.7;
 }
 
-/* 代码块容器 */
+/* ══════════════════════════════════════════════════════════════════════
+   代码块容器 + 工具条
+
+   ── 为什么从「三个绝对定位」改成「一条工具条」──
+
+   上一版三个控件各写各的 absolute 偏移，谁都不知道旁边还有谁：
+
+     .code-lang         top 0    right 0        → 96×28  占 x 912..1008
+     .copy-button       top .5rem right 5rem   → 32×27  占 x 896.. 928
+     .ai-explain-button top .5rem right 2.5rem → 60×31  占 x 908.. 968
+
+   z-index 全是 1，平局靠 DOM 顺序决胜，而 ai-explain-button 排在最后
+   → 它把前两个盖掉了。实测交叠面积：
+
+     lang ∩ explain = 1142px²   copy ∩ explain = 544px²   lang ∩ copy = 326px²
+
+   elementFromPoint 在交叠区 6/6 全部命中 ai-explain-button，
+   也就是说：复制按钮和语言标签的左半部分实际点不到。
+   加上三个芯片都是 rgba(45,45,45,.9) 深灰半透明，深灰底块边界糊在一起，
+   肉眼看就是一个说不清形状的东西叠在右上角。
+
+   根因不是数值没调好，是「各自靠 right 反推」这个模式本身不可扩展：
+   以后再加一个按钮，还是会撞。
+
+   现在改成顶部一条真正的 flex 工具条：
+     - 工具条自己占一行，按钮不再压在代码文字上（「往下移一点」自然达成）
+     - 语言标签和按钮组不再抢同一块像素
+     - 长代码块滚动时工具条钉在顶部，TS 标识不会跟着滚走
+     - 容器 overflow:hidden + 圆角，工具条自然被裁成上圆角
+
+   边框按 hitari 的要求保留（12px 圆角 + 左侧 3px accent 色条）。
+   ══════════════════════════════════════════════════════════════════════ */
 .markdown-body .code-block-wrapper {
   position: relative;
   margin: 1.5rem 0;
-  border-radius: 8px;
+  border-radius: 12px;
   overflow: hidden;
+  background: var(--code-block-bg);
+  border: 1px solid var(--code-block-border);
+  border-left: 3px solid var(--code-block-accent);
 }
 
-/* 语言标签 */
+/* 工具条 */
+.markdown-body .code-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.375rem 0.5rem 0.375rem 0.75rem;
+  background: var(--code-block-toolbar-bg);
+  border-bottom: 1px solid var(--code-block-border);
+  min-height: 2.125rem;
+}
+
+/* 语言标签：不再是右上角的深灰方块，而是工具条左侧的普通标签 */
 .markdown-body .code-lang {
-  position: absolute;
-  top: 0;
-  right: 0;
-  padding: 0.25rem 0.75rem;
-  font-size: 0.75rem;
-  font-family: "Fira Code", "Consolas", monospace;
-  color: #888;
-  background: rgba(45, 45, 45, 0.9);
-  backdrop-filter: blur(4px);
-  border-bottom-left-radius: 8px;
+  font-size: 0.6875rem;
+  font-family: "Fira Code", "JetBrains Mono", Consolas, monospace;
+  color: var(--code-block-lang);
+  background: var(--code-block-lang-bg);
+  padding: 0.125rem 0.5rem;
+  border-radius: 999px;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
-  z-index: 1;
+  letter-spacing: 0.06em;
+  line-height: 1.5;
+  white-space: nowrap;
+  max-width: 12rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-/* 复制按钮 */
-.markdown-body .copy-button {
-  position: absolute;
-  top: 0.5rem;
-  right: 5rem;
-  padding: 0.35rem 0.5rem;
-  font-size: 0.75rem;
-  color: #888;
-  background: rgba(45, 45, 45, 0.9);
-  backdrop-filter: blur(4px);
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  opacity: 0;
-  transition: all 0.2s ease;
-  z-index: 1;
-}
-
-.markdown-body .code-block-wrapper:hover .copy-button {
-  opacity: 1;
-}
-
-.markdown-body .copy-button:hover {
-  color: #fff;
-  background: rgba(99, 102, 241, 0.8);
-}
-
-/* AI 解释按钮 */
-.markdown-body .ai-explain-button {
-  position: absolute;
-  top: 0.5rem;
-  right: 2.5rem;
-  padding: 0.35rem 0.5rem;
-  font-size: 0.75rem;
-  color: #888;
-  background: rgba(45, 45, 45, 0.9);
-  backdrop-filter: blur(4px);
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  opacity: 0;
-  transition: all 0.2s ease;
-  z-index: 1;
+/* 右侧按钮组 */
+.markdown-body .code-actions {
   display: flex;
   align-items: center;
   gap: 0.25rem;
+  margin-left: auto;
 }
 
-.markdown-body .code-block-wrapper:hover .ai-explain-button {
-  opacity: 1;
+/* 复制 / 解释按钮的公共外观 */
+.markdown-body .copy-button,
+.markdown-body .ai-explain-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.25rem 0.5rem;
+  font-size: 0.75rem;
+  line-height: 1.25rem;
+  color: var(--code-block-btn);
+  background: var(--code-block-btn-bg);
+  border: 1px solid transparent;
+  border-radius: 6px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: color 0.15s ease, background-color 0.15s ease, border-color 0.15s ease;
 }
 
-.markdown-body .ai-explain-button:hover {
-  color: #fff;
-  background: rgba(99, 102, 241, 0.8);
+.markdown-body .copy-button:hover,
+.markdown-body .ai-explain-button:hover:not(:disabled) {
+  color: var(--accent);
+  background: var(--accent-glow);
+  border-color: var(--accent-light);
 }
 
 .markdown-body .ai-explain-button:disabled {
   cursor: not-allowed;
+  opacity: 0.55;
+}
+
+/* 触屏没有 hover：这两个按钮必须一直可见，否则永远点不到 */
+@media (hover: none) {
+  .markdown-body .copy-button,
+  .markdown-body .ai-explain-button {
+    opacity: 1;
+  }
 }
 
 /* 代码块样式
@@ -511,7 +553,12 @@ p {
 
    用户看到的「颜色特别浅」，根因就是这里：
    pre 背景和 code 前景没跟着主题一起换。
-   现在统一走变量，两套主题各给一组。 */
+   现在统一走变量，两套主题各给一组。
+
+   另：当 pre 被包在 .code-block-wrapper 里时（CodeBlock 渲染的就是这种），
+   外框（圆角/边框/左侧色条/底色）全部由 wrapper 负责，pre 只负责内容区。
+   所以这里要去掉 pre 自己的 margin/border/radius，否则会出现两层框套在一起。
+   ══════════════════════════════════════════════════════════════════════ */
 .markdown-body pre {
   margin: 1.5rem 0;
   padding: 1rem;
@@ -523,6 +570,15 @@ p {
   line-height: 1.6;
   /* 代码块会横向溢出，移动端不应该把整页撑出滚动条 */
   max-width: 100%;
+}
+
+/* 内容区：外框交给 wrapper */
+.markdown-body .code-block-wrapper > pre {
+  margin: 0;
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  padding: 0.875rem 1rem;
 }
 
 .markdown-body pre code {
@@ -582,26 +638,41 @@ p {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
-/* 表格样式 */
+/* 表格样式
+
+   原先表头和 hover 行用的是**同一个变量** --bg-secondary（实测两边都算出
+   rgb(250,250,250)），所以鼠标划过某一行时，那行颜色和表头一模一样 ——
+   看上去就是「hover 没反应」。这才是「生硬」的真正原因，不是选色问题。
+
+   现在拆成两个专用变量，并且表头比 hover 行**深一档**，层次才拉得开：
+     --table-head-bg    深 —— 表头是分隔线，不是背景
+     --table-row-hover  浅 —— 悬停只是一层很轻的提示
+
+   选浅紫而不是浅粉/浅蓝：站点 accent 本身就是紫（#6366f1），同族色系互相
+   呼应；粉色偏甜、显廉价；蓝色会和代码块 token 蓝以及链接色撞在一起，
+   读者分不清「这是可点链接」还是「这是表头」。
+   暗色版同样带紫调（#1a1726 / #16141f），不用蓝灰 —— 否则会和暗色代码块
+   背景 #0d1117 混成一片。
+   ══════════════════════════════════════════════════════════════════ */
 .markdown-body table {
   width: 100%;
   margin: 1.5rem 0;
   border-collapse: collapse;
   border-radius: 8px;
   overflow: hidden;
-  border: 1px solid var(--border);
+  border: 1px solid var(--table-border);
   font-size: 0.9rem;
 }
 
 .markdown-body thead {
-  background: var(--bg-secondary);
+  background: var(--table-head-bg);
 }
 
 .markdown-body th,
 .markdown-body td {
   padding: 0.75rem 1rem;
   text-align: left;
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid var(--table-border);
 }
 
 .markdown-body th {
@@ -618,7 +689,7 @@ p {
 }
 
 .markdown-body tbody tr:hover {
-  background: var(--bg-secondary);
+  background: var(--table-row-hover);
 }
 
 /* 列表样式 */
@@ -690,6 +761,13 @@ p {
   /* 代码块容器（背景/边框）也必须跟主题走 */
   --code-block-bg: #f6f8fa;
   --code-block-border: #e2e6ea;
+  /* 左侧色条 + 工具条 + 按钮芯片：从 pre 里拆出来，各自独立调 */
+  --code-block-accent: #6366f1;
+  --code-block-toolbar-bg: #eef1f5;
+  --code-block-lang: #6b7280;
+  --code-block-lang-bg: #dfe4ec;
+  --code-block-btn: #4b5563;
+  --code-block-btn-bg: transparent;
 
   --tok-comment: #6a737d;
   --tok-punctuation: #24292e;
@@ -711,6 +789,12 @@ p {
 [data-theme="dark"] {
   --code-block-bg: #0d1117;
   --code-block-border: #30363d;
+  --code-block-accent: #a78bfa;
+  --code-block-toolbar-bg: #161b22;
+  --code-block-lang: #9ca3af;
+  --code-block-lang-bg: #21262d;
+  --code-block-btn: #9ca3af;
+  --code-block-btn-bg: transparent;
 
   --tok-comment: #8b949e;
   --tok-punctuation: #c9d1d9;

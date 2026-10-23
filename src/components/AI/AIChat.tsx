@@ -60,6 +60,26 @@ export const AIChat = ({ content }: AIChatProps) => {
 
   return (
     <>
+      {/*
+        z-50 而不是 z-40。
+
+        目录侧边栏也是 z-40，目录走 FloatLayer portal 到 body，在 DOM 里
+        位于 AIChat 之后 —— z 相同就比绘制顺序，目录赢。实测：
+
+          buttonZ "40"  asideZ "40"  overlap true
+          elementFromPoint(按钮中心) → DIV.overflow-y-auto（目录的滚动容器）
+          topElementIsButton: false
+
+        也就是说按钮被目录盖住且**点不动**，不是只“看起来被挡”。
+        层级约定（同样写进 TOOLS.md）：
+          目录侧边栏 / 折叠 tab → z-40
+          chat 悬浮按钮 / 面板   → z-50
+          Modal                  → z-[10000]
+
+        注意：注释写在 JSX 标签**外面**。写在 <motion.button> 的属性列表中间
+        会让 TSX 解析器把后面的 className 当成注释内容，抛一串
+        TS1003 / TS17015 之类的语法错误。
+      */}
       <motion.button
         onClick={() => setIsOpen(true)}
         initial={{ scale: 0 }}
@@ -67,7 +87,7 @@ export const AIChat = ({ content }: AIChatProps) => {
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.9 }}
         aria-label="打开 AI 助手"
-        className="fixed bottom-6 right-6 z-40 w-14 h-14 rounded-full bg-gradient-to-r from-[#6366f1] to-[#8b5cf6] text-white shadow-lg shadow-[#6366f1]/30 flex items-center justify-center hover:shadow-xl hover:shadow-[#6366f1]/40 transition-shadow"
+        className="fixed bottom-6 right-6 z-50 w-14 h-14 rounded-full bg-gradient-to-r from-[#6366f1] to-[#8b5cf6] text-white shadow-lg shadow-[#6366f1]/30 flex items-center justify-center hover:shadow-xl hover:shadow-[#6366f1]/40 transition-shadow"
       >
         <MessageCircle className="w-6 h-6" />
       </motion.button>
@@ -76,7 +96,7 @@ export const AIChat = ({ content }: AIChatProps) => {
         <ErrorBoundary title="AI 助手没能打开">
           <Suspense
             fallback={
-              <div className="fixed bottom-24 right-6 z-40 w-[calc(100%_-_3rem)] max-w-[24rem] h-[32rem] rounded-2xl bg-[var(--bg-card)] border border-[var(--border)] shadow-2xl flex items-center justify-center">
+              <div className="fixed bottom-24 right-6 z-50 w-[calc(100%_-_3rem)] max-w-[24rem] h-[32rem] rounded-2xl bg-[var(--bg-card)] border border-[var(--border)] shadow-2xl flex items-center justify-center">
                 <span className="text-sm text-[var(--text-secondary)]">加载中...</span>
               </div>
             }
