@@ -40,7 +40,7 @@ import {
   type Usage,
   DEFAULT_PARAMS,
 } from "@/services/llmService";
-import { indexBlogPosts, askWithRAGStream, isRAGReady, getRAGStats, ensureIndex } from "@/services/ragService";
+import { askWithRAGStream, isRAGReady, getRAGStats, ensureIndex } from "@/services/ragService";
 import { getAllBlogContents } from "@/services/blogContentService";
 import { getPostIndex } from "@/services/blogService";
 import { ModelParams } from "@/components/AI/ModelParams";

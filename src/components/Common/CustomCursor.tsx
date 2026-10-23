@@ -208,6 +208,7 @@ export const CustomCursor = ({
 
   const particleIdRef = useRef(0);
   const lastPositionRef = useRef({ x: 0, y: 0 });
+  const lastEmitRef = useRef(0);
 
   const mouseX = useMotionValue(0);
   const mouseY = useMotionValue(0);
@@ -251,22 +252,55 @@ export const CustomCursor = ({
     setIsHovering(isClickable);
   }, []);
 
+  /*
+   * 沿轨迹连续采样，而不是「每跨 15px 补一个点」。
+   *
+   * 原实现只在单次事件里位移超过 15px 时才补一个粒子。浏览器 mousemove
+   * 的触发频率跟帧率走，鼠标快速划过时两次事件之间可以跨上百像素——
+   * 于是轨迹上出现的是一堆孤立的点，而不是一串小球，这就是
+   * 「跟随着的渐变浅粉色小球球」消失的直接原因。
+   *
+   * 现在改成插值补点：位移多远就补多少个，间距固定 12px。
+   * 同时按时间节流，避免慢速移动时在同一位置堆一坨。
+   */
+  const emitTrail = useCallback(
+    (fromX: number, fromY: number, toX: number, toY: number) => {
+      const SPACING = 12;
+      const dist = Math.hypot(toX - fromX, toY - fromY);
+      const steps = Math.min(Math.floor(dist / SPACING), 12); // 上限防止极端甩鼠标刷屏
+
+      if (steps <= 0) return;
+
+      const now = performance.now();
+      // 60ms 内只补一轮，快速移动时也不至于吐出上百个节点
+      if (now - lastEmitRef.current < 60) return;
+      lastEmitRef.current = now;
+
+      for (let i = 1; i <= steps; i++) {
+        const t = i / steps;
+        addParticle(fromX + (toX - fromX) * t, fromY + (toY - fromY) * t);
+      }
+    },
+    [addParticle],
+  );
+
   const handleMouseMove = useCallback(
     (e: MouseEvent) => {
-      const deltaX = Math.abs(e.clientX - lastPositionRef.current.x);
-      const deltaY = Math.abs(e.clientY - lastPositionRef.current.y);
+      const prev = lastPositionRef.current;
 
-      if (deltaX > 15 || deltaY > 15) {
-        addParticle(lastPositionRef.current.x, lastPositionRef.current.y);
-        lastPositionRef.current = { x: e.clientX, y: e.clientY };
+      // 第一次移动没有基准点，只记录不补点
+      if (prev.x !== 0 || prev.y !== 0) {
+        emitTrail(prev.x, prev.y, e.clientX, e.clientY);
       }
+
+      lastPositionRef.current = { x: e.clientX, y: e.clientY };
 
       mouseX.set(e.clientX);
       mouseY.set(e.clientY);
       setIsVisible(true);
       checkHover(e);
     },
-    [mouseX, mouseY, checkHover, addParticle],
+    [mouseX, mouseY, checkHover, emitTrail],
   );
 
   const handleMouseLeave = useCallback(() => setIsVisible(false), []);
@@ -306,12 +340,44 @@ export const CustomCursor = ({
 
         .cursor-pulse { animation: cursor-pulse 1.2s ease-in-out infinite; }
 
+        /*
+         * 关键修复：粒子消失的根因是这几行。
+         *
+         * 1. 原来 keyframes 里只写了 scale()，而定位用的 translate(-50%,-50%)
+         *    是内联样式。CSS 动画优先于内联样式，所以动画一开始，居中偏移就被
+         *    scale 顶掉，粒子跳到鼠标的右下方——正好在视觉上「消失」。
+         *    现在把居中位移一起写进 keyframes。
+         *
+         * 2. 更要命的是 a11y.css 里 prefers-reduced-motion 把动画时长压到
+         *    0.01ms，粒子直接跳到 100% 帧，也就是 opacity: 0。开了「减少
+         *    动态效果」的用户看到的就永远是空。现在单独给这个媒体查询写
+         *    规则，让粒子静态显示。
+         */
         @keyframes particle-fade {
-          0% { opacity: 0.6; transform: scale(1); }
-          100% { opacity: 0; transform: scale(0.3); }
+          0% {
+            opacity: 0.7;
+            transform: translate(-50%, -50%) scale(1);
+          }
+          100% {
+            opacity: 0;
+            transform: translate(-50%, -50%) scale(0.3);
+          }
         }
 
-        .cursor-particle { animation: particle-fade 0.5s ease-out forwards; }
+        .cursor-particle {
+          position: fixed;
+          z-index: 9998;
+          animation: particle-fade 0.5s ease-out forwards;
+          will-change: opacity, transform;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+          /* 不做淡出动画，但保持可见——直接设死 opacity 而不是继承 0.01ms */
+          .cursor-particle {
+            animation: none;
+            opacity: 0.7;
+          }
+        }
 
         @keyframes whisker-shake {
           0%, 100% { transform: rotate(0deg); }
@@ -333,7 +399,7 @@ export const CustomCursor = ({
       {particles.map((particle) => (
         <div
           key={particle.id}
-          className="cursor-particle pointer-events-none fixed z-[9998]"
+          className="cursor-particle pointer-events-none z-[9998]"
           style={{
             left: particle.x,
             top: particle.y,
@@ -344,7 +410,6 @@ export const CustomCursor = ({
               cursorType === "ghost"
                 ? "radial-gradient(circle, rgba(249, 168, 212, 0.8), transparent)"
                 : "radial-gradient(circle, rgba(255, 182, 193, 0.8), transparent)",
-            transform: "translate(-50%, -50%)",
           }}
         />
       ))}
