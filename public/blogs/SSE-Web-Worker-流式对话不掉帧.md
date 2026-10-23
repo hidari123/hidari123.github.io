@@ -1,7 +1,7 @@
 ---
 title: "把 SSE 塞进 Web Worker：流式对话不掉帧的完整方案"
 date: "2026-08-11"
-tags: ["Web Worker", "SSE", "流式渲染", "性能优化", "AI", "架构设计"]
+tags: [后端架构, 大模型应用, 工程实践, SSE, 性能优化, 流式渲染]
 cover: ""
 description: "AI Agent 时代，流式 token 增量渲染会持续压迫主线程。本文从真实项目出发，把 SSE 连接搬进 Web Worker，附带事件协议设计、取消机制与错误处理的完整实现。"
 ---

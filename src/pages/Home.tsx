@@ -72,7 +72,12 @@ export const Home = () => {
   const [featured, setFeatured] = useState<PostIndex[]>([]);
 
   const reducedMotion = usePrefersReducedMotion();
-  const typewriterText = useTypewriter(["你好 ✨", "欢迎 ✨"], 90, 45, 1800);
+  const typewriterText = useTypewriter(
+    ["你好呀 ✨", "欢迎来到我的小花园 ✨"],
+    90,
+    45,
+    1800,
+  );
 
   const handleRefresh = useCallback(() => setRefreshKey((p) => p + 1), []);
 
@@ -185,7 +190,10 @@ export const Home = () => {
             <span className="text-lg md:text-xl text-[var(--text-primary)] font-medium text-center">
               {typewriterText}
             </span>
-            <span className="inline-block w-0.5 h-6 bg-[var(--accent)] ml-1 animate-pulse" />
+            <span
+              className="inline-block w-0.5 h-6 bg-[var(--accent)] ml-1 animate-pulse motion-safe:animate-caret-wiggle"
+              aria-hidden="true"
+            />
           </div>
 
           <p className="text-[var(--text-secondary)] max-w-2xl mx-auto mb-8 leading-relaxed">

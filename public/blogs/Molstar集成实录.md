@@ -1,7 +1,7 @@
 ---
 title: "Mol* 集成实录：在 React 抽屉里嵌入分子可视化"
 date: "2026-10-21"
-tags: ["Mol*", "React", "WebGL", "科学可视化", "前端工程"]
+tags: [前端工程, 工程实践, 产品设计, 科学计算, React]
 cover: ""
 description: "在聊天抽屉里嵌入 Mol* 分子查看器，要处理布局裁剪、动态导入减负、残基选择语义转换、失焦降级四类问题。本文是 AtomOS 集成 Mol* 4.18 的实录，包括 sequence viewer 的布局改造、selection 事件的 Loci 遍历、以及为什么残基匹配要写成宽松分层判定。"
 ---

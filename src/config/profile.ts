@@ -21,7 +21,7 @@ export interface Profile {
 }
 
 export const PROFILE: Profile = {
-  headline: "hi，我是 hitari",
+  headline: "Hi，我是Hidari",
   subheadline: "前端 / AI 应用方向。写 React 与 TypeScript，也折腾 Agent 运行时和浏览器端推理。",
 
   skills: [

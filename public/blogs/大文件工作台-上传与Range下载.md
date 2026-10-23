@@ -1,7 +1,7 @@
 ---
 title: "大文件工作台：5 GiB 上传、Range 下载与流式校验"
 date: "2026-10-14"
-tags: ["文件上传", "Range 请求", "流式处理", "Go", "前端工程"]
+tags: [前端工程, 后端架构, 工程实践, Go]
 cover: ""
 description: "科研文件动辄几百 MB 到几 GiB，普通表单上传和整文件下载都会崩。本文讲解 AtomOS Workspace 的文件链路：为什么上传是原始字节流 PUT 而不是 multipart、Range 下载如何支持断点续看、以及 5 GiB 上限和路径校验的安全设计。"
 ---

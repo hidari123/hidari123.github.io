@@ -1,7 +1,7 @@
 ---
 title: "Agent 的记忆系统：分层记忆、阈值队列与独立 Curator"
 date: "2026-10-20"
-tags: ["AI Agent", "记忆系统", "PostgreSQL", "架构设计", "RAG"]
+tags: [后端架构, AI Agent, PostgreSQL, RAG]
 cover: ""
 description: "Agent 该记住什么、忘什么、谁来整理？AtomOS 的答案是三层记忆（User/Project/Session）加一个事件驱动的独立 Curator：新增记忆攒够 10 条才触发整理，用 PostgreSQL advisory lock 抢租约、全文检索找关联、乐观锁防并发编辑。本文逐层拆解。"
 ---
