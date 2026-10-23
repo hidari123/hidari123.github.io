@@ -8,30 +8,24 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { ThemeToggle } from "@/components/Common/ThemeToggle";
-import { Bot, Settings, Home, BookOpen, Bot as Robot } from "lucide-react";
-import { useAIProvider } from "@/hooks/useAIProvider";
-import { AISettingsModal } from "@/components/AI/AISettingsModal";
+import { Bot, Settings, Home, BookOpen } from "lucide-react";
+import { openAISettings } from "@/hooks/useAISettingsModal";
 
 export const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
   const location = useLocation();
-  const {
-    currentProvider,
-    showSettingsModal,
-    setShowSettingsModal,
-    saveProvider,
-    saveKey,
-    saveCustomConfig,
-  } = useAIProvider();
 
-  // 监听打开设置弹窗事件
-  useEffect(() => {
-    const handleOpenSettings = () => {
-      setShowSettingsModal(true);
-    };
-    window.addEventListener("open-ai-settings", handleOpenSettings);
-    return () => window.removeEventListener("open-ai-settings", handleOpenSettings);
-  }, []);
+  /*
+    这里不再持有 AISettingsModal，也不再监听 open-ai-settings。
+
+    原来 Navbar 和 AIChat 各挂了一个 AISettingsModal，
+    两边都监听同一个事件，于是 dispatch 一次弹两层，
+    关一次只能关掉最上面那层 —— 表现就是「点关闭还会再弹一次」。
+    而且两边各调一次 useAIProvider()，内部的 showSettingsModal
+    是彼此独立的 useState，保存完 key 两边状态不同步。
+
+    弹窗现在统一挂在 Layout，Navbar 只保留按钮。
+  */
 
   useEffect(() => {
     const handleScroll = () => {
@@ -46,7 +40,7 @@ export const Navbar = () => {
   const navLinks = [
     { name: "首页", path: "/", icon: Home },
     { name: "博客", path: "/blog", icon: BookOpen },
-    { name: "AI", path: "/ai", icon: Robot },
+    { name: "AI", path: "/ai", icon: Bot },
   ];
 
   return (
@@ -99,7 +93,7 @@ export const Navbar = () => {
 
             {/* AI Settings Button */}
             <button
-              onClick={() => setShowSettingsModal(true)}
+              onClick={() => openAISettings()}
               className="p-2 rounded-lg text-[var(--text-secondary)] hover:text-[var(--accent)] hover:bg-[var(--bg-secondary)] transition-all duration-300"
               title="AI 设置"
             >
@@ -109,19 +103,6 @@ export const Navbar = () => {
         </div>
       </div>
 
-      {/* AI Settings Modal */}
-      <AISettingsModal
-        isOpen={showSettingsModal}
-        onClose={() => setShowSettingsModal(false)}
-        onSave={(provider, key, baseURL, model) => {
-          saveProvider(provider);
-          saveKey(key);
-          if (baseURL && model) {
-            saveCustomConfig(baseURL, model);
-          }
-        }}
-        currentProviderId={currentProvider.id}
-      />
-    </nav>
+      </nav>
   );
 };

@@ -49,3 +49,10 @@ gh-pages/
 
 # 本地配置文件
 *.local
+
+# 一次性排查脚本和它们的产物。
+# 这些东西非常容易在 commit 时被顺手 git add 进去：
+# 调试代码块配色、bundle 拆包顺序时写了一堆 scripts/tmp-*.mjs，
+# 跑完就忘了删，其中一个还会用 --user-data-dir 在仓库里拉起一个 Chrome
+# profile（几十 MB 的 leveldb / tflite 模型），git status 里全是噪音。
+scripts/tmp-*

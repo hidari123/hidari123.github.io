@@ -17,6 +17,9 @@ import { ToastProvider } from "@/components/Common/Toast";
 import { PerformancePanel } from "@/components/Common/PerformancePanel";
 import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 import { useTheme } from "@/hooks/useTheme";
+import { useAISettingsModal } from "@/hooks/useAISettingsModal";
+import { useAIProvider } from "@/hooks/useAIProvider";
+import { AISettingsModal } from "@/components/AI/AISettingsModal";
 import { Lightbulb } from "lucide-react";
 
 interface LayoutProps {
@@ -26,6 +29,17 @@ interface LayoutProps {
 export const Layout = ({ children }: LayoutProps) => {
   const { toggleTheme } = useTheme();
   const searchInputRef = useRef<HTMLInputElement | null>(null);
+
+  /*
+    全站唯一的 AI 设置弹窗。
+
+    之前 Navbar 和 AIChat 各挂了一份 AISettingsModal，两边都监听
+    open-ai-settings —— dispatch 一次弹两层，关一次只能关掉最上面那层，
+    表现就是「点关闭还会再弹一次」。
+    现在 state 和弹窗都只在Layout 这一处，Navbar 和 AIChat 都只是触发方。
+  */
+  const aiSettings = useAISettingsModal();
+  const { saveProvider, saveKey, saveCustomConfig, currentProvider } = useAIProvider();
 
   // 注册搜索框引用
   useEffect(() => {
@@ -123,6 +137,22 @@ export const Layout = ({ children }: LayoutProps) => {
 
       {/* 全局 AI 聊天组件 */}
       <AIChat />
+
+      {/* 全站唯一的 AI 设置弹窗 */}
+      <AISettingsModal
+        isOpen={aiSettings.open}
+        onClose={aiSettings.hide}
+        currentProviderId={currentProvider.id}
+        onSave={(provider, key, baseURL, model) => {
+          saveProvider(provider);
+          if (baseURL && model) {
+            saveCustomConfig(baseURL, model);
+          } else {
+            saveKey(key);
+          }
+          aiSettings.hide();
+        }}
+      />
 
       {/* 快捷键帮助弹窗 */}
       <ShortcutsHelp isOpen={isHelpVisible} onClose={() => setIsHelpVisible(false)} />

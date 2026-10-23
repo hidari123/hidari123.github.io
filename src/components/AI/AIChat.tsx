@@ -16,8 +16,6 @@ import { MessageCircle } from "lucide-react";
 import { useLocation } from "react-router-dom";
 import type { AIChatProps } from "./AIChatPanel";
 import { ErrorBoundary } from "@/components/Common/ErrorBoundary";
-import { AISettingsModal } from "./AISettingsModal";
-import { useAIProvider } from "@/hooks/useAIProvider";
 
 const AIChatPanel = lazy(() =>
   import("./AIChatPanel").then((m) => ({ default: m.AIChatPanel })),
@@ -27,8 +25,6 @@ export const AIChat = ({ content }: AIChatProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
   const location = useLocation();
-  const { saveProvider, saveKey, saveCustomConfig, currentProvider } = useAIProvider();
-  const [showSettings, setShowSettings] = useState(false);
 
   // 面板已打开过就不再卸载，避免反复进出时重新拉 chunk
   useEffect(() => {
@@ -50,16 +46,17 @@ export const AIChat = ({ content }: AIChatProps) => {
   }, []);
 
   /*
-   * AI 设置弹窗原来从来没被挂载过——checkConfig() 在缺配置时
-   * dispatch("open-ai-settings")，但没有任何组件监听这个事件，
-   * 于是「点击 → 弹窗该出现 → 什么都没发生」。
-   * 现在挂在全局唯一入口这里，顺手把 close-ai-chat 也一起接上。
-   */
-  useEffect(() => {
-    const openSettings = () => setShowSettings(true);
-    window.addEventListener("open-ai-settings", openSettings);
-    return () => window.removeEventListener("open-ai-settings", openSettings);
-  }, []);
+    这里原来还有一份 AISettingsModal + 一个 open-ai-settings 监听。
+
+    Navbar 里也有一份，两边都监听同一个事件，
+    dispatch 一次就弹出两层一模一样的设置弹窗，
+    关一次只关掉最上面那层 —— 表现就是「点关闭还会再弹一次」。
+
+    现在弹窗统一挂在 Layout（useAISettingsModal），
+    AIChat 只负责聊天本身：
+      缺 API Key 时 checkConfig() → dispatch open-ai-settings
+      → 唯一的订阅者（Layout）打开那一个弹窗。
+  */
 
   return (
     <>
@@ -93,21 +90,6 @@ export const AIChat = ({ content }: AIChatProps) => {
           </Suspense>
         </ErrorBoundary>
       )}
-
-      <AISettingsModal
-        isOpen={showSettings}
-        onClose={() => setShowSettings(false)}
-        currentProviderId={currentProvider.id}
-        onSave={(provider, key, baseURL, model) => {
-          saveProvider(provider);
-          if (baseURL && model) {
-            saveCustomConfig(baseURL, model);
-          } else {
-            saveKey(key);
-          }
-          setShowSettings(false);
-        }}
-      />
     </>
   );
 };
