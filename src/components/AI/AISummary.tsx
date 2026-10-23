@@ -157,7 +157,7 @@ export const AISummary = ({ content }: AISummaryProps) => {
           ) : (
             <>
               <Sparkles className="w-5 h-5" />
-              <span>✨ AI 摘要</span>
+              <span>AI 摘要</span>
             </>
           )}
         </motion.button>

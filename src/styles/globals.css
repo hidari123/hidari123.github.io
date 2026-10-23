@@ -170,15 +170,34 @@ body::before {
 }
 
 /* 卡片悬停效果 */
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 1rem;
+}
+
 .card-hover {
   transition:
-    transform 0.3s ease,
-    box-shadow 0.3s ease;
+    transform 0.3s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.3s ease,
+    border-color 0.3s ease;
+  will-change: transform;
 }
 
 .card-hover:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 20px 40px var(--shadow);
+  transform: translateY(-3px);
+  border-color: color-mix(in srgb, var(--accent) 45%, var(--border));
+  box-shadow:
+    0 12px 28px -8px color-mix(in srgb, var(--accent) 22%, transparent),
+    0 4px 10px -4px var(--shadow);
+}
+
+/* 键盘 Tab 到的卡片要有和鼠标一样的反馈，不能只支持一种输入 */
+.card-hover:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  transform: translateY(-3px);
+  border-color: color-mix(in srgb, var(--accent) 45%, var(--border));
 }
 
 /* 自定义滚动条 - 圆润粉色可爱风格 */
@@ -634,119 +653,132 @@ p {
 }
 
 /* ========================================
-   PrismJS Code Highlighting Themes
+   PrismJS 代码高亮配色
+
+   ── 为什么这里没有任何 [data-theme="..."] 选择器 ──
+
+   原来的写法是 `[data-theme="light"] .token.comment { ... }`，共 80 条。
+   但 useTheme.ts 在亮色模式下的实现是：
+
+     root.removeAttribute("data-theme");   // 亮色 = 删掉属性，不是设为 "light"
+
+   所以亮色模式下 <html> 上根本不存在 data-theme="light"，那 80 条规则
+   一条都匹配不上。结果就是：深色模式有颜色，亮色模式整片代码块全是裸的
+   默认色 —— 也就是「代码还是白的」。
+
+   现在颜色全部落到 --tok-* 变量上，变量只在 :root 和 [data-theme="dark"]
+   两处赋值。切换主题时换的是变量值，规则本身一行都不用动。
+
+   这样也和文件里其他所有颜色（--bg-code、--text-primary 等）保持同一套
+   机制，不再有一半颜色跟主题走、一半靠选择器前缀。
    ======================================== */
 
-/* 亮色主题代码高亮 */
-[data-theme="light"] .token.comment,
-[data-theme="light"] .token.prolog,
-[data-theme="light"] .token.doctype,
-[data-theme="light"] .token.cdata {
-  color: #6a737d;
+:root {
+  /* 注释：暗色下要降对比度，太亮会抢正文 */
+  --tok-comment: #6a737d;
+  --tok-punctuation: #24292e;
+  --tok-property: #005cc5;
+  --tok-string: #032f62;
+  --tok-operator: #d73a49;
+  --tok-keyword: #d73a49;
+  --tok-function: #6f42c1;
+  --tok-regex: #e36209;
+  --tok-inserted: #22863a;
+  --tok-deleted: #b31d28;
+  --tok-entity: #000;
+  --tok-plain: #24292e;
+  --tok-line: #8b949e;
 }
 
-[data-theme="light"] .token.punctuation {
-  color: #24292e;
+[data-theme="dark"] {
+  --tok-comment: #8b949e;
+  --tok-punctuation: #c9d1d9;
+  --tok-property: #79c0ff;
+  --tok-string: #a5d6ff;
+  --tok-operator: #ff7b72;
+  --tok-keyword: #ff7b72;
+  --tok-function: #d2a8ff;
+  --tok-regex: #ffa657;
+  --tok-inserted: #7ee787;
+  --tok-deleted: #ffdcd7;
+  --tok-entity: #ffa657;
+  --tok-plain: #c9d1d9;
+  --tok-line: #484f58;
 }
 
-[data-theme="light"] .token.property,
-[data-theme="light"] .token.tag,
-[data-theme="light"] .token.boolean,
-[data-theme="light"] .token.number,
-[data-theme="light"] .token.constant,
-[data-theme="light"] .token.symbol,
-[data-theme="light"] .token.deleted {
-  color: #005cc5;
+/* 以下选择器不带主题前缀，靠 CSS 变量自动跟随 */
+
+.token.comment,
+.token.prolog,
+.token.doctype,
+.token.cdata {
+  color: var(--tok-comment);
+  font-style: italic;
 }
 
-[data-theme="light"] .token.selector,
-[data-theme="light"] .token.attr-name,
-[data-theme="light"] .token.string,
-[data-theme="light"] .token.char,
-[data-theme="light"] .token.builtin,
-[data-theme="light"] .token.inserted {
-  color: #032f62;
+.token.punctuation {
+  color: var(--tok-punctuation);
 }
 
-[data-theme="light"] .token.operator,
-[data-theme="light"] .token.entity,
-[data-theme="light"] .token.url,
-[data-theme="light"] .language-css .token.string,
-[data-theme="light"] .style .token.string {
-  color: #d73a49;
+.token.property,
+.token.tag,
+.token.boolean,
+.token.number,
+.token.constant,
+.token.symbol,
+.token.unit {
+  color: var(--tok-property);
 }
 
-[data-theme="light"] .token.atrule,
-[data-theme="light"] .token.attr-value,
-[data-theme="light"] .token.keyword {
-  color: #d73a49;
+.token.selector,
+.token.attr-name,
+.token.string,
+.token.char,
+.token.builtin,
+.token.inserted {
+  color: var(--tok-string);
 }
 
-[data-theme="light"] .token.function,
-[data-theme="light"] .token.class-name {
-  color: #6f42c1;
+.token.operator,
+.token.entity,
+.token.url {
+  color: var(--tok-operator);
 }
 
-[data-theme="light"] .token.regex,
-[data-theme="light"] .token.important,
-[data-theme="light"] .token.variable {
-  color: #e36209;
+.token.atrule,
+.token.attr-value,
+.token.keyword {
+  color: var(--tok-keyword);
 }
 
-/* 暗色主题代码高亮 */
-[data-theme="dark"] .token.comment,
-[data-theme="dark"] .token.prolog,
-[data-theme="dark"] .token.doctype,
-[data-theme="dark"] .token.cdata {
-  color: #6a737d;
+.token.function,
+.token.class-name {
+  color: var(--tok-function);
 }
 
-[data-theme="dark"] .token.punctuation {
-  color: #c9d1d9;
+.token.regex,
+.token.important,
+.token.variable {
+  color: var(--tok-regex);
 }
 
-[data-theme="dark"] .token.property,
-[data-theme="dark"] .token.tag,
-[data-theme="dark"] .token.boolean,
-[data-theme="dark"] .token.number,
-[data-theme="dark"] .token.constant,
-[data-theme="dark"] .token.symbol,
-[data-theme="dark"] .token.deleted {
-  color: #79c0ff;
+.token.deleted {
+  color: var(--tok-deleted);
 }
 
-[data-theme="dark"] .token.selector,
-[data-theme="dark"] .token.attr-name,
-[data-theme="dark"] .token.string,
-[data-theme="dark"] .token.char,
-[data-theme="dark"] .token.builtin,
-[data-theme="dark"] .token.inserted {
-  color: #a5d6ff;
+.token.important,
+.token.bold {
+  font-weight: 600;
 }
 
-[data-theme="dark"] .token.operator,
-[data-theme="dark"] .token.entity,
-[data-theme="dark"] .token.url,
-[data-theme="dark"] .language-css .token.string,
-[data-theme="dark"] .style .token.string {
-  color: #ff7b72;
+.token.italic {
+  font-style: italic;
 }
 
-[data-theme="dark"] .token.atrule,
-[data-theme="dark"] .token.attr-value,
-[data-theme="dark"] .token.keyword {
-  color: #ff7b72;
-}
-
-[data-theme="dark"] .token.function,
-[data-theme="dark"] .token.class-name {
-  color: #d2a8ff;
-}
-
-[data-theme="dark"] .token.regex,
-[data-theme="dark"] .token.important,
-[data-theme="dark"] .token.variable {
-  color: #ffa657;
+/* 兜底：没被任何 token 规则命中的部分要显式给色，
+   否则继承 pre 的颜色，父元素一改就跟着变 */
+.markdown-body pre code {
+  color: var(--tok-plain);
 }
 
 /* ========================================
@@ -1279,53 +1311,60 @@ select {
 
 /* ============================================================
    骨架屏 shimmer
-   用一个统一的高光层做扫描，而不是逐个 stagger 点亮。
-   深色模式下色差要更大才看得见，所以用 currentColor 的透明度控制，
-   两套主题共用一套动画。
    ============================================================ */
 
-.skeleton-shimmer {
+/*
+   参照 antd 的实现：高光层挂在每个占位块自己的元素上，
+   用 background-position 移动一段渐变，而不是平移整个元素。
+
+   两种写法视觉接近，但平移元素的方案在元素有 border-radius 时，
+   渐变会跟着一起动、和圆角边界出现错位；background-position
+   方案里渐变始终铺满元素，边界永远干净。
+
+   各块相位一致（都从 0 开始、同样时长），所以整屏是一道横贯的
+   扫描线，而不是参差不齐的闪烁。
+*/
+
+:root {
   --shimmer-base: var(--bg-secondary);
-  --shimmer-highlight: rgba(99, 102, 241, 0.08);
-  position: relative;
+  --shimmer-highlight: rgba(99, 102, 241, 0.09);
+  --shimmer-sweep: 1.6s;
 }
 
-[data-theme="dark"] .skeleton-shimmer {
-  --shimmer-highlight: rgba(167, 139, 250, 0.12);
+[data-theme="dark"] {
+  --shimmer-highlight: rgba(167, 139, 250, 0.13);
 }
 
-/* 每个占位块内部铺一层高光 */
-.skeleton-shimmer > * {
-  position: relative;
-  overflow: hidden;
-  background: var(--shimmer-base);
-}
-
-.skeleton-shimmer > *::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  transform: translateX(-100%);
-  background: linear-gradient(
+.skeleton-block {
+  background-color: var(--shimmer-base);
+  background-image: linear-gradient(
     90deg,
-    transparent,
-    var(--shimmer-highlight),
-    transparent
+    transparent 0%,
+    var(--shimmer-highlight) 50%,
+    transparent 100%
   );
-  animation: skeleton-shimmer 1.6s ease-in-out infinite;
+  background-size: 200% 100%;
+  background-repeat: no-repeat;
+  background-position: -100% 0;
+  animation: skeleton-shimmer var(--shimmer-sweep) ease-in-out infinite;
 }
 
 @keyframes skeleton-shimmer {
+  0% {
+    background-position: -100% 0;
+  }
   100% {
-    transform: translateX(100%);
+    background-position: 200% 0;
   }
 }
 
-/* 开了「减少动态效果」就停掉扫描，只留底色——
-   这时候用户看到的是稳定的灰块，而不是一闪一闪的东西 */
+/*
+   开了「减少动态效果」就停掉扫描，只留底色——
+   这时候用户看到的是稳定的灰块，而不是持续扫过的光带。
+*/
 @media (prefers-reduced-motion: reduce) {
-  .skeleton-shimmer > *::after {
+  .skeleton-block {
     animation: none;
-    display: none;
+    background-image: none;
   }
 }

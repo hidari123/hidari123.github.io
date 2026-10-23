@@ -1,7 +1,7 @@
 /**
  * 返回顶部按钮 - 小猫爪
  */
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronUp, PawPrint } from "lucide-react";
 
@@ -84,25 +84,65 @@ export const BackToTop = () => {
  * 页面滚动进度条
  */
 export const ScrollProgress = () => {
-  const [progress, setProgress] = useState(0);
+  const barRef = useRef<HTMLDivElement>(null);
 
+  /*
+    原来这里是 framer-motion + 每像素 setState：
+      window.addEventListener("scroll", updateProgress);  // 无节流
+      setProgress(scrollTop / docHeight * 100);          // 浮点，每像素都变
+      <motion.div style={{ scaleX: progress / 100 }} /> // 逐帧补间
+
+    三个问题叠在一起，就是「页面一直纵向抖」：
+      1. scroll 事件不节流，一帧可能触发几十次
+      2. setState 触发 React 重渲，ReadingCat 等兄弟组件跟着一起渲
+      3. framer-motion 拿到每帧变化的浮点会持续补间，动画循环
+         反复打断合成器
+
+    现在：完全不走 React。rAF 节流 + 直接写 DOM 的 transform。
+    浏览器把它当成纯合成层动画，不触发任何重渲，不读布局。
+    顺带去掉 motion 依赖。
+  */
   useEffect(() => {
-    const updateProgress = () => {
-      const scrollTop = window.scrollY;
+    const bar = barRef.current;
+    if (!bar) return;
+
+    let frame = 0;
+
+    const update = () => {
+      frame = 0;
+
       const docHeight = document.documentElement.scrollHeight - window.innerHeight;
-      const scrollProgress = (scrollTop / docHeight) * 100;
-      setProgress(scrollProgress);
+      // 内容比视口还短时 docHeight <= 0，要先挡掉，否则得到 -Infinity
+      const ratio = docHeight > 0 ? window.scrollY / docHeight : 0;
+      const clamped = Math.max(0, Math.min(1, ratio));
+
+      bar.style.transform = `scaleX(${clamped})`;
     };
 
-    window.addEventListener("scroll", updateProgress);
-    return () => window.removeEventListener("scroll", updateProgress);
+    const onScroll = () => {
+      if (frame) return;
+      frame = window.requestAnimationFrame(update);
+    };
+
+    update();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll, { passive: true });
+
+    return () => {
+      if (frame) window.cancelAnimationFrame(frame);
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
+    };
   }, []);
 
   return (
-    <motion.div
-      className="fixed top-0 left-0 right-0 h-1 z-[60] origin-left"
+    <div
+      ref={barRef}
+      role="progressbar"
+      aria-label="阅读进度"
+      className="fixed top-0 left-0 right-0 h-1 z-[60] origin-left will-change-transform"
       style={{
-        scaleX: progress / 100,
+        transform: "scaleX(0)",
         background: "linear-gradient(90deg, #f9a8d4, #a78bfa, #818cf8)",
       }}
     />

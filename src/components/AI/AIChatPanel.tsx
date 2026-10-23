@@ -52,7 +52,7 @@ export const AIChatPanel = ({ content, isOpen, onClose, pathname }: AIChatPanelP
   const getWelcomeMessage = useCallback(() => {
     if (articleContent) {
       const title = currentArticleTitle || "当前文章";
-      return `👋 你好！我是 AI 助手，当前正在阅读《${title}》。
+      return `你好！我是 AI 助手，当前正在阅读《${title}》。
 
 你可以：\n
 • 询问文章相关的问题\n
@@ -61,7 +61,7 @@ export const AIChatPanel = ({ content, isOpen, onClose, pathname }: AIChatPanelP
 • 或者随便聊聊\n
 有什么我可以帮助你的吗？`;
     }
-    return `👋 你好！我是这个博客的 AI 助手，可以回答关于项目的问题，也可以闲聊！
+    return `你好！我是这个博客的 AI 助手，可以回答关于项目的问题，也可以闲聊！
 
 我可以帮助你了解：\n
 • 项目的基本信息\n

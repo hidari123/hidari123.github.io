@@ -235,7 +235,7 @@ export const BlogList = () => {
                 碎碎念
               </span>
             </h1>
-            <p className="text-[var(--text-secondary)] text-lg">技术甜度：★★★★★</p>
+            <p className="text-[var(--text-secondary)] text-lg flex items-center justify-center gap-1.5">技术甜度：<span className="text-amber-400 tracking-wider" aria-hidden>★★★★★</span></p>
           </div>
 
           {/* 标签筛选：主分类 tab + 技术标签多选 */}

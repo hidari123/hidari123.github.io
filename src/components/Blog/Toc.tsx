@@ -14,6 +14,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { List, ChevronRight, PanelRightClose } from "lucide-react";
 import type { TocItem } from "../../utils/toc";
+import { FloatLayer } from "@/components/Common/FloatLayer";
 
 // 与 Layout 里 Navbar 的 h-16 对齐
 const HEADER_OFFSET = 64;
@@ -171,46 +172,10 @@ export const Toc = ({
  *   - 仍用 requestAnimationFrame 节流，避免在高频事件里做布局读取
  */
 export const TocSidebar = ({ items }: { items: TocItem[] }) => {
-  const [visible, setVisible] = useState(false);
   const [collapsed, setCollapsed] = useState(() => {
     if (typeof localStorage === "undefined") return false;
     return localStorage.getItem("toc_collapsed") === "1";
   });
-  const sentinelRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const sentinel = sentinelRef.current;
-    if (!sentinel) return;
-
-    let frame = 0;
-
-    const check = () => {
-      frame = 0;
-      // 用视口坐标而不是 scrollY：这样文章顶部导航条（fixed h-16）
-      // 以下的正文一露头就开始显示，不用关心导航条的高度常量。
-      const top = sentinel.getBoundingClientRect().top;
-      setVisible(top <= HEADER_OFFSET + 40);
-    };
-
-    const onScroll = () => {
-      // 一帧内只量一次布局
-      if (frame) return;
-      frame = window.requestAnimationFrame(check);
-    };
-
-    // 文章直接带 hash 打开时（比如从搜索结果进来看某节），
-    // 初始位置就在正文中，此时 scroll 不一定会触发
-    check();
-
-    window.addEventListener("scroll", onScroll, { passive: true });
-    window.addEventListener("resize", onScroll, { passive: true });
-
-    return () => {
-      if (frame) window.cancelAnimationFrame(frame);
-      window.removeEventListener("scroll", onScroll);
-      window.removeEventListener("resize", onScroll);
-    };
-  }, []);
 
   const toggleCollapsed = () => {
     setCollapsed((prev) => {
@@ -227,37 +192,29 @@ export const TocSidebar = ({ items }: { items: TocItem[] }) => {
   if (items.length === 0) return null;
 
   return (
-    <>
-      <div ref={sentinelRef} aria-hidden className="h-0 w-full" />
-
+    <FloatLayer>
       {/* 收起态：一条细长的 tab */}
       {collapsed && (
         <button
           onClick={toggleCollapsed}
           aria-label="展开目录"
-          className={`fixed right-0 top-1/2 -translate-y-1/2 z-30 hidden lg:flex flex-col items-center gap-2 w-7 py-4 rounded-l-xl bg-[var(--bg-card)] border border-r-0 border-[var(--border)] text-[var(--text-secondary)] hover:text-[var(--accent)] transition-all duration-300 ${
-            visible ? "opacity-100 translate-x-0" : "opacity-0 translate-x-full pointer-events-none"
-          }`}
+          className="fixed right-0 top-1/2 -translate-y-1/2 z-40 hidden lg:flex flex-col items-center gap-2 w-7 py-4 rounded-l-xl bg-[var(--bg-card)]/95 backdrop-blur-sm border border-r-0 border-[var(--border)] text-[var(--text-secondary)] hover:text-[var(--accent)] transition-colors"
         >
           <ChevronRight className="w-3.5 h-3.5" />
-          <span
-            className="text-xs tracking-widest"
-            style={{ writingMode: "vertical-rl" }}
-          >
+          <span className="text-xs tracking-widest" style={{ writingMode: "vertical-rl" }}>
             目录
           </span>
         </button>
       )}
 
       {/* 展开态：右侧悬浮面板
-          用 top-28 + bottom-6 双边定位而不是 max-h：
-          面板高度随视口自适应，不会在矮屏上超出下沿，
-          也不会在长屏上只占半截。inner Toc 不再自带 max-h，
-          否则会出现内外两层滚动条，鼠标滚轮在内层滚到头就卡住。 */}
+          top-28 + bottom-6 双边定位，面板高度随视口自适应，
+          不会在矮屏上超出下沿。内层 Toc 传scroll={false} 避免
+          内外两层滚动条（滚到内层尽头会卡住）。 */}
       {!collapsed && (
         <aside
           aria-label="目录侧边栏"
-          className={`fixed right-6 top-28 bottom-6 z-30 w-60 hidden lg:block transition-all duration-300 ${visible ? "opacity-100 translate-x-0" : "opacity-0 translate-x-4 pointer-events-none"}`}
+          className="fixed right-6 top-28 bottom-6 z-40 w-60 hidden lg:block"
         >
           <div className="h-full p-4 bg-[var(--bg-card)]/95 backdrop-blur-sm rounded-xl border border-[var(--border)] shadow-lg flex flex-col overflow-hidden">
             <div className="flex items-center gap-2 mb-3 text-[var(--text-primary)]">
@@ -276,12 +233,12 @@ export const TocSidebar = ({ items }: { items: TocItem[] }) => {
               </button>
             </div>
             <div className="overflow-y-auto min-h-0 flex-1">
-              <Toc items={items} variant="sidebar" scroll={false} />
+              <Toc items={items} scroll={false} />
             </div>
           </div>
         </aside>
       )}
-    </>
+    </FloatLayer>
   );
 };
 

@@ -260,7 +260,7 @@ export const SubmitToolModal = ({ isOpen, onClose, onSuccess }: SubmitToolModalP
               <div className="px-6 pb-6">
                 <div className="p-4 rounded-lg bg-blue-500/10 border border-blue-500/20">
                   <p className="text-xs text-blue-500">
-                    💡 提示：提交的工具会保存在本地，你也可以{" "}
+                    提示：提交的工具会保存在本地，你也可以{" "}
                     <button onClick={handleCopyShareText} className="underline hover:no-underline">
                       {copied ? "已复制！" : "复制分享文本"}
                     </button>{" "}

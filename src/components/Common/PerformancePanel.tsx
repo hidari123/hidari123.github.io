@@ -12,18 +12,28 @@ import { usePerformance } from "@/hooks/usePerformance";
 import { useAICallStats } from "@/hooks/useAICallStats";
 
 // 性能指标项组件
+import type { LucideIcon } from "lucide-react";
+import { Timer, HardDrive, Bot, Zap, RefreshCw, Target } from "lucide-react";
+
 interface MetricItemProps {
-  icon: string;
+  /*
+    之前是 emoji 字符串（如 "⏱️"）。emoji 在不同系统上是不同字体，
+    在这个等宽对齐的面板里尤其明显 —— 每个图标的基线和宽度都不一样，
+    列表看着是拧的。
+
+    换成 lucide 组件：尺寸统一、能跟着 color 属性染色、跨平台一致。
+  */
+  icon: LucideIcon;
   label: string;
   value: string;
   subValue?: string;
   color?: string;
 }
 
-const MetricItem = memo<MetricItemProps>(({ icon, label, value, subValue, color = "#ff69b4" }) => (
+const MetricItem = memo<MetricItemProps>(({ icon: Icon, label, value, subValue, color = "#ff69b4" }) => (
   <div className="flex items-center justify-between py-2 border-b border-pink-200/30 last:border-b-0">
     <div className="flex items-center gap-2">
-      <span className="text-lg">{icon}</span>
+      <Icon className="w-4 h-4 shrink-0" style={{ color }} />
       <span className="text-xs text-pink-300/80 font-mono">{label}</span>
     </div>
     <div className="text-right">
@@ -284,13 +294,13 @@ export const PerformancePanel = memo<PerformancePanelProps>(({ updateInterval = 
                 {/* 指标列表 */}
                 <div className="p-3 space-y-1">
                   <MetricItem
-                    icon="⏱️"
+                    icon={Timer}
                     label="页面加载时间"
                     value={formatTime(metrics.pageLoadTime)}
                     color="#ec4899"
                   />
                   <MetricItem
-                    icon="💾"
+                    icon={HardDrive}
                     label="内存使用"
                     value={formatBytes(metrics.memoryUsage)}
                     subValue={
@@ -301,26 +311,26 @@ export const PerformancePanel = memo<PerformancePanelProps>(({ updateInterval = 
                     color="#f472b6"
                   />
                   <MetricItem
-                    icon="🤖"
+                    icon={Bot}
                     label="AI 调用次数"
                     value={stats.callCount.toString()}
                     subValue={`成功 ${stats.successCount} / 失败 ${stats.failureCount}`}
                     color="#fb7185"
                   />
                   <MetricItem
-                    icon="⚡"
+                    icon={Zap}
                     label="API 平均耗时"
                     value={formatTime(stats.averageDuration)}
                     color="#f43f5e"
                   />
                   <MetricItem
-                    icon="🔄"
+                    icon={RefreshCw}
                     label="重绘次数"
                     value={metrics.repaintCount.toString()}
                     color="#e11d48"
                   />
                   <MetricItem
-                    icon="🎯"
+                    icon={Target}
                     label="FPS"
                     value={metrics.fps.toString()}
                     subValue={metrics.fps >= 50 ? "流畅" : metrics.fps >= 30 ? "一般" : "卡顿"}

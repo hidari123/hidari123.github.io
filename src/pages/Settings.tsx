@@ -8,7 +8,7 @@
 
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Settings, Github, Eye, EyeOff, Check, AlertCircle, ExternalLink } from "lucide-react";
+import { Settings, Github, Eye, EyeOff, Check, AlertCircle, ExternalLink, Info, AlertTriangle } from "lucide-react";
 
 export const SettingsPage = () => {
   const [githubToken, setGithubToken] = useState("");
@@ -212,7 +212,7 @@ export const SettingsPage = () => {
 
             {/* 说明 */}
             <div className="p-4 bg-[var(--bg-secondary)] rounded-lg">
-              <h4 className="font-medium text-sm mb-2">💡 关于仓库</h4>
+              <h4 className="font-medium text-sm mb-2 flex items-center gap-1.5"><Info className="w-4 h-4 text-[var(--accent)]" />关于仓库</h4>
               <ul className="text-sm text-[var(--text-secondary)] space-y-1">
                 <li>• 每篇博客文章会自动创建一个 Issue 作为评论区</li>
                 <li>• Issue 标题格式：[Blog] {`{文章slug}`}</li>
@@ -324,7 +324,7 @@ export const SettingsPage = () => {
 
           {/* 注意事项 */}
           <div className="mt-6 p-4 bg-[var(--bg-secondary)] rounded-xl border border-[var(--border)]">
-            <h4 className="text-sm font-medium mb-2">⚠️ 注意事项</h4>
+            <h4 className="text-sm font-medium mb-2 flex items-center gap-1.5"><AlertTriangle className="w-4 h-4 text-[var(--accent)]" />注意事项</h4>
             <ul className="text-sm text-[var(--text-secondary)] space-y-1">
               <li>• 请勿将 Token 提交到公共仓库</li>
               <li>• Token 仅存储在浏览器本地，不会发送到服务器</li>

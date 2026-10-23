@@ -1,7 +1,18 @@
 /**
- * 可爱的跳动猫爪加载动画
+ * 跳动加载动画
+ *
+ * 原来四个 🐾 emoji 在不同系统上是不同字体：
+ * Windows 上是 Segoe UI Emoji 的彩色猫爪，macOS 是 Apple Color Emoji，
+ * Linux 常常退化成单色字形。四个副本大小不一、基线不齐，
+ * 再叠上 translate 位移，观感是「四个大小不一的图在乱跳」。
+ *
+ * 换成 lucide 的 PawPrint：
+ * - 尺寸由 w/h 决定，和周围 UI 同一套网格
+ * - 用 currentColor 染色，自动跟随主题
+ * - 所有平台渲染结果一致
  */
 import { motion } from "framer-motion";
+import { PawPrint } from "lucide-react";
 
 interface LoadingSpinnerProps {
   size?: "sm" | "md" | "lg";
@@ -42,12 +53,12 @@ export const LoadingSpinner = ({ size = "md", text = "加载中..." }: LoadingSp
             }}
           >
             <span
-              className="text-2xl block"
+              className="block text-[var(--accent)]"
               style={{
                 transform: `scale(${pos.scale})`,
               }}
             >
-              🐾
+              <PawPrint className="w-7 h-7" />
             </span>
           </motion.div>
         ))}

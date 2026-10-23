@@ -68,7 +68,7 @@ interface Message {
   isNotice?: boolean;
 }
 
-const WELCOME_MESSAGE = `👋 你好！我是这个博客的 AI 助手。
+const WELCOME_MESSAGE = `你好！我是这个博客的 AI 助手。
 
 我可以帮助你：
 
@@ -77,7 +77,7 @@ const WELCOME_MESSAGE = `👋 你好！我是这个博客的 AI 助手。
 • 讨论编程、React、TypeScript 等话题
 • 或者随便聊聊天
 
-💡 **提示**：点击上方的"索引博客"按钮，可以让我基于博客文章回答更专业的问题！
+**提示**：点击上方的"索引博客"按钮，可以让我基于博客文章回答更专业的问题！
 
 有什么我可以帮助你的吗？`;
 
@@ -204,8 +204,8 @@ export const AIPage = () => {
         id: Date.now().toString(),
         role: "assistant",
         content: fromCache
-          ? `✅ 索引已就绪（命中缓存，${stats.chunkCount} 个文本块）。\n\n可以直接提问了。`
-          : `✅ 索引完成！已加载 ${blogs.length} 篇文章，生成了 ${stats.chunkCount} 个文本块。\n\n现在你可以问我关于博客内容的问题了，我会基于文章内容给出准确的回答！`,
+          ? `索引已就绪（命中缓存，${stats.chunkCount} 个文本块）。\n\n可以直接提问了。`
+          : `索引完成！已加载 ${blogs.length} 篇文章，生成了 ${stats.chunkCount} 个文本块。\n\n现在你可以问我关于博客内容的问题了，我会基于文章内容给出准确的回答！`,
         timestamp: Date.now(),
       };
       setMessages((prev) => [...prev.slice(-19), successMessage]);
@@ -352,7 +352,7 @@ export const AIPage = () => {
               {
                 id: `switch-${Date.now()}`,
                 role: "assistant",
-                content: `⚠️ ${from} 调用失败（${reason}），已自动切换到 ${to}。`,
+                content: `[提示] ${from} 调用失败（${reason}），已自动切换到 ${to}。`,
                 timestamp: Date.now(),
                 isNotice: true,
               },

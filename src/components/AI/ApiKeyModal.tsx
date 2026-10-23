@@ -6,7 +6,7 @@
  * Copyright (c) 2026 by hidari, All Rights Reserved.
  */
 import { useState } from "react";
-import { X, Key, ExternalLink, Eye, EyeOff, AlertCircle, Sparkles } from "lucide-react";
+import { X, Key, ExternalLink, Eye, EyeOff, AlertCircle, Sparkles, ShieldCheck } from "lucide-react";
 import { Modal } from "@/components/Common/Modal";
 
 interface ApiKeyModalProps {
@@ -159,8 +159,9 @@ export const ApiKeyModal = ({ isOpen, onClose, onSave }: ApiKeyModalProps) => {
 
               {/* 底部安全提示 */}
               <div className="px-6 py-3 bg-[var(--bg-secondary)] border-t border-[var(--border)]">
-                <p className="text-xs text-center text-[var(--text-secondary)]">
-                  🔒 您的密钥仅存储在本地，不会被上传或共享
+                <p className="text-xs text-center text-[var(--text-secondary)] flex items-center justify-center gap-1.5">
+                  <ShieldCheck className="w-3.5 h-3.5 shrink-0 text-[var(--accent)]" />
+                  <span>您的密钥仅存储在本地，不会被上传或共享</span>
                 </p>
               </div>
             </div>

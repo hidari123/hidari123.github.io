@@ -8,7 +8,7 @@
 /**
  * 页脚组件 - 可爱风格
  */
-import { Github, Twitter, Mail, Rss } from "lucide-react";
+import { Github, Twitter, Mail, Rss, Sparkles, Heart, Bot } from "lucide-react";
 import { motion } from "framer-motion";
 
 export const Footer = () => {
@@ -30,7 +30,12 @@ export const Footer = () => {
             <p className="text-sm text-[var(--text-secondary)]">
               © {currentYear} All rights reserved.
             </p>
-            <p className="text-xs text-[var(--text-muted)] mt-1">Made with ❤️ and 🤖</p>
+            <p className="text-xs text-[var(--text-muted)] mt-1 flex items-center justify-center gap-1">
+              Made with
+              <Heart className="w-3 h-3 text-rose-400" fill="currentColor" aria-hidden />
+              and
+              <Bot className="w-3 h-3" aria-hidden />
+            </p>
           </div>
 
           {/* 中间：社交链接 */}
@@ -61,12 +66,13 @@ export const Footer = () => {
           </div>
         </div>
 
-        {/* 底部装饰 */}
+        {/* 底部装饰：用 lucide 图标代替 emoji。
+            emoji 不吃 currentColor，换主题时会和背景撞色。 */}
         <div className="mt-8 flex justify-center gap-2">
           {[...Array(5)].map((_, i) => (
             <motion.span
               key={i}
-              className="text-lg"
+              className="text-[var(--accent)]"
               animate={{
                 y: [0, -5, 0],
               }}
@@ -76,7 +82,7 @@ export const Footer = () => {
                 delay: i * 0.1,
               }}
             >
-              ✨
+              <Sparkles className="w-4 h-4" />
             </motion.span>
           ))}
         </div>

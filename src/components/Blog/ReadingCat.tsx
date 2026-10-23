@@ -8,19 +8,38 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import {
+  PawPrint,
+  Cat,
+  Laugh,
+  Meh,
+  PartyPopper,
+} from "lucide-react";
 
-/** 根据阅读进度获取表情 */
-const getCatMood = (progress: number): { emoji: string; message: string } => {
+/**
+ * 根据阅读进度取表情。
+ *
+ * 原来这里返回 emoji 字符串。emoji 有三个问题：
+ * - 跨平台字形不一致，同一个 😺 在 Windows / macOS / Linux 上是三张脸
+ * - 不吃 currentColor，暗色模式下那几张脸依然是固定配色，强行发亮
+ * - 和周围整套 lucide 图标完全不在一个设计体系里
+ *
+ * 现在返回 lucide 图标组件，配色交给 currentColor。
+ * 而且状态本身也能表达得更准：起止用猫爪/庆祝，过程用猫脸表情。
+ */
+type MoodIcon = typeof Cat;
+
+const getCatMood = (progress: number): { icon: MoodIcon; message: string } => {
   if (progress === 0) {
-    return { emoji: "😪", message: "准备开始阅读啦~" };
+    return { icon: PawPrint, message: "准备开始阅读啦~" };
   } else if (progress <= 30) {
-    return { emoji: "😺", message: "好奇地探索中..." };
+    return { icon: Cat, message: "好奇地探索中..." };
   } else if (progress <= 70) {
-    return { emoji: "😸", message: "越读越兴奋呢！" };
+    return { icon: Laugh, message: "越读越兴奋呢！" };
   } else if (progress < 100) {
-    return { emoji: "😿", message: "快看完了，再坚持一下~" };
+    return { icon: Meh, message: "快看完了，再坚持一下~" };
   } else {
-    return { emoji: "🎉", message: "太棒了！全部读完啦！" };
+    return { icon: PartyPopper, message: "太棒了！全部读完啦！" };
   }
 };
 
@@ -37,9 +56,19 @@ export const ReadingCat = () => {
   const [progress, setProgress] = useState(0);
   const [showTooltip, setShowTooltip] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
-  const [hasShownConfetti, setHasShownConfetti] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(false);
   const catRef = useRef<HTMLDivElement>(null);
+
+  /*
+    用 ref 镜像上一次的值。
+
+    原来 hasShownConfetti 放在 useEffect 依赖里：
+    依赖一变 → effect 重新执行 → 移除 + 重新添加 scroll 监听器。
+    滚动到 100% 触发烟花 → hasShownConfetti 变 true → 整个 effect 重跑。
+    ref 则完全绕开这条链路，监听器只注册一次。
+  */
+  const progressRef = useRef(0);
+  const hasShownConfettiRef = useRef(false);
 
   // 计算滚动进度
   const calculateProgress = useCallback(() => {
@@ -57,12 +86,20 @@ export const ReadingCat = () => {
       if (!ticking) {
         requestAnimationFrame(() => {
           const newProgress = calculateProgress();
+
+          // 值没变就 bail：滚过大部分页面时 progress 会停在同一个整数，
+          // 少一次 setState 就少一次渲染，滚动会明显顺滑
+          if (newProgress === progressRef.current) {
+            ticking = false;
+            return;
+          }
+          progressRef.current = newProgress;
           setProgress(newProgress);
 
           // 100% 时显示烟花
-          if (newProgress === 100 && !hasShownConfetti) {
+          if (newProgress === 100 && !hasShownConfettiRef.current) {
             setShowConfetti(true);
-            setHasShownConfetti(true);
+            hasShownConfettiRef.current = true;
             setTimeout(() => setShowConfetti(false), 3000);
           }
 
@@ -79,7 +116,7 @@ export const ReadingCat = () => {
     return () => {
       window.removeEventListener("scroll", handleScroll);
     };
-  }, [calculateProgress, hasShownConfetti]);
+  }, [calculateProgress]);
 
   // 点击空白处关闭对话框
   useEffect(() => {
@@ -99,7 +136,20 @@ export const ReadingCat = () => {
   }, [showTooltip]);
 
   const mood = getCatMood(progress);
-  const randomEncouragement = encouragements[Math.floor(Math.random() * encouragements.length)];
+  const MoodIcon = mood.icon;
+
+  /*
+    原来这行在函数体里裸写：
+      encouragements[Math.floor(Math.random() * encouragements.length)]
+
+    每次组件重渲就换一句文案。滚动时 progress 一直在变 → 持续重渲
+    → tooltip 里的文字不断变 → 气泡宽度跟着变 → 布局抖动。
+
+    用 useMemo 固定到组件挂载时为止。
+  */
+  const [randomEncouragement] = useState(
+    () => encouragements[Math.floor(Math.random() * encouragements.length)],
+  );
 
   // 拖拽结束时的处理
   const handleDragEnd = (_: unknown, info: { offset: { x: number; y: number } }) => {
@@ -204,10 +254,10 @@ export const ReadingCat = () => {
             onClick={expandCat}
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
-            className="fixed left-0 bottom-24 z-[9999] w-12 h-12 rounded-r-full bg-gradient-to-r from-pink-200 to-rose-200 dark:from-pink-800/50 dark:to-rose-800/50 shadow-lg shadow-pink-500/20 flex items-center justify-center text-2xl"
+            className="fixed left-0 bottom-24 z-[9999] w-12 h-12 rounded-r-full bg-gradient-to-r from-pink-200 to-rose-200 dark:from-pink-800/50 dark:to-rose-800/50 shadow-lg shadow-pink-500/20 flex items-center justify-center text-rose-400"
             style={{ clipPath: "inset(0 50% 0 0)" }}
           >
-            😺
+            <Cat className="w-5 h-5" />
           </motion.button>
         )}
       </AnimatePresence>
@@ -236,7 +286,7 @@ export const ReadingCat = () => {
                   transition={{ duration: 0.2 }}
                   className="absolute bottom-full left-0 mb-3 px-3 py-2 bg-white/95 dark:bg-gray-800/95 backdrop-blur-md rounded-xl shadow-xl border border-pink-100 dark:border-pink-900/30 min-w-[160px] text-center"
                 >
-                  <div className="text-xl mb-0.5">{mood.emoji}</div>
+                  <MoodIcon className="w-5 h-5 mb-0.5" aria-hidden />
                   <div className="text-base font-bold text-pink-500 mb-0.5">{progress}%</div>
                   <div className="text-xs text-gray-500 dark:text-gray-400">
                     {progress === 100 ? mood.message : randomEncouragement}
@@ -312,7 +362,9 @@ export const ReadingCat = () => {
               </svg>
 
               {/* 猫咪表情 */}
-              <span className="relative z-10">{mood.emoji}</span>
+              <span className="relative z-10 block text-pink-500">
+                <MoodIcon className="w-7 h-7" aria-hidden />
+              </span>
             </motion.button>
           </motion.div>
         )}

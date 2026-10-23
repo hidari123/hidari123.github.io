@@ -6,7 +6,7 @@
  * Copyright (c) 2026 by hidari, All Rights Reserved.
  */
 import { motion } from "framer-motion";
-import { ExternalLink, Key, AlertCircle, CheckCircle, Sparkles } from "lucide-react";
+import { ExternalLink, Key, AlertCircle, CheckCircle, Sparkles, Waves, Bot } from "lucide-react";
 
 export const AIHelp = () => {
   return (
@@ -34,14 +34,14 @@ export const AIHelp = () => {
             <div className="bg-gradient-to-r from-green-500/10 to-emerald-500/10 border border-green-500/20 rounded-2xl p-6 mb-6">
               <div className="flex items-center gap-3 mb-4">
                 <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-green-500 to-emerald-500 flex items-center justify-center">
-                  <span className="text-2xl">🌊</span>
+                  <Waves className="w-6 h-6 text-white" />
                 </div>
                 <div>
                   <h2 className="text-2xl font-bold text-[var(--text-primary)]">
                     DeepSeek（推荐）
                   </h2>
                   <p className="text-green-600 font-medium">
-                    🎁 新用户注册即送 500 万 tokens 免费额度
+                    新用户注册即送 500 万 tokens 免费额度
                   </p>
                 </div>
               </div>
@@ -133,7 +133,7 @@ export const AIHelp = () => {
             <div className="bg-gradient-to-r from-[#6366f1]/10 to-[#8b5cf6]/10 border border-[#6366f1]/20 rounded-2xl p-6 mb-6">
               <div className="flex items-center gap-3 mb-4">
                 <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#6366f1] to-[#8b5cf6] flex items-center justify-center">
-                  <span className="text-2xl">🤖</span>
+                  <Bot className="w-6 h-6 text-white" />
                 </div>
                 <div>
                   <h2 className="text-2xl font-bold text-[var(--text-primary)]">OpenAI</h2>

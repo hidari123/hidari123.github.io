@@ -7,7 +7,7 @@
  */
 import { useState, useMemo, useEffect, useCallback } from "react";
 import { motion } from "framer-motion";
-import { Sparkles, Plus, ArrowRight, FileText } from "lucide-react";
+import { Sparkles, Plus, ArrowRight, FileText, Github, Wrench, SearchX, CalendarDays } from "lucide-react";
 import { Link } from "react-router-dom";
 import { ToolCard } from "../components/Home/ToolCard";
 import { ToolFilter } from "../components/Home/ToolFilter";
@@ -73,7 +73,7 @@ export const Home = () => {
 
   const reducedMotion = usePrefersReducedMotion();
   const typewriterText = useTypewriter(
-    ["你好呀 ✨", "欢迎来到我的小花园 ✨"],
+    ["你好呀", "欢迎来到我的小花园"],
     90,
     45,
     1800,
@@ -200,21 +200,26 @@ export const Home = () => {
             {PROFILE.subheadline}
           </p>
 
+          {/* 两个 CTA 统一规格：
+              之前只有「看文章」带图标，GitHub 那个是纯文字，
+              看上去一个满一个空、重心也对不齐。
+              现在两个都是 20px 图标 + 同样 padding + 同样圆角/字重。 */}
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <Link
               to="/blog"
-              className="btn flex items-center space-x-2 px-7 py-3 text-base shadow-lg shadow-blue-500/25"
+              className="btn flex items-center justify-center gap-2 h-12 px-7 text-base shadow-lg shadow-blue-500/25"
             >
-              <Sparkles className="w-5 h-5" />
+              <Sparkles className="w-5 h-5 shrink-0" />
               <span>看文章</span>
             </Link>
             <a
               href={PROFILE.links[0]?.href ?? "#"}
               target="_blank"
               rel="noreferrer noopener"
-              className="px-7 py-3 text-base font-medium rounded-lg border-2 border-[var(--accent)] text-[var(--accent)] hover:bg-[var(--accent)] hover:text-white transition-all duration-300 flex items-center space-x-2"
+              className="flex items-center justify-center gap-2 h-12 px-7 text-base font-medium rounded-lg border-2 border-[var(--accent)] text-[var(--accent)] hover:bg-[var(--accent)] hover:text-white transition-all duration-300"
             >
-              GitHub
+              <Github className="w-5 h-5 shrink-0" />
+              <span>GitHub</span>
             </a>
           </div>
 
@@ -250,7 +255,7 @@ export const Home = () => {
                   精选文章
                 </h2>
                 <p className="text-[var(--text-secondary)] text-sm">
-                  从工程实践里拆出来的笔记，不是文档搬运
+                  从工程实践里沉淀下来的思考
                 </p>
               </div>
               <Link
@@ -272,19 +277,20 @@ export const Home = () => {
                 >
                   <Link
                     to={`/blog/${post.slug}`}
-                    className="card card-hover h-full flex flex-col group"
+                    className="card card-hover h-full flex flex-col p-5 group"
                   >
-                    <time className="text-xs text-[var(--text-secondary)] mb-2">
-                      {post.date}
-                    </time>
+                    <div className="flex items-center gap-2 text-xs text-[var(--text-muted)] mb-3">
+                      <CalendarDays className="w-3.5 h-3.5 shrink-0" />
+                      <time>{post.date}</time>
+                    </div>
                     <h3 className="font-semibold mb-2 leading-snug group-hover:text-[var(--accent)] transition-colors line-clamp-2">
                       {post.title}
                     </h3>
-                    <p className="text-sm text-[var(--text-secondary)] line-clamp-3 flex-1">
+                    <p className="text-sm text-[var(--text-secondary)] line-clamp-3 flex-1 mb-4">
                       {post.description}
                     </p>
                     {post.tags.length > 0 && (
-                      <div className="flex flex-wrap gap-1.5 mt-3">
+                      <div className="flex flex-wrap gap-1.5 mt-auto pt-3 border-t border-[var(--border)]/60">
                         {post.tags.slice(0, 3).map((tag) => (
                           <span
                             key={tag}
@@ -305,7 +311,10 @@ export const Home = () => {
         {/* ---------- 工具箱 ---------- */}
         <motion.section {...enter(0.15)}>
           <div className="text-center mb-8">
-            <h2 className="text-2xl md:text-3xl font-bold mb-3">🛠️ 工具箱</h2>
+            <h2 className="text-2xl md:text-3xl font-bold mb-3 flex items-center gap-2.5">
+            <Wrench className="w-7 h-7 text-[var(--accent)]" />
+            <span>工具箱</span>
+          </h2>
             <p className="text-[var(--text-secondary)] max-w-2xl mx-auto text-sm">
               我自己在用的工具，顺手分享。觉得有用就推荐给我
             </p>
@@ -347,7 +356,9 @@ export const Home = () => {
               animate={{ opacity: 1 }}
               className="text-center py-16"
             >
-              <div className="text-6xl mb-4">🔍</div>
+              <div className="text-6xl mb-4 flex justify-center">
+            <SearchX className="w-14 h-14 text-[var(--text-muted)] opacity-50" />
+          </div>
               <h3 className="text-xl font-semibold mb-2">没有找到匹配的工具</h3>
               <p className="text-[var(--text-secondary)]">尝试更换关键词或切换分类</p>
             </motion.div>
