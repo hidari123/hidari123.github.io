@@ -28,7 +28,7 @@ import { AudioReader } from "@/components/Blog/AudioReader";
 import { ReadingCat } from "@/components/Blog/ReadingCat";
 import { TocSidebar, TocCollapsible } from "@/components/Blog/Toc";
 import { RelatedPosts } from "@/components/Blog/RelatedPosts";
-import { MarkdownCode } from "@/components/Blog/MarkdownCode";
+import { MarkdownCode, MarkdownPre } from "@/components/Blog/MarkdownCode";
 import { PostCover } from "@/components/Blog/PostCover";
 import { useAIContext } from "@/context/AIContext";
 import { useSeo } from "@/hooks/useSeo";
@@ -325,7 +325,15 @@ export const BlogPost = () => {
               <ReactMarkdown
                 remarkPlugins={[remarkGfm]}
                 rehypePlugins={[rehypeSlug]}
-                components={{ code: MarkdownCode }}
+                /*
+                  pre 必须一起接管。
+                  只接管 code 的话，CodeBlock 会被塞进 react-markdown 自己的
+                  <pre> 里，形成 <pre><div>…<pre> 的非法嵌套，
+                  浏览器容错解析会拆出一个多余的空壳 pre，
+                  页面上就出现两个重叠的「解释」按钮。
+                  详见 MarkdownCode.tsx 里的说明。
+                */
+                components={{ code: MarkdownCode, pre: MarkdownPre }}
               >
                 {post.content}
               </ReactMarkdown>
