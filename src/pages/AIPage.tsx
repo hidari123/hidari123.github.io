@@ -32,7 +32,6 @@ import {
 import { useAIProvider } from "@/hooks/useAIProvider";
 import { useSeo } from "@/hooks/useSeo";
 import {
-  streamChat,
   trimMessagesToBudget,
   estimateTokens,
   type ChatMessage,
@@ -40,6 +39,7 @@ import {
   type Usage,
   DEFAULT_PARAMS,
 } from "@/services/llmService";
+import { streamChatWithFailover } from "@/services/resilientLlm";
 import { askWithRAGStream, isRAGReady, getRAGStats, ensureIndex } from "@/services/ragService";
 import { getAllBlogContents } from "@/services/blogContentService";
 import { getPostIndex } from "@/services/blogService";
@@ -64,6 +64,8 @@ interface Message {
   usage?: Usage;
   /** 停止原因：stop / length / aborted */
   finishReason?: string;
+  /** 降级提示这类系统插入的消息，不计入对话历史 */
+  isNotice?: boolean;
 }
 
 const WELCOME_MESSAGE = `👋 你好！我是这个博客的 AI 助手。
@@ -83,7 +85,8 @@ const WELCOME_MESSAGE = `👋 你好！我是这个博客的 AI 助手。
 const CONTEXT_BUDGET = 8000;
 
 export const AIPage = () => {
-  const { checkConfig, getCurrentConfig, setShowSettingsModal } = useAIProvider();
+  const { checkConfig, getCurrentConfig, setShowSettingsModal, currentProvider } =
+    useAIProvider();
 
   useSeo({
     title: "AI 助手",
@@ -216,7 +219,8 @@ export const AIPage = () => {
   /** 把界面消息转成 API 消息格式（去掉 welcome，裁剪到预算内） */
   const buildHistory = useCallback((): ChatMessage[] => {
     const history: ChatMessage[] = messages
-      .filter((m) => m.id !== "welcome")
+      // 欢迎语和降级提示都不进历史：前者不是用户说的，后者是系统状态
+      .filter((m) => m.id !== "welcome" && !m.isNotice)
       .map((m) => ({ role: m.role, content: m.content }));
 
     const { kept, dropped } = trimMessagesToBudget(history, CONTEXT_BUDGET);
@@ -319,9 +323,9 @@ export const AIPage = () => {
           { role: "user", content: trimmedInput },
         ];
 
-        const result = await streamChat(
+        const result = await streamChatWithFailover(
           apiMessages,
-          { baseURL: config.apiUrl, apiKey: config.apiKey, model: config.model },
+          currentProvider?.id,
           params,
           {
             onChunk: (chunk) => {
@@ -341,6 +345,19 @@ export const AIPage = () => {
             onUsage: (u) => addUsage(u),
           },
           controller.signal,
+          // 降级时告知用户「换了哪一家」，而不是让他们以为一直用的是原来那家
+          (from, to, reason) => {
+            setMessages((prev) => [
+              ...prev,
+              {
+                id: `switch-${Date.now()}`,
+                role: "assistant",
+                content: `⚠️ ${from} 调用失败（${reason}），已自动切换到 ${to}。`,
+                timestamp: Date.now(),
+                isNotice: true,
+              },
+            ]);
+          },
         );
 
         if (result.usage) addUsage(result.usage);
