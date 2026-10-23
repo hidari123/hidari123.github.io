@@ -12,7 +12,6 @@
  */
 
 import { useState, useEffect, useCallback } from "react";
-import { motion, AnimatePresence } from "framer-motion";
 import {
   X,
   Key,
@@ -31,7 +30,7 @@ import {
   AlertTriangle,
 } from "lucide-react";
 import { AIProvider, AI_PROVIDERS } from "@/config/aiProviders";
-import { useModalScrollLock } from "@/hooks/useModalScrollLock";
+import { Modal } from "@/components/Common/Modal";
 import { getProviderKeys, setProviderKeys, getKeyHealth } from "@/services/keyPool";
 
 const CUSTOM_BASE_URL_KEY = "ai_custom_base_url";
@@ -87,7 +86,8 @@ export const AISettingsModal = ({
   const [order, setOrder] = useState<string[]>([]);
 
   // 遮罩铺满视口不代表 body 锁住了 —— 不锁的话滚轮会把底层页面一起滚走。
-  useModalScrollLock(isOpen);
+  // 现在这层锁、Esc 关闭、遮罩点击都由 Modal 外壳统一做，
+  // 以前这里是五份各自为政的调用点之一。
 
   // 按用户偏好排序展示；没排过就是配置里的自然顺序
   const orderedProviders = (): AIProvider[] => {
@@ -234,25 +234,8 @@ export const AISettingsModal = ({
   };
 
   return (
-    <AnimatePresence>
-      {isOpen && (
-        <>
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50"
-            onClick={handleClose}
-          />
-
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95, y: 20 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95, y: 20 }}
-            transition={{ duration: 0.2 }}
-            className="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none"
-          >
-            <div className="bg-[var(--bg-card)] rounded-2xl shadow-2xl w-full max-w-2xl max-h-[85vh] overflow-hidden pointer-events-auto flex flex-col">
+    <Modal isOpen={isOpen} onClose={handleClose}>
+      <div className="bg-[var(--bg-card)] rounded-2xl shadow-2xl overflow-hidden">
               {/* 头部 */}
               <div className="relative p-6 pb-4 border-b border-[var(--border)]">
                 <button
@@ -578,9 +561,6 @@ export const AISettingsModal = ({
                 )}
               </div>
             </div>
-          </motion.div>
-        </>
-      )}
-    </AnimatePresence>
+    </Modal>
   );
 };

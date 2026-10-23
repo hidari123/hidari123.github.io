@@ -1276,3 +1276,56 @@ select {
     display: none !important;
   }
 } */
+
+/* ============================================================
+   骨架屏 shimmer
+   用一个统一的高光层做扫描，而不是逐个 stagger 点亮。
+   深色模式下色差要更大才看得见，所以用 currentColor 的透明度控制，
+   两套主题共用一套动画。
+   ============================================================ */
+
+.skeleton-shimmer {
+  --shimmer-base: var(--bg-secondary);
+  --shimmer-highlight: rgba(99, 102, 241, 0.08);
+  position: relative;
+}
+
+[data-theme="dark"] .skeleton-shimmer {
+  --shimmer-highlight: rgba(167, 139, 250, 0.12);
+}
+
+/* 每个占位块内部铺一层高光 */
+.skeleton-shimmer > * {
+  position: relative;
+  overflow: hidden;
+  background: var(--shimmer-base);
+}
+
+.skeleton-shimmer > *::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--shimmer-highlight),
+    transparent
+  );
+  animation: skeleton-shimmer 1.6s ease-in-out infinite;
+}
+
+@keyframes skeleton-shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+/* 开了「减少动态效果」就停掉扫描，只留底色——
+   这时候用户看到的是稳定的灰块，而不是一闪一闪的东西 */
+@media (prefers-reduced-motion: reduce) {
+  .skeleton-shimmer > *::after {
+    animation: none;
+    display: none;
+  }
+}

@@ -1,9 +1,9 @@
 /**
- * 返回顶部按钮 - 小猫爪 🐾
+ * 返回顶部按钮 - 小猫爪
  */
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronUp } from "lucide-react";
+import { ChevronUp, PawPrint } from "lucide-react";
 
 export const BackToTop = () => {
   const [isVisible, setIsVisible] = useState(false);
@@ -57,8 +57,9 @@ export const BackToTop = () => {
               ease: "easeInOut",
             }}
           >
+            {/* 悬停时换成猫爪图标（lucide 版本，不受系统 emoji 字体影响） */}
             {isHovered ? (
-              <span className="text-2xl">🐾</span>
+              <PawPrint className="w-6 h-6 text-white" />
             ) : (
               <ChevronUp className="w-6 h-6 text-white" />
             )}

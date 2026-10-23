@@ -2,10 +2,10 @@
  * 提交工具弹窗组件
  */
 import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { X, Send, CheckCircle, Link, Loader2 } from "lucide-react";
 import { CATEGORIES, type ToolCategory, saveSubmittedTool } from "../../data/tools";
-import { useModalScrollLock } from "@/hooks/useModalScrollLock";
+import { Modal } from "@/components/Common/Modal";
 
 interface SubmitToolModalProps {
   isOpen: boolean;
@@ -25,8 +25,7 @@ export const SubmitToolModal = ({ isOpen, onClose, onSuccess }: SubmitToolModalP
   const [isSuccess, setIsSuccess] = useState(false);
   const [copied, setCopied] = useState(false);
 
-  // 第四个模态框，同样接进统一的滚动锁
-  useModalScrollLock(isOpen);
+  // 滚动锁 / Esc / 遮罩点击都交给 Modal 外壳
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -73,29 +72,21 @@ export const SubmitToolModal = ({ isOpen, onClose, onSuccess }: SubmitToolModalP
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const handleBackdropClick = (e: React.MouseEvent) => {
-    if (e.target === e.currentTarget) {
-      onClose();
-    }
-  };
-
   return (
-    <AnimatePresence>
-      {isOpen && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          onClick={handleBackdropClick}
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-md"
-        >
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95, y: 20 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95, y: 20 }}
-            transition={{ duration: 0.2 }}
-            className="w-full max-w-lg bg-white/95 dark:bg-gray-800/95 rounded-2xl shadow-xl border border-gray-200/50 dark:border-gray-700/50 backdrop-blur-xl overflow-hidden"
-          >
+    // 遮罩色原本比别的弹窗淡（40% vs 50%），保留这个差异
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      panelClassName="max-w-lg"
+      backdropClassName="bg-black/40 backdrop-blur-md"
+    >
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95, y: 20 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        exit={{ opacity: 0, scale: 0.95, y: 20 }}
+        transition={{ duration: 0.2 }}
+        className="w-full bg-white/95 dark:bg-gray-800/95 rounded-2xl shadow-xl border border-gray-200/50 dark:border-gray-700/50 backdrop-blur-xl overflow-hidden"
+      >
             {/* 头部 */}
             <div className="flex items-center justify-between p-6 border-b border-gray-200/50 dark:border-gray-700/50">
               <div>
@@ -279,8 +270,6 @@ export const SubmitToolModal = ({ isOpen, onClose, onSuccess }: SubmitToolModalP
               </div>
             )}
           </motion.div>
-        </motion.div>
-      )}
-    </AnimatePresence>
+    </Modal>
   );
 };

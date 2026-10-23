@@ -5,12 +5,12 @@
  * @LastEditTime: 2026-05-27 14:59:44
  * Copyright (c) 2026 by hidari, All Rights Reserved.
  */
-import { useState, useCallback } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { useState, useCallback, useEffect } from "react";
 import { Copy, Check, Loader2, X, Bot, AlertCircle } from "lucide-react";
 import { useAIProvider } from "@/hooks/useAIProvider";
 import { explainCode } from "@/services/aiService";
-import { useModalScrollLock } from "@/hooks/useModalScrollLock";
+import { Modal } from "@/components/Common/Modal";
+import { highlightCode } from "@/utils/prismHighlight";
 
 interface CodeBlockProps {
   code: string;
@@ -25,9 +25,27 @@ export const CodeBlock = ({ code, language }: CodeBlockProps) => {
   const [showExplanation, setShowExplanation] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // 代码解释模态框同样要锁 body —— 它的 max-h-80vh + overflow-hidden
-  // 会让内容看不全，但页面还能滚，是同一个 bug 的第三种表现。
-  useModalScrollLock(showExplanation);
+  /*
+    Prism 高亮。
+
+    原来是直接渲染 {code} 纯文本，而 package.json 里的 prismjs、globals.css 里
+    两套完整的 .token 主题色全都闲在那儿——主题写了，从没被触发过。
+
+    先渲纯文本、再异步替换成高亮，而不是等高亮完成再显示：
+    代码块一出现就是完整的（文章可读性不能挂在一个 chunk 上），
+    prism 到位后无感替换。
+  */
+  const [html, setHtml] = useState<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    highlightCode(code, language).then((result) => {
+      if (!cancelled) setHtml(result);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [code, language]);
 
   const handleCopy = useCallback(async () => {
     try {
@@ -97,31 +115,29 @@ export const CodeBlock = ({ code, language }: CodeBlockProps) => {
           title="AI 解释"
         >
           {explaining ? <Loader2 className="w-4 h-4 animate-spin" /> : <Bot className="w-4 h-4" />}
-          <span>🤖 解释</span>
+          <span>解释</span>
         </button>
         <pre>
-          <code className={`language-${language}`}>{code}</code>
+          <code
+            className={`language-${language}`}
+            /*
+              html 为 null 时先走纯文本分支；不为 null 才注入。
+              code 来自 public/blogs 下的静态文章文件（进版本库，无用户输入），
+              所以 HTML 注入面可控。
+            */
+            dangerouslySetInnerHTML={html ? { __html: html } : undefined}
+          >
+            {html ? undefined : code}
+          </code>
         </pre>
       </div>
 
-      <AnimatePresence>
-        {showExplanation && (
-          <>
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50"
-              onClick={() => setShowExplanation(false)}
-            />
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              transition={{ duration: 0.2 }}
-              className="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none"
-            >
-              <div className="bg-[var(--bg-card)] rounded-2xl shadow-2xl w-full max-w-2xl max-h-[80vh] flex flex-col pointer-events-auto overflow-hidden">
+      <Modal
+        isOpen={showExplanation}
+        onClose={() => setShowExplanation(false)}
+        maxHeightClassName="max-h-[80vh]"
+      >
+          <div className="bg-[var(--bg-card)] rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[80vh]">
                 <div className="flex items-center justify-between px-6 py-4 border-b border-[var(--border)]">
                   <div className="flex items-center gap-2">
                     <Bot className="w-5 h-5 text-[#6366f1]" />
@@ -171,10 +187,7 @@ export const CodeBlock = ({ code, language }: CodeBlockProps) => {
                   ) : null}
                 </div>
               </div>
-            </motion.div>
-          </>
-        )}
-      </AnimatePresence>
+      </Modal>
     </>
   );
 };

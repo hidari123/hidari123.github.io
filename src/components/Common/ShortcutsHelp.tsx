@@ -5,24 +5,46 @@
  * @LastEditTime: 2026-05-15 16:07:10
  * Copyright (c) 2026 by hidari, All Rights Reserved.
  */
-import { motion, AnimatePresence } from "framer-motion";
-import { X, Keyboard, Sparkles } from "lucide-react";
-import { useModalScrollLock } from "@/hooks/useModalScrollLock";
+import { motion } from "framer-motion";
+import {
+  X,
+  Keyboard,
+  Sparkles,
+  Sparkle,
+  Flower,
+  HelpCircle,
+  ArrowDown,
+  ArrowUp,
+  Palette,
+  Search,
+  Bot,
+  type LucideIcon,
+} from "lucide-react";
+import { Modal } from "@/components/Common/Modal";
 
 interface ShortcutItem {
   key: string;
   description: string;
-  icon?: string;
+  /** 图标组件而不是 emoji 字符串 */
+  Icon: LucideIcon;
 }
 
+/*
+ * 快捷键列表。
+ *
+ * icon 改成 lucide 组件而不是 emoji 字符串：
+ * emoji 在不同系统上是不同字体渲染的，同一行里大小基线都对不齐，
+ * 颜色也不跟着主题走。换成图标组件后能和文字严格对齐、
+ * 跟随 currentColor，深色模式下不用单独处理。
+ */
 const shortcuts: ShortcutItem[] = [
-  { key: "?", description: "显示/隐藏快捷键帮助", icon: "❓" },
-  { key: "J / ↓", description: "下一篇", icon: "⬇️" },
-  { key: "K / ↑", description: "上一篇", icon: "⬆️" },
-  { key: "T", description: "切换暗色/亮色主题", icon: "🎨" },
-  { key: "/", description: "聚焦搜索框", icon: "🔍" },
-  { key: "E", description: "打开 AI 助手", icon: "🤖" },
-  { key: "Esc", description: "关闭弹窗", icon: "✨" },
+  { key: "?", description: "显示/隐藏快捷键帮助", Icon: HelpCircle },
+  { key: "J / ↓", description: "下一篇", Icon: ArrowDown },
+  { key: "K / ↑", description: "上一篇", Icon: ArrowUp },
+  { key: "T", description: "切换暗色/亮色主题", Icon: Palette },
+  { key: "/", description: "聚焦搜索框", Icon: Search },
+  { key: "E", description: "打开 AI 助手", Icon: Bot },
+  { key: "Esc", description: "关闭弹窗", Icon: Sparkle },
 ];
 
 interface ShortcutsHelpProps {
@@ -31,49 +53,38 @@ interface ShortcutsHelpProps {
 }
 
 export const ShortcutsHelp = ({ isOpen, onClose }: ShortcutsHelpProps) => {
-  // 这也是模态框，之前漏了滚动锁
-  useModalScrollLock(isOpen);
-
-  const handleOverlayClick = (e: React.MouseEvent) => {
-    if (e.target === e.currentTarget) {
-      onClose();
-    }
-  };
+  // 滚动锁、Esc 关闭、遮罩点击都在 Modal 外壳里了。
+  // 这里的面板用的是弹簧入场（spring），和别的弹窗的 duration 不同，
+  // 所以面板动画保留在自己的 JSX 里，Modal 只接管外壳。
+  const decorations = (
+    <>
+      {/*
+        装饰元素改成图标：
+        emoji 不吃 currentColor，粉色爱心在暗色模式下会变成一团脏粉色。
+        用 lucide + currentColor 后它们自动跟随主题的强调色。
+      */}
+      <Sparkles className="absolute top-10 left-10 w-8 h-8 text-[#f472b6] opacity-50 animate-bounce" />
+      <Sparkle className="absolute top-20 right-16 w-6 h-6 text-[#a78bfa] opacity-40 animate-pulse" />
+      <Flower className="absolute bottom-20 left-20 w-6 h-6 text-[#c4b5fd] opacity-30 animate-pulse" />
+    </>
+  );
 
   return (
-    <AnimatePresence>
-      {isOpen && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.2 }}
-          className="fixed inset-0 z-[100] flex items-center justify-center p-4"
-          onClick={handleOverlayClick}
-        >
-          {/* 背景遮罩 - 渐变毛玻璃效果 */}
-          <div className="absolute inset-0 bg-gradient-to-br from-[#6366f1]/20 via-[#8b5cf6]/10 to-[#a78bfa]/20 backdrop-blur-md" />
-
-          {/* 装饰性爱心 */}
-          <div className="absolute top-10 left-10 text-4xl animate-bounce opacity-50">💕</div>
-          <div className="absolute top-20 right-16 text-3xl animate-pulse opacity-40">✨</div>
-          <div className="absolute bottom-20 left-20 text-3xl animate-pulse opacity-30">🌸</div>
-          <div
-            className="absolute bottom-10 right-10 text-4xl animate-bounce opacity-50"
-            style={{ animationDelay: "0.5s" }}
-          >
-            💜
-          </div>
-
-          {/* 主弹窗 */}
-          <motion.div
-            initial={{ scale: 0.8, opacity: 0, y: 20 }}
-            animate={{ scale: 1, opacity: 1, y: 0 }}
-            exit={{ scale: 0.8, opacity: 0, y: 20 }}
-            transition={{ type: "spring", damping: 20, stiffness: 300 }}
-            className="relative w-full max-w-md bg-[var(--bg-card)] rounded-3xl shadow-2xl border border-[var(--border)] overflow-hidden"
-            onClick={(e) => e.stopPropagation()}
-          >
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      panelClassName="max-w-md"
+      backdropClassName="bg-gradient-to-br from-[#6366f1]/20 via-[#8b5cf6]/10 to-[#a78bfa]/20 backdrop-blur-md"
+      decorations={decorations}
+    >
+      {/* 主弹窗 */}
+      <motion.div
+        initial={{ scale: 0.8, opacity: 0, y: 20 }}
+        animate={{ scale: 1, opacity: 1, y: 0 }}
+        exit={{ scale: 0.8, opacity: 0, y: 20 }}
+        transition={{ type: "spring", damping: 20, stiffness: 300 }}
+        className="w-full bg-[var(--bg-card)] rounded-3xl shadow-2xl border border-[var(--border)] overflow-hidden"
+      >
             {/* 顶部装饰渐变条 */}
             <div className="h-2 bg-gradient-to-r from-pink-300 via-purple-300 to-indigo-300" />
 
@@ -108,11 +119,7 @@ export const ShortcutsHelp = ({ isOpen, onClose }: ShortcutsHelpProps) => {
                 >
                   {/* 快捷键标签 */}
                   <div className="flex items-center gap-2 min-w-[120px]">
-                    {shortcut.icon && (
-                      <span className="text-lg group-hover:scale-110 transition-transform">
-                        {shortcut.icon}
-                      </span>
-                    )}
+                    <shortcut.Icon className="w-4 h-4 text-[var(--accent)] group-hover:scale-110 transition-transform shrink-0" />
                     <kbd className="px-3 py-1.5 text-sm font-mono font-semibold bg-[var(--bg-card)] border border-[var(--border)] rounded-lg shadow-sm text-[var(--accent)] group-hover:border-[var(--accent)] group-hover:shadow-[var(--accent)]/20 transition-all duration-200">
                       {shortcut.key}
                     </kbd>
@@ -141,9 +148,7 @@ export const ShortcutsHelp = ({ isOpen, onClose }: ShortcutsHelpProps) => {
             {/* 底部装饰渐变条 */}
             <div className="h-1 bg-gradient-to-r from-indigo-300 via-purple-300 to-pink-300" />
           </motion.div>
-        </motion.div>
-      )}
-    </AnimatePresence>
+    </Modal>
   );
 };
 

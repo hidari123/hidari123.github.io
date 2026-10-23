@@ -18,14 +18,21 @@ export interface Tool {
 // 工具分类
 export type ToolCategory = "all" | "ai" | "dev" | "writing" | "design" | "seo";
 
-// 分类配置
+/*
+ * 分类图标用 lucide 组件名，不是 emoji。
+ *
+ * 原来这里是 📦🤖🛠️📝🎨🔍。emoji 在每个系统上是不同的字体：
+ * Windows 用 Segoe UI Emoji，macOS 用 Apple Color Emoji，
+ * 字面高度和基线都不一样，并排时高低不齐，颜色也不跟主题色走。
+ * 改成 lucide 后跟着 currentColor 变，深色模式自动适配。
+ */
 export const CATEGORIES: { id: ToolCategory; name: string; icon: string }[] = [
-  { id: "all", name: "全部", icon: "📦" },
-  { id: "ai", name: "AI 工具", icon: "🤖" },
-  { id: "dev", name: "开发工具", icon: "🛠️" },
-  { id: "writing", name: "写作辅助", icon: "📝" },
-  { id: "design", name: "设计工具", icon: "🎨" },
-  { id: "seo", name: "SEO 工具", icon: "🔍" },
+  { id: "all", name: "全部", icon: "LayoutGrid" },
+  { id: "ai", name: "AI 工具", icon: "Bot" },
+  { id: "dev", name: "开发工具", icon: "Wrench" },
+  { id: "writing", name: "写作辅助", icon: "PenLine" },
+  { id: "design", name: "设计工具", icon: "Palette" },
+  { id: "seo", name: "SEO 工具", icon: "Search" },
 ];
 
 // 工具列表数据

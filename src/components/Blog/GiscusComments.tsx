@@ -7,6 +7,7 @@
  */
 
 import { useEffect, useMemo, useState } from "react";
+import { MessageCircle } from "lucide-react";
 import Giscus from "@giscus/react";
 import { getGiscusConfig, isGiscusConfigured } from "@/config/giscus";
 
@@ -73,7 +74,9 @@ export const GiscusComments = ({ slug }: GiscusCommentsProps) => {
         </div>
 
         <div className="p-6 bg-[var(--bg-card)] rounded-xl border border-[var(--border)] text-center">
-          <div className="text-4xl mb-4">💬</div>
+          <div className="mb-4 flex justify-center">
+            <MessageCircle className="w-10 h-10 text-[var(--text-secondary)] opacity-50" />
+          </div>
           <h3 className="text-lg font-medium mb-2">评论区未配置</h3>
           <p className="text-[var(--text-secondary)] text-sm mb-4">
             要启用评论区，请配置 Giscus 环境变量

@@ -6,9 +6,8 @@
  * Copyright (c) 2026 by hidari, All Rights Reserved.
  */
 import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
 import { X, Key, ExternalLink, Eye, EyeOff, AlertCircle, Sparkles } from "lucide-react";
-import { useModalScrollLock } from "@/hooks/useModalScrollLock";
+import { Modal } from "@/components/Common/Modal";
 
 interface ApiKeyModalProps {
   isOpen: boolean;
@@ -21,8 +20,8 @@ export const ApiKeyModal = ({ isOpen, onClose, onSave }: ApiKeyModalProps) => {
   const [showKey, setShowKey] = useState(false);
   const [error, setError] = useState("");
 
-  // 与 AI 设置、代码块模态框共用同一个滚动锁实现
-  useModalScrollLock(isOpen);
+  // 滚动锁、Esc 关闭、遮罩点击、焦点管理都由 Modal 外壳统一处理，
+  // 以前这里是单独调 useModalScrollLock 的五份之一。
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -52,28 +51,9 @@ export const ApiKeyModal = ({ isOpen, onClose, onSave }: ApiKeyModalProps) => {
   };
 
   return (
-    <AnimatePresence>
-      {isOpen && (
-        <>
-          {/* 背景遮罩 */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50"
-            onClick={handleClose}
-          />
-
-          {/* 弹窗 */}
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95, y: 20 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95, y: 20 }}
-            transition={{ duration: 0.2 }}
-            className="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none"
-          >
-            <div className="bg-[var(--bg-card)] rounded-2xl shadow-2xl w-full max-w-md pointer-events-auto overflow-hidden">
-              {/* 头部 */}
+    <Modal isOpen={isOpen} onClose={handleClose} panelClassName="max-w-md">
+      <div className="bg-[var(--bg-card)] rounded-2xl shadow-2xl overflow-hidden">
+          {/* 头部 */}
               <div className="relative p-6 pb-4">
                 <button
                   onClick={handleClose}
@@ -184,9 +164,6 @@ export const ApiKeyModal = ({ isOpen, onClose, onSave }: ApiKeyModalProps) => {
                 </p>
               </div>
             </div>
-          </motion.div>
-        </>
-      )}
-    </AnimatePresence>
+    </Modal>
   );
 };

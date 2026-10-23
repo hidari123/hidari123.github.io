@@ -15,22 +15,24 @@ import { PostCover } from "@/components/Blog/PostCover";
 import { TagFilter } from "@/components/Blog/TagFilter";
 import { CATEGORY_TAGS, type CategoryTag } from "@/data/tags";
 import { useSeo } from "@/hooks/useSeo";
+import {
+  SkeletonPostCard as SkeletonCard,
+  SkeletonStatus,
+} from "@/components/Common/Skeleton";
 import { Ghost } from "react-kawaii";
 
-// 骨架屏组件
-const PostCardSkeleton = () => (
-  <div className="bg-[var(--bg-card)] rounded-2xl overflow-hidden animate-pulse">
-    <div className="h-52 bg-gradient-to-br from-[var(--bg-secondary)] to-[var(--border)]"></div>
-    <div className="p-6">
-      <div className="h-6 bg-[var(--bg-secondary)] rounded w-3/4 mb-3"></div>
-      <div className="h-4 bg-[var(--bg-secondary)] rounded w-1/2 mb-4"></div>
-      <div className="space-y-2">
-        <div className="h-3 bg-[var(--bg-secondary)] rounded"></div>
-        <div className="h-3 bg-[var(--bg-secondary)] rounded w-5/6"></div>
-      </div>
-    </div>
-  </div>
-);
+/*
+ * 骨架屏
+ *
+ * 原来用的是 animate-pulse（整块一起明暗暗），两个问题：
+ *  - 卡片之间的动画不同步，一排六张卡闪烁参差，像坏掉了
+ *  - reduced-motion 下 pulse 会被压成 0.01ms，变成一块死灰，看不出在加载
+ *
+ * 改成全局统一的 shimmer 扫描，并和 Skeleton.tsx 里的骨架对齐真实卡片布局
+ * （封面高从 h-52 改成 h-40，和 PostCard 里的封面比例一致，
+ * 否则内容加载完的瞬间卡片会跳一下）。
+ */
+const PostCardSkeleton = () => <SkeletonCard />;
 
 // 空状态组件 - 使用 react-kawaii Ghost
 const EmptyState = () => (
@@ -46,7 +48,7 @@ const EmptyState = () => (
     >
       <Ghost mood="sad" size={120} color="#a78bfa" />
     </motion.div>
-    <h2 className="text-2xl font-semibold mb-4">这里空空如也 👻</h2>
+    <h2 className="text-2xl font-semibold mb-4">这里空空如也</h2>
     <p className="text-[var(--text-secondary)]">还没有发布任何文章，敬请期待...</p>
   </motion.div>
 );
@@ -251,8 +253,11 @@ export const BlogList = () => {
           {loading ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {[...Array(6)].map((_, i) => (
-                <PostCardSkeleton key={i} />
+                <div key={i} className="skeleton-shimmer">
+                  <PostCardSkeleton />
+                </div>
               ))}
+              <SkeletonStatus text="正在加载文章列表" />
             </div>
           ) : paginatedPosts.length === 0 ? (
             <EmptyState />

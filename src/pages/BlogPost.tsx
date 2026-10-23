@@ -34,22 +34,15 @@ import { useAIContext } from "@/context/AIContext";
 import { useSeo } from "@/hooks/useSeo";
 import { showToast } from "@/components/Common/Toast";
 import { extractToc, toPlainText } from "@/utils/toc";
+import { SkeletonArticle, SkeletonStatus } from "@/components/Common/Skeleton";
+import { Search } from "lucide-react";
 
-// 骨架屏
-const PostSkeleton = () => (
-  <div className="animate-pulse max-w-3xl mx-auto">
-    <div className="h-8 bg-[var(--bg-secondary)] rounded w-1/2 mb-4"></div>
-    <div className="flex items-center gap-4 mb-8">
-      <div className="h-4 bg-[var(--bg-secondary)] rounded w-24"></div>
-      <div className="h-4 bg-[var(--bg-secondary)] rounded w-24"></div>
-    </div>
-    <div className="space-y-3">
-      <div className="h-4 bg-[var(--bg-secondary)] rounded"></div>
-      <div className="h-4 bg-[var(--bg-secondary)] rounded w-5/6"></div>
-      <div className="h-4 bg-[var(--bg-secondary)] rounded w-4/5"></div>
-    </div>
-  </div>
-);
+/*
+ * 骨架屏：换成共享的 SkeletonArticle。
+ * 原版用 animate-pulse，且只给了三行正文，和真实文章差得太远——
+ * 内容一加载出来整页高度会从 200px 跳到 2000px，滚动位置直接乱掉。
+ */
+const PostSkeleton = () => <SkeletonArticle />;
 
 // 404 组件
 const NotFound = () => {
@@ -60,7 +53,9 @@ const NotFound = () => {
       animate={{ opacity: 1, y: 0 }}
       className="text-center py-20"
     >
-      <div className="text-6xl mb-4">🔍</div>
+      <div className="text-6xl mb-4 text-[var(--text-secondary)]">
+          <Search className="w-14 h-14 mx-auto" />
+        </div>
       <h2 className="text-2xl font-semibold mb-4">文章未找到</h2>
       <p className="text-[var(--text-secondary)] mb-8">抱歉，找不到您要访问的文章</p>
       <button onClick={() => navigate("/blog")} className="btn flex items-center gap-2 mx-auto">
@@ -175,8 +170,9 @@ export const BlogPost = () => {
   if (loading) {
     return (
       <div className="min-h-[calc(100vh-8rem)] py-12">
-        <div className="container">
+        <div className="container skeleton-shimmer">
           <PostSkeleton />
+          <SkeletonStatus text="正在加载文章" />
         </div>
       </div>
     );

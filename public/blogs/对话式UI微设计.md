@@ -98,7 +98,7 @@ const canCollapse = Boolean(user && (entries.length > 1 || activityState) && !ha
 const thinking = isLast && activeModelCalls && !nonUser.some((item) => item.role === "assistant" && item.pending);
 ```
 
-`thinking` 的判定不是"模型在跑"，是**"模型在跑且还没有任何可见输出"**——一旦有第一个字落屏，状态就从 thinking 切到流式输出。
+`thinking` 的判定不是"模型在跑"，是 **"模型在跑且还没有任何可见输出"** ——一旦有第一个字落屏，状态就从 thinking 切到流式输出。
 
 这个区分很值钱：**"思考中"和"打字中"是两种不同的用户预期**。思考中可能持续几十秒（长 reasoning），用户需要的是"它没死"的确认；打字中用户开始阅读，需要的是流畅的追加渲染。把两者混为一个"loading"，用户要么在打字阶段还在等"什么时候开始"，要么在思考阶段以为卡死了。
 

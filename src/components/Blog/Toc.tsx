@@ -25,9 +25,22 @@ interface TocProps {
   onNavigate?: () => void;
   /** 当前章节变化时回调，供移动端折叠条显示「你在哪」 */
   onActiveChange?: (text: string) => void;
+  /**
+   * 导航本身要不要自带滚动。
+   *
+   * 桌面悬浮面板里已经有一层 `overflow-y-auto` 包着了（为了跟自适应高度的面板配合），
+   * nav 再自带一个 max-h 就是两层滚动条。默认 true 是给移动端折叠面板用的。
+   */
+  scroll?: boolean;
 }
 
-export const Toc = ({ items, variant = "sidebar", onNavigate, onActiveChange }: TocProps) => {
+export const Toc = ({
+  items,
+  variant = "sidebar",
+  onNavigate,
+  onActiveChange,
+  scroll = true,
+}: TocProps) => {
   const [activeId, setActiveId] = useState<string>(items[0]?.id ?? "");
   const navRef = useRef<HTMLElement>(null);
 
@@ -107,7 +120,11 @@ export const Toc = ({ items, variant = "sidebar", onNavigate, onActiveChange }: 
   }
 
   return (
-    <nav ref={navRef} className="space-y-1 max-h-[calc(100vh-8rem)] overflow-y-auto" aria-label="文章目录">
+    <nav
+      ref={navRef}
+      className={`space-y-1 ${scroll ? "max-h-[calc(100vh-8rem)] overflow-y-auto" : ""}`}
+      aria-label="文章目录"
+    >
       {items.map((item) => (
         <button
           key={item.id}
@@ -135,10 +152,23 @@ export const Toc = ({ items, variant = "sidebar", onNavigate, onActiveChange }: 
  *
  * 现在改成：
  * 1. fixed 悬浮在视口右侧，不占文档流
- * 2. 滚动到正文开始之前隐藏 —— 读者还在看封面和标题的时候，
- *    右侧飘一个目录框是纯噪音
+ * 2. 滚过正文开头之后常驻，直到滚回文章开头之前都不消失
  * 3. 可收起：收起后只剩一条 28px 宽的竖 tab，不占任何横向空间
  * 4. 状态记在 localStorage：跳到另一篇文章不该重新展开
+ *
+ * ── 以前为什么是「拉到最下面才出现，滚一下又没了」──
+ *
+ * 原实现是「0 高度哨兵 + IntersectionObserver(rootMargin: -80px 0)」。
+ * 问题出在 IO 的语义上：它只在哨兵**穿出**观察区时回调。
+ * 哨兵滚到视口上边缘之外 → isIntersecting 变 false → 目录隐藏。
+ * 用户此时往回滚一点 → 又变 true → 目录重现。
+ *
+ * 于是目录进入视口就隐藏、离开才重现 —— 行为正好和预期相反。
+ * 负的 rootMargin 只是把这个切换点又往后推了一点，让体感更迟钝。
+ *
+ * 改成在 scroll 里直接量位置，一次拿到「滚过正文开头没有」这个确定答案：
+ *   - 滚动事件是高频的，但这里只写一个 boolean，React 会自动跳过同值重渲
+ *   - 仍用 requestAnimationFrame 节流，避免在高频事件里做布局读取
  */
 export const TocSidebar = ({ items }: { items: TocItem[] }) => {
   const [visible, setVisible] = useState(false);
@@ -148,20 +178,38 @@ export const TocSidebar = ({ items }: { items: TocItem[] }) => {
   });
   const sentinelRef = useRef<HTMLDivElement>(null);
 
-  // 正文开始位置由一个 0 高度的哨兵标记。
-  // 不用 scrollY 硬编码阈值 —— 文章长度不一样，同一个阈值在不同文章里
-  // 触发时机完全不同。
   useEffect(() => {
     const sentinel = sentinelRef.current;
     if (!sentinel) return;
 
-    const observer = new IntersectionObserver(
-      ([entry]) => setVisible(entry.isIntersecting),
-      { threshold: 0, rootMargin: "-80px 0px 0px 0px" },
-    );
+    let frame = 0;
 
-    observer.observe(sentinel);
-    return () => observer.disconnect();
+    const check = () => {
+      frame = 0;
+      // 用视口坐标而不是 scrollY：这样文章顶部导航条（fixed h-16）
+      // 以下的正文一露头就开始显示，不用关心导航条的高度常量。
+      const top = sentinel.getBoundingClientRect().top;
+      setVisible(top <= HEADER_OFFSET + 40);
+    };
+
+    const onScroll = () => {
+      // 一帧内只量一次布局
+      if (frame) return;
+      frame = window.requestAnimationFrame(check);
+    };
+
+    // 文章直接带 hash 打开时（比如从搜索结果进来看某节），
+    // 初始位置就在正文中，此时 scroll 不一定会触发
+    check();
+
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll, { passive: true });
+
+    return () => {
+      if (frame) window.cancelAnimationFrame(frame);
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
+    };
   }, []);
 
   const toggleCollapsed = () => {
@@ -201,15 +249,17 @@ export const TocSidebar = ({ items }: { items: TocItem[] }) => {
         </button>
       )}
 
-      {/* 展开态：右侧悬浮面板 */}
+      {/* 展开态：右侧悬浮面板
+          用 top-28 + bottom-6 双边定位而不是 max-h：
+          面板高度随视口自适应，不会在矮屏上超出下沿，
+          也不会在长屏上只占半截。inner Toc 不再自带 max-h，
+          否则会出现内外两层滚动条，鼠标滚轮在内层滚到头就卡住。 */}
       {!collapsed && (
         <aside
           aria-label="目录侧边栏"
-          className={`fixed right-6 top-28 z-30 w-60 hidden lg:block transition-all duration-300 ${
-            visible ? "opacity-100 translate-x-0" : "opacity-0 translate-x-4 pointer-events-none"
-          }`}
+          className={`fixed right-6 top-28 bottom-6 z-30 w-60 hidden lg:block transition-all duration-300 ${visible ? "opacity-100 translate-x-0" : "opacity-0 translate-x-4 pointer-events-none"}`}
         >
-          <div className="p-4 bg-[var(--bg-card)]/95 backdrop-blur-sm rounded-xl border border-[var(--border)] shadow-lg max-h-[calc(100vh-9rem)] flex flex-col">
+          <div className="h-full p-4 bg-[var(--bg-card)]/95 backdrop-blur-sm rounded-xl border border-[var(--border)] shadow-lg flex flex-col overflow-hidden">
             <div className="flex items-center gap-2 mb-3 text-[var(--text-primary)]">
               <List className="w-4 h-4 text-[var(--accent)]" />
               <h2 className="text-sm font-semibold">目录</h2>
@@ -225,8 +275,8 @@ export const TocSidebar = ({ items }: { items: TocItem[] }) => {
                 <PanelRightClose className="w-3.5 h-3.5" />
               </button>
             </div>
-            <div className="overflow-y-auto min-h-0">
-              <Toc items={items} />
+            <div className="overflow-y-auto min-h-0 flex-1">
+              <Toc items={items} variant="sidebar" scroll={false} />
             </div>
           </div>
         </aside>
