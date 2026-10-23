@@ -27,13 +27,19 @@ jobs:
 
       # pnpm 必须先于 setup-node：setup-node 的 `cache: pnpm`
       # 要在执行时找到 pnpm 才能算缓存键，否则这一步直接失败。
-      # 版本钉死为 9：pnpm >= 10 默认不执行依赖的 install 脚本
-      #（ERR_PNPM_IGNORED_BUILDS），而 vite 构建依赖 esbuild 的原生
-      # 二进制 —— 不显式批准就会构建失败。packageManager 字段是同一声明。
+      #
+      # 注意：这里绝对不能再写 version。pnpm/action-setup@v4 会把
+      # with.version 和 package.json 的 packageManager 字段做
+      # **字符串全等**比较（不是比 major），两者同时存在且不一致时
+      # 直接抛 "Multiple versions of pnpm specified" 而失败。
+      # packageManager 已经是唯一事实来源，删掉 version 才不会冲突。
+      # 保留 packageManager 钉 9 的理由：pnpm >= 10 默认不执行依赖的
+      # install 脚本（ERR_PNPM_IGNORED_BUILDS），而 vite 构建依赖
+      # esbuild 的原生二进制。
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
-          version: 9
+          standalone: false
 
       - name: Setup Node
         uses: actions/setup-node@v4
