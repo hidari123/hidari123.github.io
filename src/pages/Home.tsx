@@ -310,12 +310,19 @@ export const Home = () => {
 
         {/* ---------- 工具箱 ---------- */}
         <motion.section {...enter(0.15)}>
-          <div className="text-center mb-8">
+          {/*
+            标题左对齐，不居中。
+            下面卡片是 4 列网格，居中标题会和网格的左边缘错开一条，
+            看上去像「这一段自己漂到中间去了」；
+            左对齐后标题、搜索框、筛选器、卡片左边缘在同一条线上。
+            去掉 mx-auto 是必须的 —— 留着它 text-left 也不会真的靠左。
+          */}
+          <div className="text-left mb-8">
             <h2 className="text-2xl md:text-3xl font-bold mb-3 flex items-center gap-2.5">
-            <Wrench className="w-7 h-7 text-[var(--accent)]" />
-            <span>工具箱</span>
-          </h2>
-            <p className="text-[var(--text-secondary)] max-w-2xl mx-auto text-sm">
+              <Wrench className="w-7 h-7 text-[var(--accent)] shrink-0" />
+              <span>工具箱</span>
+            </h2>
+            <p className="text-[var(--text-secondary)] max-w-2xl text-sm">
               我自己在用的工具，顺手分享。觉得有用就推荐给我
             </p>
           </div>
