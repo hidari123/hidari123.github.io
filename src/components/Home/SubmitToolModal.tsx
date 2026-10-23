@@ -5,6 +5,7 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Send, CheckCircle, Link, Loader2 } from "lucide-react";
 import { CATEGORIES, type ToolCategory, saveSubmittedTool } from "../../data/tools";
+import { useModalScrollLock } from "@/hooks/useModalScrollLock";
 
 interface SubmitToolModalProps {
   isOpen: boolean;
@@ -23,6 +24,9 @@ export const SubmitToolModal = ({ isOpen, onClose, onSuccess }: SubmitToolModalP
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [copied, setCopied] = useState(false);
+
+  // 第四个模态框，同样接进统一的滚动锁
+  useModalScrollLock(isOpen);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

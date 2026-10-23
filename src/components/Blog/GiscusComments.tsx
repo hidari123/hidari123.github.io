@@ -6,8 +6,9 @@
  * Copyright (c) 2026 by hidari, All Rights Reserved.
  */
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Giscus from "@giscus/react";
+import { getGiscusConfig, isGiscusConfigured } from "@/config/giscus";
 
 interface GiscusCommentsProps {
   slug: string;
@@ -15,6 +16,12 @@ interface GiscusCommentsProps {
 
 export const GiscusComments = ({ slug }: GiscusCommentsProps) => {
   const [theme, setTheme] = useState<"light" | "dark">("light");
+
+  // 配置来自 src/config/giscus.ts（进版本库）+ 可选的 VITE_GISCUS_* 环境变量覆盖。
+  // 不再依赖 .env 里的四个值必须跟着构建走 —— 上一轮就是因为 .env 被 untrack，
+  // CI 拿不到配置，线上评论直接消失。
+  const config = useMemo(() => getGiscusConfig(), []);
+  const configured = isGiscusConfigured(config);
 
   // 监听主题变化
   useEffect(() => {
@@ -44,14 +51,8 @@ export const GiscusComments = ({ slug }: GiscusCommentsProps) => {
     return () => observer.disconnect();
   }, []);
 
-  // 获取环境变量配置
-  const repo = import.meta.env.VITE_GISCUS_REPO || "";
-  const repoId = import.meta.env.VITE_GISCUS_REPO_ID || "";
-  const category = import.meta.env.VITE_GISCUS_CATEGORY || "Announcements";
-  const categoryId = import.meta.env.VITE_GISCUS_CATEGORY_ID || "";
-
   // 如果未配置，显示提示
-  if (!repo || !repoId || !categoryId) {
+  if (!configured) {
     return (
       <div className="mt-12 pt-8 border-t border-[var(--border)]">
         <div className="flex items-center gap-2 mb-6">
@@ -78,11 +79,14 @@ export const GiscusComments = ({ slug }: GiscusCommentsProps) => {
             要启用评论区，请配置 Giscus 环境变量
           </p>
           <div className="text-left bg-[var(--bg-secondary)] rounded-lg p-4 text-sm">
-            <p className="text-[var(--text-secondary)] mb-2">请在 .env 文件中添加：</p>
+            <p className="text-[var(--text-secondary)] mb-2">在 src/config/giscus.ts 里填写：</p>
             <pre className="bg-[var(--bg-primary)] rounded p-2 overflow-x-auto">
-              {`VITE_GISCUS_REPO=用户名/仓库名
-VITE_GISCUS_REPO_ID=你的仓库ID
-VITE_GISCUS_CATEGORY_ID=你的分类ID`}
+              {`GISCUS_CONFIG = {
+  repo: "用户名/仓库名",
+  repoId: "你的仓库ID",
+  category: "Announcements",
+  categoryId: "你的分类ID",
+}`}
             </pre>
             <p className="text-[var(--text-secondary)] mt-3">
               访问{" "}
@@ -124,10 +128,10 @@ VITE_GISCUS_CATEGORY_ID=你的分类ID`}
       <div className="bg-[var(--bg-card)] rounded-xl border border-[var(--border)] p-4">
         <Giscus
           id={`comments-${slug}`}
-          repo={repo}
-          repoId={repoId}
-          category={category}
-          categoryId={categoryId}
+          repo={config.repo as `${string}/${string}`}
+          repoId={config.repoId}
+          category={config.category}
+          categoryId={config.categoryId}
           mapping="pathname"
           strict="0"
           reactionsEnabled="1"

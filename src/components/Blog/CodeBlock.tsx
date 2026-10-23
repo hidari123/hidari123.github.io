@@ -10,6 +10,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Copy, Check, Loader2, X, Bot, AlertCircle } from "lucide-react";
 import { useAIProvider } from "@/hooks/useAIProvider";
 import { explainCode } from "@/services/aiService";
+import { useModalScrollLock } from "@/hooks/useModalScrollLock";
 
 interface CodeBlockProps {
   code: string;
@@ -23,6 +24,10 @@ export const CodeBlock = ({ code, language }: CodeBlockProps) => {
   const [explanation, setExplanation] = useState<string | null>(null);
   const [showExplanation, setShowExplanation] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // 代码解释模态框同样要锁 body —— 它的 max-h-80vh + overflow-hidden
+  // 会让内容看不全，但页面还能滚，是同一个 bug 的第三种表现。
+  useModalScrollLock(showExplanation);
 
   const handleCopy = useCallback(async () => {
     try {

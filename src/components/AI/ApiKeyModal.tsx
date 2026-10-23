@@ -8,6 +8,7 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Key, ExternalLink, Eye, EyeOff, AlertCircle, Sparkles } from "lucide-react";
+import { useModalScrollLock } from "@/hooks/useModalScrollLock";
 
 interface ApiKeyModalProps {
   isOpen: boolean;
@@ -19,6 +20,9 @@ export const ApiKeyModal = ({ isOpen, onClose, onSave }: ApiKeyModalProps) => {
   const [inputKey, setInputKey] = useState("");
   const [showKey, setShowKey] = useState(false);
   const [error, setError] = useState("");
+
+  // 与 AI 设置、代码块模态框共用同一个滚动锁实现
+  useModalScrollLock(isOpen);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();

@@ -7,6 +7,7 @@
  */
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Keyboard, Sparkles } from "lucide-react";
+import { useModalScrollLock } from "@/hooks/useModalScrollLock";
 
 interface ShortcutItem {
   key: string;
@@ -30,6 +31,9 @@ interface ShortcutsHelpProps {
 }
 
 export const ShortcutsHelp = ({ isOpen, onClose }: ShortcutsHelpProps) => {
+  // 这也是模态框，之前漏了滚动锁
+  useModalScrollLock(isOpen);
+
   const handleOverlayClick = (e: React.MouseEvent) => {
     if (e.target === e.currentTarget) {
       onClose();

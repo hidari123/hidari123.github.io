@@ -123,7 +123,7 @@ export const ToolCard = ({ tool, searchQuery = "" }: ToolCardProps) => {
 
       <div className="relative z-10 p-5">
         {/* 头部：图标 + AI 徽章 */}
-        <div className="flex items-center justify-start mb-4">
+        <div className="flex items-center gap-3 mb-4">
           <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500/5 to-purple-500/5 group-hover:from-blue-400/15 group-hover:to-purple-400/15 transition-all duration-300">
             <IconComponent className="w-6 h-6 text-blue-500 group-hover:scale-110 transition-transform duration-300" />
           </div>

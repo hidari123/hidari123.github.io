@@ -55,6 +55,28 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      # ---------------------------------------------------------------------------
+      # 关于 Giscus 配置：为什么不从 secrets 写 .env
+      #
+      # 2026-10-23 曾经因为 .env 被 untrack，CI 拿不到 Giscus 的四个值，
+      # 线上评论区直接消失（对比 9b1e3b4 与其后所有 commit 即可复现）。
+      # 当时的修法提议是"把四个值搬进 Actions secrets，CI 里写 .env 再构建"。
+      # 实测这个修法方向错了：
+      #
+      #   1. Giscus 的 repoId / categoryId 天生公开 —— 它们被内联进每个访客的
+      #      浏览器脚本，任何人右键就能看到。真正的权限边界在 GitHub Discussions
+      #      那一侧，不在这两个字符串上。放进 secrets 是心理安慰，不是防护。
+      #   2. secrets 引入新的故障面：值漏配、名字拼错、仓库 fork 后拿不到 secret，
+      #      每一个都会让线上评论区无声消失，而且要跨 commit 才能查。
+      #
+      # 所以配置源改为 src/config/giscus.ts（进版本库，随代码一起 review）。
+      # Giscus 的 API Key 走的是完全另一条路：用户自己在设置面板填，
+      # 构建期不注入任何凭据，audit:secrets 仍在下面兜底。
+      #
+      # 如果你坚持要 secrets 覆盖能力，src/config/giscus.ts 已经留了口子：
+      # 同名 VITE_GISCUS_* 环境变量存在时会覆盖默认值，缺一个就整体回落。
+      # ---------------------------------------------------------------------------
+
       # 拉 RAG 嵌入模型（int8 量化，22MB）。
       # 之前漏了这一步，模型是 git-lfs 指针（133 字节），
       # 线上点「索引博客」会直接失败 —— 但构建照样通过，属于静默故障。
@@ -84,6 +106,20 @@ jobs:
           test -f dist/sitemap.xml || { echo "::error::sitemap.xml missing"; exit 1; }
           test -d dist/blogs || { echo "::error::blogs dir missing"; exit 1; }
           echo "blog count: $(ls dist/blogs | wc -l)"
+
+      # 评论区门禁：把"配置是否真的进了产物"变成可验证的事。
+      # 上一轮故障的性质是「构建通过但评论区不工作」—— 没有任何一步会红。
+      # 这里直接 grep 产物：配置在 src/config/giscus.ts 里，进不了 bundle
+      # 只有一种可能（被打包器摇掉了或被误删），那种情况必须拦住部署。
+      - name: Verify giscus config in bundle
+        run: |
+          for v in R_kgDOSc6mtw DIC_kwDOSc6mt84C8_-2; do
+            if ! grep -qr "$v" dist/assets/; then
+              echo "::error::giscus value $v missing from bundle — comments will break on deploy"
+              exit 1
+            fi
+          done
+          echo "giscus config present in bundle"
 
       # 密钥泄漏门禁（两道）：API Key 被打进构建产物、或 .env 还在版本库里，直接拒绝部署。
       # 前者是真正的护栏 —— 前面几步配置对了，不代表产物里没有意外引用的密钥。

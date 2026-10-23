@@ -20,6 +20,7 @@ import {
   ChevronLeft,
 } from "lucide-react";
 import { AIProvider, AI_PROVIDERS } from "@/config/aiProviders";
+import { useModalScrollLock } from "@/hooks/useModalScrollLock";
 
 const PROVIDER_KEY_PREFIX = "ai_provider_key_";
 const CUSTOM_BASE_URL_KEY = "ai_custom_base_url";
@@ -45,6 +46,10 @@ export const AISettingsModal = ({
   const [baseURL, setBaseURL] = useState("");
   const [model, setModel] = useState("");
   const [error, setError] = useState("");
+
+  // 遮罩铺满视口不代表 body 锁住了 —— 不锁的话滚轮会把底层页面一起滚走。
+  // 统一走 hook，顺带把滚动类按键也吞掉。
+  useModalScrollLock(isOpen);
 
   // 当弹窗打开时，读取本地存储的配置
   useEffect(() => {
