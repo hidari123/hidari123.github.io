@@ -161,6 +161,38 @@ function loadPrism(): Promise<PrismLike | null> {
         return null;
       }
 
+      /*
+        ── 必须在 import 任何 prism-* 语法之前把 Prism 挂到全局上 ──
+
+        prismjs 的组件文件（prism-typescript.js 等）不是 ES module，
+        而是这种形式：
+
+            (function (Prism) { ... })(Prism);
+
+        末尾那个 `Prism` 是**裸全局标识符**，不是从 import 来的变量。
+        在 CommonJS 环境下它能跑，是因为 prismjs 自己写了
+        `global.Prism = ...`，而组件文件执行时去读那个全局。
+
+        Rollup 打包后这个前提就没了：chunk 末尾只保留
+        `module.exports` 的等价物（K = W.exports），**不产生任何全局变量**。
+        于是每个组件文件执行到 `})(Prism)` 就抛：
+
+            ReferenceError: Prism is not defined
+
+        症状是代码块静默退回纯文本——因为调用点包了 try/catch，只 warn。
+        控制台只有一行「[prism] 加载失败，代码块退回纯文本」，
+        页面上就是「代码还是白的」。
+
+        这就是前几轮反复查不出来的原因：
+        - tsc / lint / build 全部只看代码，不看运行时作用域
+        - vitest 跑在 jsdom 里，prismjs 走 CJS 分支会自己建全局，正常
+        - 就算单测断言的是「highlight() 返回带 token 的 HTML」，
+          那条路径在 jsdom 下**恰好**是通的，测不出打包后的断链
+
+        所以顺序不能错：先挂全局，再加载语法。
+      */
+      (globalThis as GlobalWithPrism).Prism = direct;
+
       // 扩展语法加载
       try {
         await loadExtraLanguages();
@@ -169,18 +201,8 @@ function loadPrism(): Promise<PrismLike | null> {
       }
 
       /*
-        关键：prism-xxx.js 这些语法文件是 IIFE，内部引用的是全局 Prism：
-            (function (Prism) { Prism.languages.python = ... })(Prism);
-        末尾的 `global.Prism = Prism` 赋值挂在 prismjs 自己的沙箱里。
-
-        结果是：语法注册到了 globalThis.Prism 上，而上面拿到的
-        import 实例是另一个对象。两者的 languages 恰好是同一个引用
-        （能跑通 typescript 就是因为它注册得早），但并不是所有路径
-        都碰巧共享——实测拿 import 实例时 typescript/python/go
-        全部取不到。
-
-        所以这里在加载完语法之后，优先采用 globalThis.Prism。
-        拿不到再退回 import 实例（万一某些打包器把 global 也代理了）。
+        优先用 globalThis.Prism：语法组件注册到的是全局上的那个对象，
+        而 import 拿到的 direct 未必是同一个引用。
       */
       const globalPrism = (globalThis as GlobalWithPrism).Prism;
       const instance =

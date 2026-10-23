@@ -502,20 +502,32 @@ p {
   cursor: not-allowed;
 }
 
-/* 代码块样式 */
+/* 代码块样式
+
+   这里的背景色原来是写死的 #1e1e1e（VSCode 那套暗色）。
+   结果是亮色模式下：pre 背景 = rgb(30,30,30) 深灰，
+   而下面这行 color 已经被改成 --tok-plain（亮色值 #24292e，也是深灰）
+   —— 深灰字压深灰底，基本看不见。
+
+   用户看到的「颜色特别浅」，根因就是这里：
+   pre 背景和 code 前景没跟着主题一起换。
+   现在统一走变量，两套主题各给一组。 */
 .markdown-body pre {
   margin: 1.5rem 0;
   padding: 1rem;
-  background: #1e1e1e;
+  background: var(--code-block-bg);
+  border: 1px solid var(--code-block-border);
   border-radius: 8px;
   overflow-x: auto;
   font-size: 14px;
   line-height: 1.6;
+  /* 代码块会横向溢出，移动端不应该把整页撑出滚动条 */
+  max-width: 100%;
 }
 
 .markdown-body pre code {
   background: transparent;
-  color: #d4d4d4;
+  color: var(--tok-plain);
   padding: 0;
   border: none;
   border-radius: 0;
@@ -675,6 +687,10 @@ p {
 
 :root {
   /* 注释：暗色下要降对比度，太亮会抢正文 */
+  /* 代码块容器（背景/边框）也必须跟主题走 */
+  --code-block-bg: #f6f8fa;
+  --code-block-border: #e2e6ea;
+
   --tok-comment: #6a737d;
   --tok-punctuation: #24292e;
   --tok-property: #005cc5;
@@ -688,9 +704,14 @@ p {
   --tok-entity: #000;
   --tok-plain: #24292e;
   --tok-line: #8b949e;
+--tok-parameter: #24292e;
+--tok-namespace: #6f42c1;
 }
 
 [data-theme="dark"] {
+  --code-block-bg: #0d1117;
+  --code-block-border: #30363d;
+
   --tok-comment: #8b949e;
   --tok-punctuation: #c9d1d9;
   --tok-property: #79c0ff;
@@ -704,6 +725,8 @@ p {
   --tok-entity: #ffa657;
   --tok-plain: #c9d1d9;
   --tok-line: #484f58;
+--tok-parameter: #ffa657;
+--tok-namespace: #ffd7ff;
 }
 
 /* 以下选择器不带主题前缀，靠 CSS 变量自动跟随 */
@@ -711,7 +734,8 @@ p {
 .token.comment,
 .token.prolog,
 .token.doctype,
-.token.cdata {
+.token.cdata,
+.token.shebang {
   color: var(--tok-comment);
   font-style: italic;
 }
@@ -720,45 +744,86 @@ p {
   color: var(--tok-punctuation);
 }
 
+/*
+  数字 / 布尔 / null / 常量 / 单位 / 属性名 / 选择器 / 标签
+  Prism 会把它们放进同一个「值」桶。这里刻意不给 tag 和 selector 上色 ——
+  标签名和属性名一旦和字符串同色，HTML 里就分不清哪个是尖括号哪个是引号了。
+*/
 .token.property,
-.token.tag,
-.token.boolean,
-.token.number,
 .token.constant,
 .token.symbol,
-.token.unit {
+.token.unit,
+.token.number,
+.token.boolean,
+.token.null,
+.token.tag,
+.token.selector,
+.token.attr-name {
   color: var(--tok-property);
 }
 
-.token.selector,
-.token.attr-name,
 .token.string,
 .token.char,
 .token.builtin,
-.token.inserted {
+.token.inserted,
+.token.attr-value,
+.token.template-string,
+.token.interpolation,
+.token.string-interpolation {
   color: var(--tok-string);
 }
 
 .token.operator,
 .token.entity,
-.token.url {
+.token.url,
+.token.punctuation.bracket {
   color: var(--tok-operator);
 }
 
 .token.atrule,
-.token.attr-value,
-.token.keyword {
+.token.keyword,
+.token.spread,
+.token.arrow {
   color: var(--tok-keyword);
 }
 
+/*
+  ── 函数名 ──
+
+  这一组是上一版漏掉最多的：function-variable 覆盖的是箭头函数的
+  名字部分，而箭头函数是 TS/TSX 文章里最常见的写法。
+  它不在 CSS 里 -> 不着色 -> 继承 code 的纯文本色，
+  于是 const A = () => ... 里只有 const 和箭头有色，函数名是黑的，
+  看起来就��整个箭头函数没高亮。
+
+  同批漏掉的还有 parameter、method、magic、namespace、decorator、
+  generic、operator-word —— 都是真实会出现但不写出来就会掉回默认色的类型。
+*/
 .token.function,
+.token.function-variable,
+.token.method,
 .token.class-name {
   color: var(--tok-function);
 }
 
+.token.parameter,
+.token.argument,
+.token.parameter-declaration {
+  color: var(--tok-parameter);
+}
+
+.token.namespace,
+.token.decorator,
+.token.annotation {
+  color: var(--tok-namespace);
+}
+
 .token.regex,
 .token.important,
-.token.variable {
+.token.variable,
+.token.magic,
+.token.definition,
+.token.property-access {
   color: var(--tok-regex);
 }
 
@@ -766,8 +831,8 @@ p {
   color: var(--tok-deleted);
 }
 
-.token.important,
-.token.bold {
+.token.bold,
+.token.important {
   font-weight: 600;
 }
 

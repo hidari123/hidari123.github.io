@@ -117,11 +117,47 @@ function generateSeo(): Plugin {
   };
 }
 
+/**
+ * 给 prismjs 补一个可用的 globalThis.Prism
+ *
+ * 实现放在 scripts/prism-global-shim.js —— 那里有大段解释，
+ * 而且内联在模板字符串里会让反引号和转义变得很难读。
+ *
+ * 这里只负责在打包阶段把它插到 prism chunk 的最前面。
+ */
+function prismGlobalShim(): Plugin {
+  return {
+    name: "prism-global-shim",
+    generateBundle(_options, bundle) {
+      for (const [fileName, asset] of Object.entries(bundle)) {
+        if (!fileName.endsWith(".js")) continue;
+        if (asset.type !== "chunk") continue;
+        // 不只是 prism 核心块：每个语言组件都是独立 chunk，都需要这个垫片
+        if (!/(^|\/)prism(-|\.)/.test(fileName)) continue;
+
+        const shim = fs.readFileSync(
+          path.resolve(__dirname, "scripts/prism-global-shim.js"),
+          "utf8",
+        );
+        asset.code = shim + "\n" + asset.code;
+        console.log("[prism-shim] 已注入", fileName, shim.length, "字节");
+      }
+    },
+  };
+}
+
+
 export default defineConfig({
   // 部署改由 GitHub Actions 负责（.github/workflows/deploy.yml）。
   // 之前用的 vite-plugin-gh-pages 从一个临时 clone 推送，失败被静默吞掉，
   // 日志显示 "Published" 但远端分支其实没更新。
-  plugins: [react(), stripUnusedModelFiles(), spaFallback(), generateSeo()],
+  plugins: [
+    react(),
+    prismGlobalShim(),
+    stripUnusedModelFiles(),
+    spaFallback(),
+    generateSeo(),
+  ],
   base: "/",
   resolve: {
     alias: {
@@ -164,8 +200,29 @@ export default defineConfig({
         // 路由级懒加载（见 src/App.tsx）已经按页面切分，这里只处理
         // 跨页面共享的那几块。
         manualChunks(id) {
-          // prismjs 只被文章详情用到，且体积不小，单独成块避免拖慢首屏
-          if (id.includes("node_modules/prismjs")) return "prism";
+          /*
+            prismjs **不能**再手动成块。
+
+            之前这里写 `if (id.includes("node_modules/prismjs")) return "prism"`,
+            把 prism 核心和 8 个语言组件全部合并进同一个 chunk。后果是：
+
+            - 组件文件是 CJS，产物是 `(function (Prism) { ... })(Prism)`
+              这种顶层 IIFE；rollup 会把它当副作用语句提到 chunk 开头；
+            - 核心是 ES 模块，执行体在 chunk 末尾。
+
+            于是组件先跑：`languages.typescript = languages.extend('javascript', ...)`
+            里的 javascript 还不存在，拿到 undefined，
+            紧跟着 `.keyword.push(...)` 就抛
+            `Cannot read properties of undefined (reading 'push')`。
+
+            不手动分块时，每个 `import("prismjs/components/prism-xxx")`
+            各自成块，按 prismHighlight.ts 里的 await 顺序执行：
+            核心先跑（它自己会写 window.Prism），组件后跑，
+            顺序天然正确。
+
+            代价是多了几个几 KB 的小块，首次展开代码块时会并行拉取 ——
+            对只在文章详情页用到的功能来说可以接受。
+          */
           // giscus 只在文章底部渲染，评论框不可见时不必下载
           if (id.includes("node_modules/@giscus")) return "giscus";
           // onnxruntime 必须独立成块：它只在「索引博客」时动态 import，
