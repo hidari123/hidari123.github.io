@@ -41,10 +41,15 @@ jobs:
         with:
           standalone: false
 
+      # Node 必须 >= 22.22.2：jsdom@30 声明 engines
+      # "^22.22.2 || ^24.15.0 || >=26.0.0"，它经由 undici@8 在运行时
+      # 真的用到新 Node API（Node 20 上会抛
+      # TypeError: Cannot read properties of undefined (reading 'bind')）。
+      # 本地是 24.18，CI 就跟 24 —— 本地能跑通 CI 就必须能跑通。
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 24
           cache: pnpm
 
       - name: Install dependencies
