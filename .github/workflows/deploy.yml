@@ -41,8 +41,22 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      # 拉 RAG 嵌入模型（int8 量化，22MB）。
+      # 之前漏了这一步，模型是 git-lfs 指针（133 字节），
+      # 线上点「索引博客」会直接失败 —— 但构建照样通过，属于静默故障。
+      # allow-failure：拉不到模型不该阻断部署，只是 RAG 功能降级。
+      - name: Fetch embedding model
+        run: pnpm run fetch:model
+        continue-on-error: true
+
       - name: Type check
         run: pnpm run tsc
+
+      - name: Lint
+        run: pnpm run lint
+
+      - name: Unit tests
+        run: pnpm run test
 
       - name: Build
         run: pnpm run vite-build
@@ -52,8 +66,16 @@ jobs:
         run: |
           test -f dist/index.html || { echo "::error::dist/index.html missing"; exit 1; }
           test -f dist/posts/index.json || { echo "::error::index.json missing"; exit 1; }
+          test -f dist/404.html || { echo "::error::404.html missing (SPA fallback broken)"; exit 1; }
+          test -f dist/sitemap.xml || { echo "::error::sitemap.xml missing"; exit 1; }
           test -d dist/blogs || { echo "::error::blogs dir missing"; exit 1; }
           echo "blog count: $(ls dist/blogs | wc -l)"
+
+      # 密钥泄漏门禁（两道）：API Key 被打进构建产物、或 .env 还在版本库里，直接拒绝部署。
+      # 前者是真正的护栏 —— 前面几步配置对了，不代表产物里没有意外引用的密钥。
+      # 后者防的是回归：这个仓库的 .env 曾经被提交过一次，光扫产物是发现不了的。
+      - name: Audit secrets
+        run: pnpm run audit:secrets
 
       - name: Deploy to gh-pages
         uses: peaceiris/actions-gh-pages@v4
@@ -68,4 +90,6 @@ jobs:
         run: |
           echo "### 🚀 Deployed to gh-pages" >> $GITHUB_STEP_SUMMARY
           echo "commit: \`${GITHUB_SHA}\`" >> $GITHUB_STEP_SUMMARY
+          echo "model_int8 present: $(test -f dist/models/all-MiniLM-L6-v2/onnx/model_int8.onnx && echo yes || echo NO)" >> $GITHUB_STEP_SUMMARY
+          echo "model_int8 size: $(du -h dist/models/all-MiniLM-L6-v2/onnx/model_int8.onnx 2>/dev/null | cut -f1 || echo missing)" >> $GITHUB_STEP_SUMMARY
           echo "articles: $(ls dist/blogs | wc -l)" >> $GITHUB_STEP_SUMMARY

@@ -1,0 +1,17 @@
+{
+  "name": "Hitari's Blog",
+  "short_name": "Hitari's Blog",
+  "description": "前端工程实践与 LLM 应用探索",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0f0f14",
+  "theme_color": "#6366f1",
+  "icons": [
+    {
+      "src": "/vite.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}

@@ -3,7 +3,15 @@
  */
 import { motion } from "framer-motion";
 
-export const LoadingSpinner = () => {
+interface LoadingSpinnerProps {
+  size?: "sm" | "md" | "lg";
+  text?: string;
+}
+
+const SCALE = { sm: 0.7, md: 1, lg: 1.3 } as const;
+
+export const LoadingSpinner = ({ size = "md", text = "加载中..." }: LoadingSpinnerProps) => {
+  const s = SCALE[size];
   const pawPositions = [
     { x: 0, y: 0, scale: 0.8 },
     { x: 20, y: -10, scale: 1 },
@@ -12,9 +20,9 @@ export const LoadingSpinner = () => {
   ];
 
   return (
-    <div className="flex flex-col items-center justify-center gap-4">
+    <div className="flex flex-col items-center justify-center gap-4" role="status" aria-live="polite">
       {/* 猫爪印 */}
-      <div className="relative w-20 h-20">
+      <div className="relative w-20 h-20" style={{ transform: `scale(${s})` }}>
         {pawPositions.map((pos, index) => (
           <motion.div
             key={index}
@@ -49,7 +57,7 @@ export const LoadingSpinner = () => {
         animate={{ opacity: [0.5, 1, 0.5] }}
         transition={{ duration: 1.5, repeat: Infinity }}
       >
-        加载中...
+        {text}
       </motion.p>
     </div>
   );

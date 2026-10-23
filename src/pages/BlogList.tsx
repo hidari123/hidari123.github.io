@@ -11,11 +11,9 @@ import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Calendar, Tag } from "lucide-react";
 import { getAllPosts, type Post } from "@/services/blogService";
-import { ImageOff } from "lucide-react";
+import { PostCover } from "@/components/Blog/PostCover";
+import { useSeo } from "@/hooks/useSeo";
 import { Ghost } from "react-kawaii";
-
-// 默认封面图片
-const DEFAULT_COVER = "https://images.unsplash.com/photo-1677442136019-21780ecad995?w=800&q=80";
 
 // 骨架屏组件
 const PostCardSkeleton = () => (
@@ -53,7 +51,8 @@ const EmptyState = () => (
 
 // 文章卡片组件
 const PostCard = ({ post }: { post: Post }) => {
-  const coverImage = post.cover || DEFAULT_COVER;
+  // frontmatter 里指定了 cover 就用作者给的图，否则用代码生成的封面
+  const hasCustomCover = Boolean(post.cover);
 
   return (
     <motion.div
@@ -64,23 +63,32 @@ const PostCard = ({ post }: { post: Post }) => {
     >
       <Link to={`/blog/${post.slug}`}>
         <div className="group bg-[var(--bg-card)] rounded-2xl overflow-hidden border border-[var(--border)] hover:border-[var(--accent)]/50 transition-all duration-300 hover:shadow-xl hover:shadow-[var(--accent)]/10">
-          {/* 封面图 */}
+          {/* 封面 */}
           <div className="relative h-52 overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-br from-[var(--accent)]/20 to-purple-500/20 group-hover:from-[var(--accent)]/30 group-hover:to-purple-500/30 transition-all duration-300"></div>
-            <img
-              src={coverImage}
-              alt={post.title}
-              className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-500"
-              onError={(e) => {
-                (e.target as HTMLImageElement).style.display = "none";
-                (e.target as HTMLImageElement).nextElementSibling?.classList.remove("hidden");
-              }}
-            />
-            <div className="hidden absolute inset-0 flex items-center justify-center bg-[var(--bg-secondary)]">
-              <ImageOff className="w-12 h-12 text-[var(--text-secondary)]" />
+            {hasCustomCover ? (
+              <img
+                src={post.cover}
+                alt={post.title}
+                loading="lazy"
+                decoding="async"
+                className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-500"
+                onError={(e) => {
+                  // 图挂了也不能留空洞：退回到生成封面
+                  const el = e.target as HTMLImageElement;
+                  el.style.display = "none";
+                  el.nextElementSibling?.classList.remove("hidden");
+                }}
+              />
+            ) : null}
+            <div className={hasCustomCover ? "hidden" : "h-full"}>
+              <PostCover
+                slug={post.slug}
+                title={post.title}
+                category={post.tags[0]}
+                variant="art"
+                className="w-full h-full transform group-hover:scale-105 transition-transform duration-500"
+              />
             </div>
-            {/* 渐变遮罩 */}
-            <div className="absolute inset-0 bg-gradient-to-t from-[var(--bg-card)] via-transparent to-transparent"></div>
           </div>
 
           {/* 内容 */}
@@ -128,6 +136,12 @@ export const BlogList = () => {
   const [loading, setLoading] = useState(true);
   const [selectedTag, setSelectedTag] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
+
+  useSeo({
+    title: "博客",
+    description: `${"技术文章"}：涵盖 React、TypeScript、LLM、Agent 架构与前端工程实践。`,
+    path: "/blog",
+  });
 
   // 加载文章
   useEffect(() => {

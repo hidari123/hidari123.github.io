@@ -8,6 +8,7 @@ import { defineConfig, type Plugin } from "vite";
 import react from "@vitejs/plugin-react";
 import path from "path";
 import fs from "fs";
+import { execFileSync } from "child_process";
 
 /**
  * 构建结束后删除 dist/models 下的 .git_disabled 目录。
@@ -36,11 +37,46 @@ function stripModelGitDir(): Plugin {
   };
 }
 
+/**
+ * 生成 404.html（SPA fallback）
+ *
+ * GitHub Pages 没有服务端重写，未知路径直接 404。部署完必须有这个文件，
+ * 否则从外部点进 /blog/xxx 的链接全是死链——面试官从简历或搜索结果点进来
+ * 第一眼看到 404，项目当场减分。
+ */
+function spaFallback(): Plugin {
+  return {
+    name: "spa-fallback",
+    closeBundle() {
+      execFileSync(process.execPath, [path.resolve(__dirname, "scripts/spa-fallback.cjs")], {
+        stdio: "inherit",
+      });
+    },
+  };
+}
+
+/**
+ * 生成 SEO 产物（sitemap.xml / rss.xml / robots.txt）
+ *
+ * 与 404.html 一样，这些文件必须存在于 dist 根目录才能被 GitHub Pages
+ * 正确伺服，所以要在构建后生成，而不是放在 public/ 里。
+ */
+function generateSeo(): Plugin {
+  return {
+    name: "generate-seo",
+    closeBundle() {
+      execFileSync(process.execPath, [path.resolve(__dirname, "scripts/generate-seo.cjs")], {
+        stdio: "inherit",
+      });
+    },
+  };
+}
+
 export default defineConfig({
   // 部署改由 GitHub Actions 负责（.github/workflows/deploy.yml）。
   // 之前用的 vite-plugin-gh-pages 从一个临时 clone 推送，失败被静默吞掉，
   // 日志显示 "Published" 但远端分支其实没更新。
-  plugins: [react(), stripModelGitDir()],
+  plugins: [react(), stripModelGitDir(), spaFallback(), generateSeo()],
   base: "/",
   resolve: {
     alias: {
@@ -79,13 +115,26 @@ export default defineConfig({
     target: "esnext",
     rollupOptions: {
       output: {
-        // 拆开体积大且相对独立的依赖：并行下载 + 缓存粒度变细
-        manualChunks: {
-          react: ["react", "react-dom"],
-          markdown: ["react-markdown", "remark-gfm", "remark-frontmatter"],
-          giscus: ["@giscus/react"],
+        // 拆开体积大且相对独立的依赖：并行下载 + 缓存粒度变细。
+        // 路由级懒加载（见 src/App.tsx）已经按页面切分，这里只处理
+        // 跨页面共享的那几块。
+        manualChunks(id) {
+          // prismjs 只被文章详情用到，且体积不小，单独成块避免拖慢首屏
+          if (id.includes("node_modules/prismjs")) return "prism";
+          // giscus 只在文章底部渲染，评论框不可见时不必下载
+          if (id.includes("node_modules/@giscus")) return "giscus";
+          // onnxruntime 必须独立成块：它只在「索引博客」时动态 import，
+          // 但 wasm 胶水代码很大，绝不能被 rollup 内联进主 chunk
+          if (id.includes("onnxruntime-web")) return "onnx";
         },
       },
+    },
+  },
+  // giscus 只在文章详情页出现，首页没必要提前拉；
+  // 动态 import 的 chunk 交给浏览器导航时按需加载
+  modulePreload: {
+    resolveDependencies(filename, deps) {
+      return deps.filter((d) => !d.includes("giscus"));
     },
   },
 });

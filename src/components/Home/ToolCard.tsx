@@ -3,7 +3,39 @@
  * 展示单个工具的信息
  */
 import { motion } from "framer-motion";
-import * as LucideIcons from "lucide-react";
+import {
+  Bot,
+  Brain,
+  Image,
+  Search,
+  Cpu,
+  Sparkles,
+  Code,
+  Palette,
+  FileJson,
+  Regex,
+  Wand2,
+  FileDiff,
+  Lock,
+  Clock,
+  Key,
+  FileText,
+  CheckCircle,
+  Hash,
+  BookOpen,
+  PenTool,
+  Figma,
+  ImagePlus,
+  Layout,
+  TrendingUp,
+  BarChart3,
+  Gauge,
+  Smartphone,
+  Code2,
+  Grid,
+  ArrowRight,
+  Box,
+} from "lucide-react";
 import type { Tool } from "../../data/tools";
 
 interface ToolCardProps {
@@ -11,42 +43,47 @@ interface ToolCardProps {
   searchQuery?: string;
 }
 
-export const ToolCard = ({ tool, searchQuery = "" }: ToolCardProps) => {
-  // 动态获取图标组件
-  const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
-    Bot: LucideIcons.Bot,
-    Brain: LucideIcons.Brain,
-    Image: LucideIcons.Image,
-    Search: LucideIcons.Search,
-    Cpu: LucideIcons.Cpu,
-    Sparkles: LucideIcons.Sparkles,
-    Code: LucideIcons.Code,
-    Palette: LucideIcons.Palette,
-    FileJson: LucideIcons.FileJson,
-    Regex: LucideIcons.Regex,
-    Wand2: LucideIcons.Wand2,
-    FileDiff: LucideIcons.FileDiff,
-    Lock: LucideIcons.Lock,
-    Clock: LucideIcons.Clock,
-    Key: LucideIcons.Key,
-    FileText: LucideIcons.FileText,
-    CheckCircle: LucideIcons.CheckCircle,
-    Hash: LucideIcons.Hash,
-    BookOpen: LucideIcons.BookOpen,
-    PenTool: LucideIcons.PenTool,
-    Figma: LucideIcons.Figma,
-    ImagePlus: LucideIcons.ImagePlus,
-    Layout: LucideIcons.Layout,
-    TrendingUp: LucideIcons.TrendingUp,
-    BarChart3: LucideIcons.BarChart3,
-    Gauge: LucideIcons.Gauge,
-    Smartphone: LucideIcons.Smartphone,
-    Code2: LucideIcons.Code2,
-    Grid: LucideIcons.Grid,
-    ArrowRight: LucideIcons.ArrowRight,
-  };
+/**
+ * 图标映射表：只列实际用到的 28 个。
+ * 原先写的是 `import * as LucideIcons from "lucide-react"`，那会把 lucide 的
+ * 2700+ 图标全部拉进 bundle（未 tree-shake，源码量约 18MB），
+ * 而实际只用到 28 个。
+ */
+const iconMap = {
+  Bot,
+  Brain,
+  Image,
+  Search,
+  Cpu,
+  Sparkles,
+  Code,
+  Palette,
+  FileJson,
+  Regex,
+  Wand2,
+  FileDiff,
+  Lock,
+  Clock,
+  Key,
+  FileText,
+  CheckCircle,
+  Hash,
+  BookOpen,
+  PenTool,
+  Figma,
+  ImagePlus,
+  Layout,
+  TrendingUp,
+  BarChart3,
+  Gauge,
+  Smartphone,
+  Code2,
+  Grid,
+} as const;
 
-  const IconComponent = iconMap[tool.icon] || LucideIcons.Box;
+export const ToolCard = ({ tool, searchQuery = "" }: ToolCardProps) => {
+  const IconComponent =
+    (iconMap as Record<string, typeof Bot | undefined>)[tool.icon] ?? Box;
 
   // 高亮搜索匹配文字
   const highlightText = (text: string) => {
@@ -94,7 +131,7 @@ export const ToolCard = ({ tool, searchQuery = "" }: ToolCardProps) => {
           {/* AI 徽章 */}
           {tool.isAI && (
             <span className="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium rounded-full bg-gradient-to-r from-purple-500/20 to-pink-500/20 text-purple-500 border border-purple-500/30">
-              <LucideIcons.Bot className="w-3 h-3" />
+              <Bot className="w-3 h-3" />
               AI
             </span>
           )}
@@ -126,7 +163,7 @@ export const ToolCard = ({ tool, searchQuery = "" }: ToolCardProps) => {
         <div className="flex items-center justify-end mt-4 pt-4 border-t border-gray-200/50 dark:border-gray-700/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
           <span className="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1">
             访问工具
-            <LucideIcons.ArrowRight className="w-3 h-3" />
+            <ArrowRight className="w-3 h-3" />
           </span>
         </div>
       </div>

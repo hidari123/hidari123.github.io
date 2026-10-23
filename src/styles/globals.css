@@ -88,6 +88,18 @@ html {
   scroll-behavior: smooth;
 }
 
+/*
+ * 锚点滚动偏移：导航栏是 fixed 的 h-16（64px），不补这段的话
+ * 点击目录跳过去，标题会正好被导航条盖住，看起来像没跳。
+ */
+:target,
+.markdown-body h1[id],
+.markdown-body h2[id],
+.markdown-body h3[id],
+.markdown-body h4[id] {
+  scroll-margin-top: 5rem;
+}
+
 body {
   font-family:
     "Inter",

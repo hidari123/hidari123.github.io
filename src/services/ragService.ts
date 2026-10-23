@@ -6,15 +6,37 @@
  * Copyright (c) 2026 by hidari, All Rights Reserved.
  *
  * 使用 ONNX Runtime Web 加载本地模型生成向量嵌入
+ *
+ * 性能要点：onnxruntime-web 只用 `import type` 引类型，运行时才动态 import。
+ * 原先是静态 import，导致首页就要背上 ort 的 wasm 胶水代码（dist 里还躺着
+ * 一份 27MB 的 .wasm）；现在 ONNX 完全挡在「点索引博客」这一步之后，
+ * 不进 AI 页的用户一次都不会碰到它。
  */
-import * as ort from "onnxruntime-web";
+import type * as Ort from "onnxruntime-web";
 
-// 配置 ONNX Runtime Web
-ort.env.wasm.numThreads = navigator.hardwareConcurrency || 4;
-ort.env.wasm.simd = true;
+// 仅在真正需要推理时加载的 ort 实例
+let ortModule: typeof Ort | null = null;
 
-// 本地模型路径
-const LOCAL_MODEL_PATH = "/models/all-MiniLM-L6-v2/onnx/model.onnx";
+async function getOrt(): Promise<typeof Ort> {
+  if (!ortModule) {
+    const mod = await import("onnxruntime-web");
+    // esbuild interop：默认导出才是真正的命名空间
+    ortModule = ((mod as { default?: typeof Ort }).default ?? mod) as typeof Ort;
+
+    // 必须在创建 session 之前配好环境
+    ortModule.env.wasm.numThreads = navigator.hardwareConcurrency || 4;
+    ortModule.env.wasm.simd = true;
+  }
+  return ortModule;
+}
+
+/**
+ * 模型路径：用 int8 动态量化版（21.9MB），而不是 fp32 的 model.onnx（86.2MB）。
+ * 体积差 4 倍，对检索质量的影响可以忽略，却直接决定用户第一次点「索引博客」
+ * 要下多少字节。
+ */
+const MODEL_BASE = "/models/all-MiniLM-L6-v2";
+const LOCAL_MODEL_PATH = `${MODEL_BASE}/onnx/model_int8.onnx`;
 
 interface Chunk {
   text: string;
@@ -30,21 +52,19 @@ interface RAGSource {
   similarity: number;
 }
 
-let session: ort.InferenceSession | null = null;
+let session: Ort.InferenceSession | null = null;
 let chunks: Chunk[] = [];
 let chunkVectors: number[][] = [];
 let isReady = false;
 let isLoading = false;
-let vocab: Map<string, number> = new Map();
+const vocab = new Map<string, number>();
 let unkTokenId = 100;
 let padTokenId = 0;
 
 // 正确的 BERT WordPiece 分词器
 async function loadTokenizer() {
   try {
-    const vocabResponse = await fetch(
-      `${LOCAL_MODEL_PATH.replace("/onnx/model.onnx", "/vocab.txt")}`,
-    );
+    const vocabResponse = await fetch(`${MODEL_BASE}/vocab.txt`);
     const vocabText = await vocabResponse.text();
 
     vocab.clear();
@@ -118,7 +138,7 @@ function tokenize(text: string): { inputIds: number[]; attentionMask: number[] }
 
   // 先对中文按字拆分，再按空格和标点分割
   const spaced = splitChineseChars(text.toLowerCase());
-  const words = spaced.split(/(\s+|[.,!?;:'"()\[\]{}])/).filter((t) => t.trim().length > 0);
+  const words = spaced.split(/(\s+|[.,!?;:'"()[\]{}])/).filter((t) => t.trim().length > 0);
 
   const tokens: string[] = ["[CLS]"];
 
@@ -174,6 +194,9 @@ export async function initEmbeddingModel(onProgress?: (status: string) => void):
 
     onProgress?.("正在加载 ONNX 模型...");
 
+    // 到这一步才动态 import ort，把 wasm 下载推迟到用户真正需要时
+    const ort = await getOrt();
+
     // 加载 ONNX 模型
     session = await ort.InferenceSession.create(LOCAL_MODEL_PATH, {
       executionProviders: ["wasm"],
@@ -196,6 +219,7 @@ async function getEmbedding(text: string): Promise<number[]> {
     throw new Error("模型未初始化");
   }
 
+  const ort = await getOrt();
   const { inputIds, attentionMask } = tokenize(text);
 
   const inputIdsTensor = new ort.Tensor("int64", BigInt64Array.from(inputIds.map(BigInt)), [
@@ -217,7 +241,7 @@ async function getEmbedding(text: string): Promise<number[]> {
     input_ids: inputIdsTensor,
     attention_mask: attentionMaskTensor,
     token_type_ids: tokenTypeIdsTensor,
-  } as Record<string, ort.Tensor>);
+  } as Record<string, Ort.Tensor>);
 
   // 提取最后一层的隐藏状态
   const lastHiddenState = results["last_hidden_state"];

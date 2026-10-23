@@ -8,13 +8,22 @@ build/
 .next/
 out/
 
-# 模型目录里的裸 git 仓库（LFS 对象占了 300MB，绝不能进 dist）
+# ONNX 嵌入模型（约 330MB，8 个量化变体 + 训练元数据）。
+# 由 scripts/fetch-model.cjs 在构建前按需拉取，不进版本库：
+# 1. 仓库体积会因此少几百 MB，面试官 clone 快得多；
+# 2. 只用到 model_int8.onnx（21.9MB），其余变体对运行时毫无意义。
+# 本地要跑 RAG 时执行：node scripts/fetch-model.cjs
+public/models/
+models/
 .git_disabled/
 
 # 环境变量
+# 注意：VITE_ 前缀的变量会被 Vite 内联进产物，任何写在这里的密钥都会随 JS 分发。
+# 密钥一律走用户运行时输入（localStorage），见 src/hooks/useOpenAIKey.ts。
 .env
 .env.local
 .env.production
+.env.*.local
 
 # IDE 配置
 .vscode/

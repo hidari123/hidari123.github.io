@@ -1,0 +1,22 @@
+/**
+ * 减少动态效果：尊重系统设置
+ *
+ * 站点上有多处常驻动画（自定义光标、飘心、星星闪烁、kawaii 角色浮动、
+ * 卡片 hover 上浮）。前庭功能障碍的用户在系统里打开"减少动态效果"后，
+ * 这些应该一起停掉——这既是可访问性要求，也是面试时能讲的一点细节。
+ */
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
