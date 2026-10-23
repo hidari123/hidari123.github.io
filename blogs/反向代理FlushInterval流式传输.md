@@ -1,7 +1,7 @@
 ---
 title: "反向代理的 FlushInterval：流式响应在网关层被吞掉的坑"
 date: "2026-10-12"
-tags: ["Go", "反向代理", "SSE", "流式传输", "网络", "后端架构"]
+tags: [后端架构, 工程实践, Go, SSE]
 cover: ""
 description: "SSE 流式输出在开发环境好好的，上了网关就变成一次性吐完？问题多半不在你的代码，在代理的响应缓冲。本文从 Go httputil.ReverseProxy 的 FlushInterval 说起，讲清流式传输、大文件上传、Range 下载为什么共享同一个坑，以及 WebSocket 升级为什么是例外。"
 ---

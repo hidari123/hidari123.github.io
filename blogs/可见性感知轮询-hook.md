@@ -1,7 +1,7 @@
 ---
 title: "可见性感知轮询：一个 hook 省下整个后台标签页的请求"
 date: "2026-10-10"
-tags: ["React", "自定义 Hook", "性能优化", "浏览器 API", "前端工程"]
+tags: [前端工程, React, 性能优化, 自定义 Hook]
 cover: ""
 description: "轮询任务列表、作业状态——这些后台请求在标签页不可见时纯属浪费。AtomOS 用一个 28 行的 hook 解决：visibilitychange 时清除/恢复定时器，回到可见立刻补一发。讲解 ref 保存 fetcher 避免 interval 重置、以及为什么比 setInterval + 条件判断更稳。"
 ---

@@ -1,7 +1,7 @@
 ---
 title: "顶部崩溃页的最后一道防线：一个 ErrorBoundary 的自我约束"
 date: "2026-10-01"
-tags: ["React", "错误边界", "容错设计", "i18n", "前端工程"]
+tags: [前端工程, React]
 cover: ""
 description: "一个 40 行的 ErrorBoundary 为什么值得单独讲？因为它是应用里唯一一个'所有依赖都可能已经失效'的组件。AtomOS 的实现里藏着一条关键决策：这个组件禁止使用 i18n。"
 ---

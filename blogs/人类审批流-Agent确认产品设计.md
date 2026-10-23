@@ -1,7 +1,7 @@
 ---
 title: "人类审批流：把 Agent 的'请求确认'做成产品"
 date: "2026-10-17"
-tags: ["AI Agent", "Human-in-the-loop", "React", "状态机", "产品设计"]
+tags: [AI Agent, 产品设计, React, 状态机]
 cover: ""
 description: "Agent 要提交 GPU 任务时暂停等人类点头，这个'暂停'在工程上是三件事：运行时的挂起语义、事件流里的审批协议、前端的状态机渲染。本文讲解 AtomOS 的 ApprovalContract 设计、审批期间的 composer 锁定、以及 Normal/Auto 两档策略的边界。"
 ---

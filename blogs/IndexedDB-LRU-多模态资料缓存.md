@@ -1,7 +1,7 @@
 ---
 title: "前端缓存三件套：IndexedDB + LRU 撑起多模态资料缓存"
 date: "2026-07-14"
-tags: ["IndexedDB", "缓存策略", "LRU", "离线优先", "性能优化", "AI"]
+tags: [大模型应用, 工程实践, 性能优化, 缓存策略]
 cover: ""
 description: "多模态 AI 产品要处理大量几十 MB 的 PDF 和模型素材，localStorage 完全不够用。本文以 ScholarClub 为例，讲解 IndexedDB 的事务模型、一个手写的 LRU 淘汰实现，以及大文件缓存的工程约束。"
 ---

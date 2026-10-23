@@ -1,7 +1,7 @@
 ---
 title: "多协议 LLM 网关：Chat Completions、Responses 与不守规矩的模型"
 date: "2026-10-13"
-tags: ["LLM", "网关", "API 设计", "Python", "AI 工程"]
+tags: [后端架构, 大模型应用, Python]
 cover: ""
 description: "同一个 Agent 循环要接 OpenAI Responses、Chat Completions 和 MiniMax，而真实世界里的模型连 tool calling 的输出格式都不统一。本文讲解 AtomOS 的多协议适配层：状态模式的双轨设计、XML 风格 tool call 的兜底解析、以及流式事件如何归一成统一形状。"
 ---

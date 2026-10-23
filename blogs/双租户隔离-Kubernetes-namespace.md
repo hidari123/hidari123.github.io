@@ -1,7 +1,7 @@
 ---
 title: "双租户隔离：一个用户的 Kubernetes namespace 是什么体验"
 date: "2026-10-18"
-tags: ["Kubernetes", "多租户", "安全隔离", "架构设计", "RLS"]
+tags: [后端架构, 工程实践, Kubernetes]
 cover: ""
 description: "AtomOS 给每个用户分配真实的 Kubernetes namespace、每个 Project 独立 PVC，数据库用 RLS 和复合外键兜底。本文讲解为什么本地开发也用真隔离、可信身份如何在 Go 网关注入、以及为什么 Agent 永远不接收客户端传来的身份参数。"
 ---

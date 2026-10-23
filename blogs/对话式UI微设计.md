@@ -1,7 +1,7 @@
 ---
 title: "对话式 UI 的"最小惊讶"：从 Auto 模式选择到 Thinking 折叠"
 date: "2026-10-11"
-tags: ["AI Agent", "UX 设计", "React", "产品设计", "前端工程"]
+tags: [前端工程, AI Agent, 产品设计, React]
 cover: ""
 description: "Agent 对话界面的信息密度极高：思考过程、工具调用、审批请求、流式回复同时发生。本文拆解 AtomOS 聊天 UI 的几个微决策：活动条目的动词化标签、Thinking 状态的语义、自动模式的 UI 明示、以及为什么错误卡片和成功卡片要有不同的视觉重量。"
 ---

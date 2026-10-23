@@ -1,7 +1,7 @@
 ---
 title: "Lexical 自定义节点：把分子残基做成编辑器里的原子引用"
 date: "2026-10-19"
-tags: ["Lexical", "富文本编辑器", "React", "前端工程", "Mol*"]
+tags: [前端工程, 工程实践, 科学计算, React]
 cover: ""
 description: "让用户在聊天输入框里插入一个'指向蛋白质第 47 号残基'的不可分割引用芯片，点击即跳转 3D 视图定位。本文讲解 Lexical 自定义节点的实现：atomos:// URI 协议、clone 递归陷阱、token 模式与 contentEditable=false、以及 Markdown 序列化的兼容设计。"
 ---

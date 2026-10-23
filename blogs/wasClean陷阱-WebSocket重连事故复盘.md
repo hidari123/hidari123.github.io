@@ -1,7 +1,7 @@
 ---
 title: "wasClean 陷阱：一次滚动重启让聊天永久卡死"
 date: "2026-09-25"
-tags: ["WebSocket", "React", "故障排查", "前端工程", "Agent UI"]
+tags: [前端工程, AI Agent, React, WebSocket]
 cover: ""
 description: "e.wasClean 为 true 就不重连——这个看似合理的判断，让聊天界面在服务端滚动重启后永久卡死，而且没有任何报错。本文完整复盘这次事故的根因、修复原则，以及重连链条上三个反直觉的坑。"
 ---

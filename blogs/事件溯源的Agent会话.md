@@ -1,7 +1,7 @@
 ---
 title: "事件溯源的 Agent 会话：append-only 事件日志 + 双写投影"
 date: "2026-10-15"
-tags: ["事件溯源", "PostgreSQL", "架构设计", "Agent", "后端"]
+tags: [后端架构, AI Agent, PostgreSQL]
 cover: ""
 description: "Agent 会话的每一次模型调用、工具执行、状态变更都写成一条不可变事件，UI 状态是事件流的投影。本文讲解 append-only 事件日志、按会话单调递增的 seq 如何分配、投影表的双写与重建，以及为什么日志是事实源而投影只是缓存。"
 ---

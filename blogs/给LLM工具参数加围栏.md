@@ -1,7 +1,7 @@
 ---
 title: "给 LLM 的工具参数加围栏：模型会幻觉出越权参数"
 date: "2026-09-28"
-tags: ["AI Agent", "工具调用", "安全设计", "后端架构", "LLM"]
+tags: [后端架构, AI Agent, 大模型应用, 工程实践]
 cover: ""
 description: "LLM 完全可能在工具参数里编出 namespace、serviceAccount 这类根本不在 schema 里的字段。本文讲解 AtomOS 如何用服务端保留字拦截模型幻觉参数、用 JSON Schema 预编译校验堵住畸形参数，以及审批策略为什么用 Decimal 而不是 float 比较资源阈值。"
 ---

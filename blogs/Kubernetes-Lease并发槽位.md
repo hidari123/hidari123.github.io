@@ -1,7 +1,7 @@
 ---
 title: "Kubernetes Lease 做并发槽位：为什么数 Running Job 是竞态"
 date: "2026-10-05"
-tags: ["Kubernetes", "分布式系统", "Go", "调度", "后端架构"]
+tags: [后端架构, Go, Kubernetes]
 cover: ""
 description: "限制每用户在途任务数，最直觉的写法是数一数 Running 状态的任务再决定放不放行——但这在并发下是错的。本文讲解 AtomOS 如何用一组固定 Lease 加 CAS 抢占实现构造性有界的并发槽，以及为什么泄漏自愈比完美释放更重要。"
 ---

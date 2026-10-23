@@ -1,7 +1,7 @@
 ---
 title: "Agent 上下文压缩：跨厂商可移植的 checkpoint 设计"
 date: "2026-10-08"
-tags: ["LLM", "Agent", "上下文管理", "架构设计", "AI 工程"]
+tags: [后端架构, AI Agent, 大模型应用, 工程实践]
 cover: ""
 description: "长对话必然撞上下文窗口。厂商原生的 compact 接口各不相同且不可迁移，本文讲解 AtomOS 的替代方案：用固定 schema 的 JSON checkpoint 做可移植摘要，按闭合回合分组切分历史，以及如何防止摘要本身丢掉关键事实。"
 ---

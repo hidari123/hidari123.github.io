@@ -1,7 +1,7 @@
 ---
 title: "缓存优先的 Hook：先渲染缓存再后台刷新，而不是转圈"
 date: "2026-10-03"
-tags: ["React", "自定义 Hook", "缓存策略", "localStorage", "前端工程"]
+tags: [前端工程, 工程实践, React, 缓存策略, 自定义 Hook]
 cover: ""
 description: "每次路由切换都转圈等接口，用户体验极差。AtomOS 的 usePersistentCache 先从 localStorage 同步读出缓存渲染，再后台刷新拉最新。讲解 stale-while-revalidate 模式、fetch-through 的取舍、以及为什么 localStorage 写入要吞异常。"
 ---

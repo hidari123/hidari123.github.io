@@ -1,7 +1,7 @@
 ---
 title: "Agent 时间线的幂等归约：REST 与 WebSocket 走同一条路"
 date: "2026-09-22"
-tags: ["WebSocket", "React", "状态管理", "Agent UI", "前端架构"]
+tags: [前端工程, AI Agent, 工程实践, React, WebSocket]
 cover: ""
 description: "Agent 对话的时间线有两个数据源：WebSocket 实时事件和 REST 历史记录。断线重连后两者必然重叠，本文讲解如何用一个纯函数 reducer 加双层去重，让任意顺序到达的事件流收敛到同一个 UI 状态。"
 ---

@@ -1,7 +1,7 @@
 ---
 title: "残基索引的五张表：把 mmCIF 的双编号体系折叠成一个查找结构"
 date: "2026-10-02"
-tags: ["结构生物学", "mmCIF", "索引设计", "数据建模", "TypeScript"]
+tags: [工程实践, 科学计算, TypeScript]
 cover: ""
 description: "3D 视图点一个原子，聊天里发一条引用，URL 里带几个键——这三件事要指向同一个残基，就得在一堆行式数据上建索引。本文拆解 AtomOS 的 StructureResidueIndex：五路合并、歧义键的显式废弃、以及为什么非聚合物的锚点逻辑要单独处理。"
 ---

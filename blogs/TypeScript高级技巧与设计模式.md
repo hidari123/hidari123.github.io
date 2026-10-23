@@ -1,7 +1,7 @@
 ---
 title: "TypeScript 高级技巧与设计模式实战"
 date: "2026-05-18"
-tags: ["TypeScript", "设计模式", "类型编程", "最佳实践"]
+tags: [前端工程, 工程实践, TypeScript]
 cover: ""
 description: "深入讲解 TypeScript 高级类型系统、装饰器、声明文件编写，以及常见设计模式的 TypeScript 实现"
 ---

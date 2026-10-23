@@ -1,7 +1,7 @@
 ---
 title: "AI Agents 实战：从零构建智能助手应用"
 date: "2026-05-16"
-tags: ["AI", "Agent", "大语言模型", "LangChain", "实战"]
+tags: [AI Agent, 大模型应用, 工程实践]
 cover: ""
 description: "深入讲解 AI Agent 的核心概念、架构设计，以及如何使用 LangChain 和 AutoGPT 构建智能助手"
 ---
