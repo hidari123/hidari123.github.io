@@ -3,6 +3,10 @@
   "private": true,
   "version": "0.0.1",
   "type": "module",
+  "packageManager": "pnpm@9.15.9",
+  "engines": {
+    "node": ">=20"
+  },
   "homepage": "https://hidari123.github.io",
   "scripts": {
     "dev": "vite",
@@ -10,7 +14,7 @@
     "tsc": "tsc --noEmit",
     "vite-build": "vite build",
     "build": "npm run tsc && npm run vite-build",
-    "lint": "eslint src --ext ts,tsx",
+    "lint": "eslint \"src/**/*.{ts,tsx}\"",
     "format": "prettier --write \"src/**/*.{ts,tsx,css}\"",
     "test": "vitest run",
     "test:watch": "vitest",

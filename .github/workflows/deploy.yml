@@ -27,10 +27,14 @@ jobs:
 
       # pnpm 必须先于 setup-node：setup-node 的 `cache: pnpm`
       # 要在执行时找到 pnpm 才能算缓存键，否则这一步直接失败。
+      # 版本必须钉死：pnpm >= 10 默认拒绝执行 esbuild/protobufjs 的
+      # install 脚本（ERR_PNPM_IGNORED_BUILDS），而 vite 的构建依赖
+      # esbuild 的原生二进制 —— 不显式批准就会构建失败。
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
           version: 9
+          run_install: false
 
       - name: Setup Node
         uses: actions/setup-node@v4
@@ -44,7 +48,7 @@ jobs:
       # 拉 RAG 嵌入模型（int8 量化，22MB）。
       # 之前漏了这一步，模型是 git-lfs 指针（133 字节），
       # 线上点「索引博客」会直接失败 —— 但构建照样通过，属于静默故障。
-      # allow-failure：拉不到模型不该阻断部署，只是 RAG 功能降级。
+      # continue-on-error：拉不到模型不该阻断部署，只是 RAG 功能降级。
       - name: Fetch embedding model
         run: pnpm run fetch:model
         continue-on-error: true

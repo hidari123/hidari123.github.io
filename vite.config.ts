@@ -11,27 +11,72 @@ import fs from "fs";
 import { execFileSync } from "child_process";
 
 /**
- * 构建结束后删除 dist/models 下的 .git_disabled 目录。
+ * 构建结束后清理 dist/models。
  *
- * 背景：public/models/all-MiniLM-L6-v2/.git_disabled 是一个嵌在 public 里的
+ * 背景一：public/models/all-MiniLM-L6-v2/.git_disabled 是一个嵌在 public 里的
  * 裸 git 仓库（目录名被改过，所以 git 不会把它当嵌套仓库处理），里面是
  * Git LFS 的裸对象，约 300MB。Vite 会原样复制整个 public/ 目录，
  * .gitignore 只影响 git 跟踪、不影响构建产物，所以必须在这里显式剔除，
  * 否则每次部署都会把 300MB 推到 gh-pages。
+ *
+ * 背景二：LFS 完整拉取后，onnx/ 下会同时出现 8 个量化变体（fp32/fp16/int8/
+ * q4/q4f16/bnb4/uint8/quantized），合计约 340MB。但运行时只读
+ * model_int8.onnx + tokenizer.json + vocab.txt（见 ragService.ts）。
+ * 留着其余 7 个只会拖慢 Pages 部署、并把免费额度烧在没人下载的字节上。
+ * 取决于开发机怎么装的模型，这里两种多余的体积都要清：
+ *   - LFS 指针文件（133 字节的文本）
+ *   - 真实但用不到的量化变体
  */
-function stripModelGitDir(): Plugin {
+const KEEP_MODEL_FILES = new Set(["tokenizer.json", "vocab.txt", "onnx/model_int8.onnx"]);
+const LFS_POINTER_MAX_BYTES = 1024;
+
+function stripUnusedModelFiles(): Plugin {
   return {
-    name: "strip-model-git-dir",
+    name: "strip-unused-model-files",
     closeBundle() {
       const modelsDir = path.resolve(__dirname, "dist/models");
-      if (!fs.existsSync(modelsDir)) return;
+      if (!fs.existsSync(modelsDir)) {
+        console.log("[strip-model] dist/models 不存在，跳过（RAG 功能将降级）。");
+        return;
+      }
 
-      for (const entry of fs.readdirSync(modelsDir)) {
-        const gitDir = path.join(modelsDir, entry, ".git_disabled");
+      for (const modelDir of fs.readdirSync(modelsDir)) {
+        const base = path.join(modelsDir, modelDir);
+
+        // 1) 裸 git 目录
+        const gitDir = path.join(base, ".git_disabled");
         if (fs.existsSync(gitDir)) {
           fs.rmSync(gitDir, { recursive: true, force: true });
-          console.log("[strip-model-git-dir] removed", gitDir);
+          console.log("[strip-model] 已移除裸 git 目录", path.relative(modelsDir, gitDir));
         }
+
+        // 2) 用不到的量化变体 + LFS 指针
+        let kept = 0;
+        let removed = 0;
+        const walk = (dir, prefix) => {
+          if (!fs.existsSync(dir)) return;
+          for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+            const full = path.join(dir, entry.name);
+            if (entry.isDirectory()) {
+              walk(full, `${prefix}${entry.name}/`);
+              continue;
+            }
+            const rel = `${prefix}${entry.name}`;
+            const size = fs.statSync(full).size;
+            // LFS 指针：极小的文本文件，内容是 "version https://git-lfs..."
+            const isPointer = size < LFS_POINTER_MAX_BYTES && /\.(onnx|json|txt|bin)$/.test(rel);
+            if (isPointer || !KEEP_MODEL_FILES.has(rel)) {
+              fs.rmSync(full, { force: true });
+              removed++;
+            } else {
+              kept++;
+            }
+          }
+        };
+        walk(base, "");
+        console.log(
+          `[strip-model] ${modelDir}: 保留 ${kept} 个文件（${kept ? "RAG 可用" : "缺失，RAG 会降级"}），清除 ${removed} 个`
+        );
       }
     },
   };
@@ -76,7 +121,7 @@ export default defineConfig({
   // 部署改由 GitHub Actions 负责（.github/workflows/deploy.yml）。
   // 之前用的 vite-plugin-gh-pages 从一个临时 clone 推送，失败被静默吞掉，
   // 日志显示 "Published" 但远端分支其实没更新。
-  plugins: [react(), stripModelGitDir(), spaFallback(), generateSeo()],
+  plugins: [react(), stripUnusedModelFiles(), spaFallback(), generateSeo()],
   base: "/",
   resolve: {
     alias: {
