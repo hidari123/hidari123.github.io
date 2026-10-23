@@ -6,12 +6,14 @@
  * Copyright (c) 2026 by hidari, All Rights Reserved.
  */
 
-import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { useState, useEffect, useMemo } from "react";
+import { Link, useSearchParams } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Calendar, Tag } from "lucide-react";
+import { Calendar } from "lucide-react";
 import { getAllPosts, type Post } from "@/services/blogService";
 import { PostCover } from "@/components/Blog/PostCover";
+import { TagFilter } from "@/components/Blog/TagFilter";
+import { CATEGORY_TAGS, type CategoryTag } from "@/data/tags";
 import { useSeo } from "@/hooks/useSeo";
 import { Ghost } from "react-kawaii";
 
@@ -134,8 +136,26 @@ const POSTS_PER_PAGE = 6;
 export const BlogList = () => {
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedTag, setSelectedTag] = useState<string | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [selectedTech, setSelectedTech] = useState<string[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
+
+  // 文章页的标签会链到 /blog?tag=xxx，不接住的话点标签等于白点。
+  // tag 可能是主分类也可能是技术标签：分类归分类，技术标签归技术标签。
+  const [searchParams, setSearchParams] = useSearchParams();
+  const tagParam = searchParams.get("tag");
+
+  useEffect(() => {
+    if (!tagParam) return;
+    if (CATEGORY_TAGS.includes(tagParam as CategoryTag)) {
+      setSelectedCategory(tagParam);
+      setSelectedTech([]);
+    } else {
+      setSelectedCategory(null);
+      setSelectedTech([tagParam]);
+    }
+    setCurrentPage(1);
+  }, [tagParam]);
 
   useSeo({
     title: "博客",
@@ -158,13 +178,18 @@ export const BlogList = () => {
     loadPosts();
   }, []);
 
-  // 获取所有标签
-  const allTags = Array.from(new Set(posts.flatMap((post) => post.tags))).sort();
-
-  // 筛选和分页
-  const filteredPosts = selectedTag
-    ? posts.filter((post) => post.tags.includes(selectedTag))
-    : posts;
+  // 筛选：主分类是单选（横向导航），技术标签是多选（AND：必须命中全部选中项）。
+  // 用 AND 而不是 OR，是因为选 React + 性能优化的人想要的是交集；
+  // OR 会把两倍的文章全塞进来，等于没筛。
+  // 分页跟着筛选条件走：改条件就回到第一页，否则可能停在空白页上。
+  const filteredPosts = useMemo(() => {
+    return posts.filter((post) => {
+      if (selectedCategory && !post.tags.includes(selectedCategory)) {
+        return false;
+      }
+      return selectedTech.every((tag) => post.tags.includes(tag));
+    });
+  }, [posts, selectedCategory, selectedTech]);
 
   const totalPages = Math.ceil(filteredPosts.length / POSTS_PER_PAGE);
   const paginatedPosts = filteredPosts.slice(
@@ -172,10 +197,25 @@ export const BlogList = () => {
     currentPage * POSTS_PER_PAGE,
   );
 
-  // 处理标签点击
-  const handleTagClick = (tag: string) => {
-    setSelectedTag(selectedTag === tag ? null : tag);
+  const handleCategoryChange = (category: string | null) => {
+    setSelectedCategory(category);
     setCurrentPage(1);
+    // 同步 URL：筛选状态可以直接分享 / 刷新不丢。
+    // 技术标签也要保留，否则换一个分类会把已选的技术标签从地址栏里抹掉。
+    const next = new URLSearchParams(searchParams);
+    if (category) next.set("tag", category);
+    else next.delete("tag");
+    setSearchParams(next, { replace: true });
+  };
+
+  const handleTechChange = (tags: string[]) => {
+    setSelectedTech(tags);
+    setCurrentPage(1);
+    const next = new URLSearchParams(searchParams);
+    // URL 里只保留一个 tag；选了多个技术标签时以第一个为准
+    if (tags.length > 0) next.set("tag", tags[0]);
+    else next.delete("tag");
+    setSearchParams(next, { replace: true });
   };
 
   return (
@@ -196,34 +236,15 @@ export const BlogList = () => {
             <p className="text-[var(--text-secondary)] text-lg">技术甜度：★★★★★</p>
           </div>
 
-          {/* 标签筛选 */}
-          {allTags.length > 0 && (
-            <div className="flex flex-wrap justify-center gap-2 mb-12">
-              <button
-                onClick={() => setSelectedTag(null)}
-                className={`px-5 py-2 rounded-full text-sm font-medium transition-all duration-300 ${
-                  selectedTag === null
-                    ? "bg-[var(--accent)] text-white shadow-lg shadow-[var(--accent)]/25"
-                    : "bg-[var(--bg-card)] text-[var(--text-secondary)] border border-[var(--border)] hover:border-[var(--accent)] hover:text-[var(--accent)]"
-                }`}
-              >
-                全部
-              </button>
-              {allTags.map((tag) => (
-                <button
-                  key={tag}
-                  onClick={() => handleTagClick(tag)}
-                  className={`px-5 py-2 rounded-full text-sm font-medium transition-all duration-300 flex items-center gap-1.5 ${
-                    selectedTag === tag
-                      ? "bg-[var(--accent)] text-white shadow-lg shadow-[var(--accent)]/25"
-                      : "bg-[var(--bg-card)] text-[var(--text-secondary)] border border-[var(--border)] hover:border-[var(--accent)] hover:text-[var(--accent)]"
-                  }`}
-                >
-                  <Tag className="w-3.5 h-3.5" />
-                  {tag}
-                </button>
-              ))}
-            </div>
+          {/* 标签筛选：主分类 tab + 技术标签多选 */}
+          {!loading && (
+            <TagFilter
+              posts={posts}
+              selectedCategory={selectedCategory}
+              onCategoryChange={handleCategoryChange}
+              selectedTech={selectedTech}
+              onTechChange={handleTechChange}
+            />
           )}
 
           {/* 文章列表 */}
@@ -285,7 +306,7 @@ export const BlogList = () => {
               {/* 文章统计 */}
               <p className="text-center text-sm text-[var(--text-secondary)] mt-8">
                 共 {filteredPosts.length} 篇文章
-                {selectedTag && `，其中标签 "${selectedTag}" 下有 ${filteredPosts.length} 篇`}
+                {filteredPosts.length !== posts.length && `（全部 ${posts.length} 篇）`}
               </p>
             </>
           )}

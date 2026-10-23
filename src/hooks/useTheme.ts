@@ -56,3 +56,30 @@ export const useTheme = () => {
 
   return { theme, toggleTheme };
 };
+
+/**
+ * 只关心「现在是不是深色」的轻量 hook。
+ *
+ * 给 PostCover 这类渲染大量元素的组件用：它只需要在主题翻转时重算色板，
+ * 不需要 toggleTheme，也不想订阅 useTheme 的全部状态。
+ * 直接复用同一个 MutationObserver 机制，行为和 useTheme 完全一致。
+ */
+export const useIsDarkTheme = (): boolean => {
+  const [isDark, setIsDark] = useState(() => {
+    if (typeof document === "undefined") return false;
+    return document.documentElement.getAttribute("data-theme") === "dark";
+  });
+
+  useEffect(() => {
+    const observer = new MutationObserver(() => {
+      setIsDark(document.documentElement.getAttribute("data-theme") === "dark");
+    });
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ["data-theme"],
+    });
+    return () => observer.disconnect();
+  }, []);
+
+  return isDark;
+};

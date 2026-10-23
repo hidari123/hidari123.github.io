@@ -195,7 +195,9 @@ export const BlogPost = () => {
 
   return (
     <div className="min-h-[calc(100vh-8rem)] py-12">
-      <div className="container">
+      {/* 右上角给悬浮目录留出空档。xl:max-w-6xl 到 lg 断点之间宽度不够，
+          目录会直接压在正文上；lg:pr-72 把那块空间让出来。 */}
+      <div className="container lg:pr-72">
         {/* 返回按钮 */}
         <motion.div
           initial={{ opacity: 0, x: -20 }}
@@ -211,8 +213,9 @@ export const BlogPost = () => {
           </Link>
         </motion.div>
 
-        <div className="lg:flex lg:gap-12">
-          {/* 文章内容 */}
+        <div>
+          {/* 文章内容。桌面端右侧目录已改为 fixed 悬浮（TocSidebar），
+              不再需要 lg:flex 的两列布局，正文可以占满宽度。 */}
           <motion.article
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -375,7 +378,7 @@ export const BlogPost = () => {
             </div>
           </motion.article>
 
-          {/* 桌面端侧边栏目录 */}
+          {/* 桌面端悬浮目录：fixed 到视口右侧，不占文档流 */}
           <TocSidebar items={toc} />
         </div>
 

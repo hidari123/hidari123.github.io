@@ -20,6 +20,7 @@
  * frontmatter 里写了 cover 的话，仍然优先用作者指定的图片。
  */
 import { useId, useMemo } from "react";
+import { useIsDarkTheme } from "@/hooks/useTheme";
 
 interface CoverPalette {
   /** 渐变起点 */
@@ -30,25 +31,73 @@ interface CoverPalette {
   accent: string;
   /** 纹理的描边色 */
   line: string;
+  /** 封面文字颜色。浅色底用深色文字，不然白字看不清 */
+  ink: string;
 }
 
 /**
- * 色板按序号取。深浅两套主题下都能保证足够的对比度，
- * 且相邻卡片的色相刻意错开，避免列表里撞色。
+ * 色板从深色高饱和换成低饱和浅色系。
+ *
+ * 原来 12 组全是 #312e81 / #7c3aed 这类深色，35 张封面在列表里排下来像一排
+ * 霓虹灯箱，和页面的可爱风完全不搭。而且标题是白字 + drop-shadow 压上去的，
+ * 深底上勉强能读，浅底上直接消失。
+ *
+ * 现在的取值范围相当于 oklch(0.88~0.95, 0.04~0.10)：
+ * 亮度拉高到接近纸白，彩度压到 0.04~0.10（人眼对低彩度本来就宽容，
+ * 这一档看起来是奶油/浅杏/薄荷/雾霾蓝，不会脏也不会刺眼）。
+ * 12 组色相互相错开 30 度左右，同一屏里不会撞色。
+ *
+ * ink 取同色相的深色变体（明度 0.32~0.40），保证标题对比度；
+ * 深色模式下会自动换成对应色相的亮色（明度 0.86 左右）。
  */
-const PALETTES: CoverPalette[] = [
-  { from: "#312e81", to: "#7c3aed", accent: "#c4b5fd", line: "#a78bfa" },
-  { from: "#0c4a6e", to: "#0891b2", accent: "#a5f3fc", line: "#67e8f9" },
-  { from: "#064e3b", to: "#059669", accent: "#a7f3d0", line: "#6ee7b7" },
-  { from: "#78350f", to: "#ea580c", accent: "#fed7aa", line: "#fdba74" },
-  { from: "#881337", to: "#e11d48", accent: "#fecdd3", line: "#fda4af" },
-  { from: "#1e293b", to: "#4f46e5", accent: "#c7d2fe", line: "#a5b4fc" },
-  { from: "#4a044e", to: "#c026d3", accent: "#f5d0fe", line: "#e879f9" },
-  { from: "#134e4a", to: "#0d9488", accent: "#99f6e4", line: "#5eead4" },
-  { from: "#7c2d12", to: "#dc2626", accent: "#fecaca", line: "#fca5a5" },
-  { from: "#164e63", to: "#0284c7", accent: "#bae6fd", line: "#7dd3fc" },
-  { from: "#3b0764", to: "#7e22ce", accent: "#e9d5ff", line: "#d8b4fe" },
-  { from: "#713f12", to: "#ca8a04", accent: "#fef08a", line: "#fde047" },
+const LIGHT_PALETTES: CoverPalette[] = [
+  // 奶油粉
+  { from: "#FDF2F4", to: "#F8E4E8", accent: "#C4758A", line: "#E8B4C0", ink: "#5C3A44" },
+  // 浅杏
+  { from: "#FDF6EC", to: "#F8EBD6", accent: "#B58444", line: "#E6C99B", ink: "#54402A" },
+  // 薄荷绿
+  { from: "#F1FAF5", to: "#E4F4EC", accent: "#4E9B77", line: "#A9DCC4", ink: "#2F5142" },
+  // 雾霾蓝
+  { from: "#F1F6FC", to: "#E2EDF8", accent: "#4E7FAE", line: "#A9C9E4", ink: "#2F4559" },
+  // 淡紫
+  { from: "#F7F4FC", to: "#EDE6F8", accent: "#7E69B5", line: "#C9BCE8", ink: "#3F3557" },
+  // 灰蓝
+  { from: "#F4F7F9", to: "#E7EEF3", accent: "#5C7C91", line: "#B4CAD8", ink: "#354954" },
+  // 淡梅
+  { from: "#FDF3F6", to: "#F7E4EC", accent: "#A75F83", line: "#E0AEC5", ink: "#4F3341" },
+  // 淡青
+  { from: "#F0FAFA", to: "#E0F2F2", accent: "#4A8F8C", line: "#A3D4D2", ink: "#2F4B4A" },
+  // 米黄
+  { from: "#FBFAF3", to: "#F1EFE0", accent: "#8A8250", line: "#CBC6A3", ink: "#43412C" },
+  // 淡鲑
+  { from: "#FDF4F0", to: "#F8E7E0", accent: "#B26F55", line: "#E6B8A4", ink: "#543628" },
+  // 淡雪松
+  { from: "#FBF6F0", to: "#F2E8DC", accent: "#9C7550", line: "#DCC1A2", ink: "#4C3A28" },
+  // 淡豆绿
+  { from: "#F6FAF2", to: "#EAF1DF", accent: "#6B9152", line: "#B7D1A1", ink: "#3A4D2E" },
+];
+
+/**
+ * 深色模式色板。
+ *
+ * 不是把浅色版整体调亮，而是降到 oklch(0.30~0.36)：封面上要放白字，
+ * 底色太亮就压不住字。这里的值是同色相的低明度版，色相关系保持一致，
+ * 所以切主题时封面不会突然换掉颜色，只是变暗。
+ * ink 反过来变成接近白，用来给深底上的角标文字。
+ */
+const DARK_PALETTES: CoverPalette[] = [
+  { from: "#3D2F33", to: "#4A383D", accent: "#E8B4C0", line: "#6E5259", ink: "#F5E8EC" },
+  { from: "#3B342A", to: "#483F31", accent: "#E6C99B", line: "#6B5C44", ink: "#F5EFE0" },
+  { from: "#2C3B33", to: "#374A3E", accent: "#A9DCC4", line: "#4F6558", ink: "#E8F5EE" },
+  { from: "#2C3743", to: "#364554", accent: "#A9C9E4", line: "#4E6172", ink: "#E8F1F8" },
+  { from: "#332E42", to: "#40394F", accent: "#C9BCE8", line: "#5B5170", ink: "#F0EAF8" },
+  { from: "#2F3940", to: "#3A4750", accent: "#B4CAD8", line: "#526875", ink: "#E9F1F5" },
+  { from: "#3B2F37", to: "#483A44", accent: "#E0AEC5", line: "#6B515F", ink: "#F8EBF1" },
+  { from: "#293A3A", to: "#334849", accent: "#A3D4D2", line: "#486767", ink: "#E6F4F4" },
+  { from: "#3A3930", to: "#474638", accent: "#CBC6A3", line: "#66624C", ink: "#F3F2E7" },
+  { from: "#3E322D", to: "#4C3D36", accent: "#E6B8A4", line: "#6F5749", ink: "#F9EDE6" },
+  { from: "#3B342C", to: "#494034", accent: "#DCC1A2", line: "#6B5B49", ink: "#F6EEE3" },
+  { from: "#323A2E", to: "#3E4937", accent: "#B7D1A1", line: "#57684A", ink: "#EDF4E6" },
 ];
 
 /** 纹理种类。每种对应一个纯代码绘制的几何图案。 */
@@ -197,17 +246,20 @@ export const PostCover = ({
   // 多张封面同屏时，SVG id 必须唯一，否则会互相覆盖
   const uid = useId().replace(/:/g, "");
   const glowId = `cover-glow-${uid}`;
+  const dark = useIsDarkTheme();
 
   const { palette, pattern, seed, angle, decor } = useMemo(() => {
     const s = hashString(slug || title || "default");
     return {
       seed: s,
-      palette: PALETTES[pick(s, 0, PALETTES.length)],
+      palette: (dark ? DARK_PALETTES : LIGHT_PALETTES)[
+        pick(s, 0, LIGHT_PALETTES.length)
+      ],
       pattern: PATTERNS[pick(s, 1, PATTERNS.length)],
       angle: 90 + pick(s, 2, 4) * 30,
       decor: pick(s, 3, 3),
     };
-  }, [slug, title]);
+  }, [slug, title, dark]);
 
   return (
     <div
@@ -244,12 +296,14 @@ export const PostCover = ({
         )}
       </svg>
 
-      {/* 底部渐隐，保证标题在任何底色上都可读 */}
+      {/* 底部渐隐。浅色底下不能用黑色渐隐（会脏），改成用当前色板的 ink
+          低透明度的渐变，保证标题可读但底色不被压死。 */}
       <div
         className="absolute inset-0"
         style={{
-          background:
-            "linear-gradient(to bottom, rgba(0,0,0,0.05) 0%, rgba(0,0,0,0.25) 45%, rgba(0,0,0,0.62) 100%)",
+          background: dark
+            ? "linear-gradient(to bottom, rgba(0,0,0,0) 0%, rgba(0,0,0,0.18) 45%, rgba(0,0,0,0.48) 100%)"
+            : `linear-gradient(to bottom, ${palette.ink}00 0%, ${palette.ink}14 45%, ${palette.ink}2E 100%)`,
         }}
         aria-hidden="true"
       />
@@ -259,13 +313,23 @@ export const PostCover = ({
         {category && (
           <span
             className="self-start rounded-full px-2.5 py-1 text-[11px] sm:text-xs font-semibold"
-            style={{ background: "rgba(0,0,0,0.25)", color: palette.accent }}
+            style={{
+              background: dark ? "rgba(0,0,0,0.3)" : `${palette.ink}14`,
+              color: dark ? palette.accent : palette.ink,
+            }}
           >
             {category}
           </span>
         )}
         {variant === "card" && (
-          <h3 className="text-white font-bold leading-tight line-clamp-2 text-base sm:text-xl drop-shadow-[0_1px_3px_rgba(0,0,0,0.5)]">
+          <h3
+            className="font-bold leading-tight line-clamp-2 text-base sm:text-xl"
+            style={{
+              color: palette.ink,
+              // 深色底上的白字需要阴影提亮，浅色底上的深字不需要
+              textShadow: dark ? "0 1px 3px rgba(0,0,0,0.5)" : "none",
+            }}
+          >
             {title}
           </h3>
         )}

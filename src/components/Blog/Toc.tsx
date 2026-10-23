@@ -12,7 +12,7 @@
  */
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { List } from "lucide-react";
+import { List, ChevronRight, PanelRightClose } from "lucide-react";
 import type { TocItem } from "../../utils/toc";
 
 // 与 Layout 里 Navbar 的 h-16 对齐
@@ -23,9 +23,11 @@ interface TocProps {
   /** 移动端折叠式目录 */
   variant?: "sidebar" | "collapsible";
   onNavigate?: () => void;
+  /** 当前章节变化时回调，供移动端折叠条显示「你在哪」 */
+  onActiveChange?: (text: string) => void;
 }
 
-export const Toc = ({ items, variant = "sidebar", onNavigate }: TocProps) => {
+export const Toc = ({ items, variant = "sidebar", onNavigate, onActiveChange }: TocProps) => {
   const [activeId, setActiveId] = useState<string>(items[0]?.id ?? "");
   const navRef = useRef<HTMLElement>(null);
 
@@ -75,6 +77,12 @@ export const Toc = ({ items, variant = "sidebar", onNavigate }: TocProps) => {
     return () => observer.disconnect();
   }, [items]);
 
+  // 把当前章节的文字抛给外层（移动端折叠条用它显示「你在哪」）
+  useEffect(() => {
+    const current = items.find((i) => i.id === activeId);
+    if (current) onActiveChange?.(current.text);
+  }, [activeId, items, onActiveChange]);
+
   const levelClass = (level: number) =>
     level === 1 ? "" : level === 2 ? "ml-3" : "ml-6";
 
@@ -119,52 +127,164 @@ export const Toc = ({ items, variant = "sidebar", onNavigate }: TocProps) => {
   );
 };
 
-/** 桌面端侧边栏 */
+/**
+ * 桌面端悬浮目录
+ *
+ * 之前这个组件是文章内容里的一坨（把 5913 字节的目录硬塞进正文流），
+ * 三个问题：占正文宽度、滚动到下面就看不到了、收起就得跳回文章开头。
+ *
+ * 现在改成：
+ * 1. fixed 悬浮在视口右侧，不占文档流
+ * 2. 滚动到正文开始之前隐藏 —— 读者还在看封面和标题的时候，
+ *    右侧飘一个目录框是纯噪音
+ * 3. 可收起：收起后只剩一条 28px 宽的竖 tab，不占任何横向空间
+ * 4. 状态记在 localStorage：跳到另一篇文章不该重新展开
+ */
 export const TocSidebar = ({ items }: { items: TocItem[] }) => {
+  const [visible, setVisible] = useState(false);
+  const [collapsed, setCollapsed] = useState(() => {
+    if (typeof localStorage === "undefined") return false;
+    return localStorage.getItem("toc_collapsed") === "1";
+  });
+  const sentinelRef = useRef<HTMLDivElement>(null);
+
+  // 正文开始位置由一个 0 高度的哨兵标记。
+  // 不用 scrollY 硬编码阈值 —— 文章长度不一样，同一个阈值在不同文章里
+  // 触发时机完全不同。
+  useEffect(() => {
+    const sentinel = sentinelRef.current;
+    if (!sentinel) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => setVisible(entry.isIntersecting),
+      { threshold: 0, rootMargin: "-80px 0px 0px 0px" },
+    );
+
+    observer.observe(sentinel);
+    return () => observer.disconnect();
+  }, []);
+
+  const toggleCollapsed = () => {
+    setCollapsed((prev) => {
+      const next = !prev;
+      try {
+        localStorage.setItem("toc_collapsed", next ? "1" : "0");
+      } catch {
+        // 隐私模式写不了，忽略 —— 折叠状态不值得报错
+      }
+      return next;
+    });
+  };
+
   if (items.length === 0) return null;
 
   return (
-    <aside className="hidden lg:block w-64 flex-shrink-0" aria-label="目录侧边栏">
-      <div className="sticky top-24">
-        <div className="p-4 bg-[var(--bg-card)] rounded-xl border border-[var(--border)]">
-          <h2 className="text-sm font-semibold mb-3 text-[var(--text-primary)] flex items-center gap-2">
-            <List className="w-4 h-4 text-[var(--accent)]" />
+    <>
+      <div ref={sentinelRef} aria-hidden className="h-0 w-full" />
+
+      {/* 收起态：一条细长的 tab */}
+      {collapsed && (
+        <button
+          onClick={toggleCollapsed}
+          aria-label="展开目录"
+          className={`fixed right-0 top-1/2 -translate-y-1/2 z-30 hidden lg:flex flex-col items-center gap-2 w-7 py-4 rounded-l-xl bg-[var(--bg-card)] border border-r-0 border-[var(--border)] text-[var(--text-secondary)] hover:text-[var(--accent)] transition-all duration-300 ${
+            visible ? "opacity-100 translate-x-0" : "opacity-0 translate-x-full pointer-events-none"
+          }`}
+        >
+          <ChevronRight className="w-3.5 h-3.5" />
+          <span
+            className="text-xs tracking-widest"
+            style={{ writingMode: "vertical-rl" }}
+          >
             目录
-            <span className="ml-auto text-xs font-normal text-[var(--text-secondary)]">
-              {items.length} 节
-            </span>
-          </h2>
-          <Toc items={items} />
-        </div>
-      </div>
-    </aside>
+          </span>
+        </button>
+      )}
+
+      {/* 展开态：右侧悬浮面板 */}
+      {!collapsed && (
+        <aside
+          aria-label="目录侧边栏"
+          className={`fixed right-6 top-28 z-30 w-60 hidden lg:block transition-all duration-300 ${
+            visible ? "opacity-100 translate-x-0" : "opacity-0 translate-x-4 pointer-events-none"
+          }`}
+        >
+          <div className="p-4 bg-[var(--bg-card)]/95 backdrop-blur-sm rounded-xl border border-[var(--border)] shadow-lg max-h-[calc(100vh-9rem)] flex flex-col">
+            <div className="flex items-center gap-2 mb-3 text-[var(--text-primary)]">
+              <List className="w-4 h-4 text-[var(--accent)]" />
+              <h2 className="text-sm font-semibold">目录</h2>
+              <span className="ml-auto text-xs font-normal text-[var(--text-secondary)]">
+                {items.length} 节
+              </span>
+              <button
+                onClick={toggleCollapsed}
+                aria-label="收起目录"
+                title="收起目录"
+                className="p-1 rounded text-[var(--text-secondary)] hover:text-[var(--accent)] transition-colors"
+              >
+                <PanelRightClose className="w-3.5 h-3.5" />
+              </button>
+            </div>
+            <div className="overflow-y-auto min-h-0">
+              <Toc items={items} />
+            </div>
+          </div>
+        </aside>
+      )}
+    </>
   );
 };
 
-/** 移动端折叠目录 */
+/**
+ * 移动端目录
+ *
+ * 折叠成顶部一条横条，sticky 跟着视口 —— 之前是普通文档流元素，
+ * 往下滑两屏就找不回来了。收起状态显示当前章节，读者知道自己在哪。
+ *
+ * 注意：即使折叠，内部那个跟踪当前章节的 Toc 也必须保持挂载。
+ * 之前写成 `{open && <Toc .../>}`，一折叠 IntersectionObserver 就被卸载，
+ * 章节高亮永久停在第一节 —— 展开时看到的永远是第一条。
+ */
 export const TocCollapsible = ({ items }: { items: TocItem[] }) => {
   const [open, setOpen] = useState(false);
+  const [activeText, setActiveText] = useState<string>("");
 
   if (items.length === 0) return null;
 
   return (
-    <div className="lg:hidden mb-6">
+    <div className="lg:hidden mb-6 sticky top-16 z-20">
       <button
         onClick={() => setOpen((v) => !v)}
         aria-expanded={open}
-        className="w-full flex items-center gap-2 p-3 bg-[var(--bg-secondary)] rounded-xl text-sm font-medium"
+        className="w-full flex items-center gap-2 p-3 bg-[var(--bg-card)]/95 backdrop-blur-sm rounded-xl border border-[var(--border)] text-sm font-medium shadow-sm"
       >
-        <List className="w-4 h-4 text-[var(--accent)]" />
-        目录
-        <span className="text-xs text-[var(--text-secondary)]">{items.length} 节</span>
-        <span className="ml-auto text-[var(--text-secondary)]">{open ? "收起" : "展开"}</span>
+        <List className="w-4 h-4 text-[var(--accent)] shrink-0" />
+        <span className="truncate text-[var(--text-primary)]">
+          {activeText || "目录"}
+        </span>
+        <span className="ml-auto shrink-0 text-xs text-[var(--text-secondary)]">
+          {open ? "收起" : `${items.length} 节`}
+        </span>
       </button>
 
-      {open && (
-        <div className="mt-2 p-4 bg-[var(--bg-secondary)] rounded-xl">
-          <Toc items={items} variant="collapsible" onNavigate={() => setOpen(false)} />
+      {/* 折叠时也需要它挂载：观察器是这个组件的职责，不能跟着 UI 一起卸载 */}
+      <div
+        className={`overflow-y-auto transition-all duration-300 ${
+          open
+            ? "mt-2 max-h-[60vh] opacity-100"
+            : "max-h-0 opacity-0 overflow-hidden pointer-events-none"
+        }`}
+        aria-hidden={!open}
+      >
+        <div className="p-4 bg-[var(--bg-card)]/98 backdrop-blur-sm rounded-xl border border-[var(--border)] shadow-lg">
+          <Toc
+            items={items}
+            variant="collapsible"
+            onNavigate={() => setOpen(false)}
+            onActiveChange={setActiveText}
+          />
         </div>
-      )}
+      </div>
     </div>
   );
 };
