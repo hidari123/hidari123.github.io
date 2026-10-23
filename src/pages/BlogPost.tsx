@@ -7,7 +7,7 @@
  */
 
 import { useState, useEffect, useMemo } from "react";
-import { useParams, Link, useNavigate } from "react-router-dom";
+import { useParams, Link, useNavigate, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -69,6 +69,20 @@ const NotFound = () => {
 export const BlogPost = () => {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
+  /*
+   * 「返回博客列表」的落点。
+   *
+   * 列表页把页码/筛选放进了 URL，但文章页自己并不知道上一页是哪个列表状态
+   * —— 那条信息随导航存在 history entry 里（PostCard 上的 state.from），
+   * 所以这里从 location.state 取。
+   *
+   * 取不到就退回 /blog：从首页、搜索、直接粘链接进来的文章本来就不存在
+   * 上一个列表页，硬 navigate(-1) 会把用户甩回首页，那不是他点的那个按钮。
+   */
+  const location = useLocation();
+  const fromState = (location.state as { from?: unknown } | null)?.from;
+  const listUrl = typeof fromState === "string" ? fromState : "/blog";
+
   const { setCurrentArticle } = useAIContext();
   const [post, setPost] = useState<Post | null>(null);
   const [loading, setLoading] = useState(true);
@@ -202,7 +216,7 @@ export const BlogPost = () => {
           className="w-full mx-auto mb-8"
         >
           <Link
-            to="/blog"
+            to={listUrl}
             className="inline-flex items-center gap-2 text-[var(--text-secondary)] hover:text-[var(--accent)] transition-colors group"
           >
             <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />

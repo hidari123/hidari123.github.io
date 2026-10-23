@@ -12,6 +12,7 @@ import { Home } from "@/pages/Home";
 import { Skeleton, SkeletonStatus } from "@/components/Common/Skeleton";
 import { ErrorBoundary } from "@/components/Common/ErrorBoundary";
 import { AIProvider } from "@/context/AIContext";
+import { useScrollToTop } from "@/hooks/useScrollToTop";
 
 /*
  * 首页静态引入，因为它是 LCP 目标——懒加载它反而会推迟首屏。
@@ -76,9 +77,19 @@ const RouteFallback = () => {
   );
 };
 
+/**
+ * 挂在 Router 内部（要用useLocation），但放在 ErrorBoundary 之外，
+ * 这样切页失败时滚动位置也会被归位，不会卡在中间某一屏。
+ */
+const ScrollToTop = () => {
+  useScrollToTop();
+  return null;
+};
+
 function App() {
   return (
     <BrowserRouter>
+      <ScrollToTop />
       <AIProvider>
         <Layout>
           {/*

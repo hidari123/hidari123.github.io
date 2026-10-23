@@ -16,7 +16,7 @@
   --bg-primary: #ffffff;
   --bg-secondary: #fafafa;
   --bg-card: #ffffff;
-  --bg-code: #f6f8fa;
+  --bg-code: #f7f5fd;
 
   /* 文字色系 - 层次更分明 */
   --text-primary: #18181b;
@@ -28,9 +28,9 @@
   --accent-light: #a5b4fc;
   --accent-glow: rgba(99, 102, 241, 0.15);
 
-  /* 边框 - 更细腻 */
-  --border: #e4e4e7;
-  --border-light: #f4f4f5;
+  /* 边框 - 更细腻。紫调，不要冷灰 */
+  --border: #e8e4f3;
+  --border-light: #f1eef9;
 
   /* 阴影 - 更轻盈 */
   --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.03);
@@ -44,8 +44,8 @@
 
   /* 表格：表头比 hover 深一档，两层都用浅紫，都远离白底 */
   --table-border: #e9e7f3;
-  --table-head-bg: #f1f0fb;
-  --table-row-hover: #f7f5fd;
+  --table-head-bg: #ece9fa;
+  --table-row-hover: #f4f1fc;
 }
 
 /* ========================================
@@ -56,7 +56,7 @@
   --bg-primary: #050505;
   --bg-secondary: #0a0a0a;
   --bg-card: #141414;
-  --bg-code: #1a1a1a;
+  --bg-code: #1e1a3b;
 
   /* 文字色系 - 柔和 */
   --text-primary: #fafafa;
@@ -68,9 +68,9 @@
   --accent-light: #c4b5fd;
   --accent-glow: rgba(167, 139, 250, 0.25);
 
-  /* 边框 - 低调 */
-  --border: #27272a;
-  --border-light: #3f3f46;
+  /* 边框 - 低调。紫调，与 --accent #a78bfa 同族 */
+  --border: #2e2842;
+  --border-light: #3d3555;
 
   /* 阴影 - 更重 */
   --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.4);
@@ -83,11 +83,14 @@
   --glass-border: rgba(255, 255, 255, 0.05);
 
   /* 表格：同样是「表头深、hover 浅」，但暗色下深浅是反过来的 ——
-     表头稍亮（#1a1726）才算分隔得开，hover 更贴近背景（#16141f）才够轻。
-     两值都带紫调，避免和暗色代码块背景 #0d1117 糊成一片。 */
-  --table-border: #2a2438;
-  --table-head-bg: #1a1726;
-  --table-row-hover: #16141f;
+     表头稍亮（#241f47）才算分隔得开，hover 更贴近背景（#201c40）才够轻。
+     两值都带紫调，避免和暗色代码块背景 #1e1a3b 糊成一片。
+     注意：--bg-code 与 --bg-card #141414 的亮度只差一档，
+     所以整套暗色底色是**整体抬亮 + 偏紫**：
+     只改代码块不改表格/工具条/边框的话，分层会全部失效。 */
+  --table-border: #332c4d;
+  --table-head-bg: #241f47;
+  --table-row-hover: #201c40;
 }
 
 * {
@@ -651,8 +654,8 @@ p {
    选浅紫而不是浅粉/浅蓝：站点 accent 本身就是紫（#6366f1），同族色系互相
    呼应；粉色偏甜、显廉价；蓝色会和代码块 token 蓝以及链接色撞在一起，
    读者分不清「这是可点链接」还是「这是表头」。
-   暗色版同样带紫调（#1a1726 / #16141f），不用蓝灰 —— 否则会和暗色代码块
-   背景 #0d1117 混成一片。
+   暗色版同样带紫调（#241f47 / #201c40），不用蓝灰 —— 否则会和暗色代码块
+   背景 #1e1a3b 混成一片。
    ══════════════════════════════════════════════════════════════════ */
 .markdown-body table {
   width: 100%;
@@ -759,14 +762,14 @@ p {
 :root {
   /* 注释：暗色下要降对比度，太亮会抢正文 */
   /* 代码块容器（背景/边框）也必须跟主题走 */
-  --code-block-bg: #f6f8fa;
-  --code-block-border: #e2e6ea;
+  --code-block-bg: #f7f5fd;
+  --code-block-border: #e6e1f5;
   /* 左侧色条 + 工具条 + 按钮芯片：从 pre 里拆出来，各自独立调 */
   --code-block-accent: #6366f1;
-  --code-block-toolbar-bg: #eef1f5;
-  --code-block-lang: #6b7280;
-  --code-block-lang-bg: #dfe4ec;
-  --code-block-btn: #4b5563;
+  --code-block-toolbar-bg: #efecfa;
+  --code-block-lang: #5b5480;
+  --code-block-lang-bg: #e6e1f7;
+  --code-block-btn: #4b4670;
   --code-block-btn-bg: transparent;
 
   --tok-comment: #6a737d;
@@ -787,13 +790,13 @@ p {
 }
 
 [data-theme="dark"] {
-  --code-block-bg: #0d1117;
-  --code-block-border: #30363d;
+  --code-block-bg: #1e1a3b;
+  --code-block-border: #332c4d;
   --code-block-accent: #a78bfa;
-  --code-block-toolbar-bg: #161b22;
-  --code-block-lang: #9ca3af;
-  --code-block-lang-bg: #21262d;
-  --code-block-btn: #9ca3af;
+  --code-block-toolbar-bg: #221e42;
+  --code-block-lang: #a89fd0;
+  --code-block-lang-bg: #2e2853;
+  --code-block-btn: #b4abd6;
   --code-block-btn-bg: transparent;
 
   --tok-comment: #8b949e;
@@ -878,7 +881,7 @@ p {
   名字部分，而箭头函数是 TS/TSX 文章里最常见的写法。
   它不在 CSS 里 -> 不着色 -> 继承 code 的纯文本色，
   于是 const A = () => ... 里只有 const 和箭头有色，函数名是黑的，
-  看起来就��整个箭头函数没高亮。
+  看起来就像整个箭头函数没高亮。
 
   同批漏掉的还有 parameter、method、magic、namespace、decorator、
   generic、operator-word —— 都是真实会出现但不写出来就会掉回默认色的类型。

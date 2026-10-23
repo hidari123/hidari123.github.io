@@ -6,15 +6,15 @@
  * Copyright (c) 2026 by hidari, All Rights Reserved.
  */
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Calendar } from "lucide-react";
 import { getAllPosts, type Post } from "@/services/blogService";
 import { PostCover } from "@/components/Blog/PostCover";
 import { TagFilter } from "@/components/Blog/TagFilter";
-import { CATEGORY_TAGS, type CategoryTag } from "@/data/tags";
 import { useSeo } from "@/hooks/useSeo";
+import { parseListState, buildListSearch, buildListUrl } from "@/utils/listState";
 import {
   SkeletonPostCard as SkeletonCard,
   SkeletonStatus,
@@ -54,7 +54,7 @@ const EmptyState = () => (
 );
 
 // 文章卡片组件
-const PostCard = ({ post }: { post: Post }) => {
+const PostCard = ({ post, from }: { post: Post; from: string }) => {
   // frontmatter 里指定了 cover 就用作者给的图，否则用代码生成的封面
   const hasCustomCover = Boolean(post.cover);
 
@@ -65,7 +65,12 @@ const PostCard = ({ post }: { post: Post }) => {
       whileHover={{ y: -8 }}
       transition={{ duration: 0.3 }}
     >
-      <Link to={`/blog/${post.slug}`}>
+      {/*
+        from 把「我从哪个列表页状态过来的」挂在 location.state 上。
+        文章页的返回按钮靠它回到原页码 —— 页码在 URL 里，但 URL 只存在于
+        导航那一刻的 history entry，文章页自己不知道上一个列表页是哪一页。
+      */}
+      <Link to={`/blog/${post.slug}`} state={{ from }}>
         <div className="group bg-[var(--bg-card)] rounded-2xl overflow-hidden border border-[var(--border)] hover:border-[var(--accent)]/50 transition-all duration-300 hover:shadow-xl hover:shadow-[var(--accent)]/10">
           {/* 封面 */}
           <div className="relative h-52 overflow-hidden">
@@ -138,26 +143,38 @@ const POSTS_PER_PAGE = 6;
 export const BlogList = () => {
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-  const [selectedTech, setSelectedTech] = useState<string[]>([]);
-  const [currentPage, setCurrentPage] = useState(1);
 
-  // 文章页的标签会链到 /blog?tag=xxx，不接住的话点标签等于白点。
-  // tag 可能是主分类也可能是技术标签：分类归分类，技术标签归技术标签。
+  /*
+   * 列表状态（分类 / 技术标签 / 页码）全部从 URL 读，单一事实来源。
+   *
+   * 原来这里有 4 个useState + 一个 useEffect 同步，URL 只承载单个 ?tag=
+   * 而且多选标签时会被截断成一个 —— 状态和 URL 两套值互相覆盖，
+   * 页码更是根本没进 URL，所以从第 N 页进文章再返回必定回到第 1 页。
+   * 现在反过来：URL 是唯一来源，state 只是它的投影。
+   */
   const [searchParams, setSearchParams] = useSearchParams();
-  const tagParam = searchParams.get("tag");
+  const { category: selectedCategory, tech: selectedTech, page: currentPage } = useMemo(
+    () => parseListState(searchParams),
+    [searchParams],
+  );
 
-  useEffect(() => {
-    if (!tagParam) return;
-    if (CATEGORY_TAGS.includes(tagParam as CategoryTag)) {
-      setSelectedCategory(tagParam);
-      setSelectedTech([]);
-    } else {
-      setSelectedCategory(null);
-      setSelectedTech([tagParam]);
-    }
-    setCurrentPage(1);
-  }, [tagParam]);
+  /** 改列表状态 → 写回 URL。replace:true，避免翻页在历史栈里堆一堆记录 */
+  const applyState = useCallback(
+    (next: Partial<{ category: string | null; tech: string[]; page: number }>, replace = true) => {
+      setSearchParams(
+        (prev) => {
+          const cur = parseListState(prev);
+          const merged = { ...cur, ...next };
+          // 改筛选条件就回到第 1 页，否则可能停在空白页上
+          if (next.category !== undefined || next.tech !== undefined) merged.page = 1;
+          const s = buildListSearch(merged);
+          return new URLSearchParams(s.replace(/^\?/, ""));
+        },
+        { replace },
+      );
+    },
+    [setSearchParams],
+  );
 
   useSeo({
     title: "博客",
@@ -194,30 +211,31 @@ export const BlogList = () => {
   }, [posts, selectedCategory, selectedTech]);
 
   const totalPages = Math.ceil(filteredPosts.length / POSTS_PER_PAGE);
+  /*
+   * 筛选结果变少（比如从 6 页退到 2 页）时，currentPage 可能超出范围，
+   * 结果就是空白列表 + 一个「上一页」也点不动的死页。
+   * 这里在渲染期把越界的页码夹回最后一页，而不是等用户自己去点。
+   */
+  const safePage = Math.min(currentPage, Math.max(totalPages, 1));
   const paginatedPosts = filteredPosts.slice(
-    (currentPage - 1) * POSTS_PER_PAGE,
-    currentPage * POSTS_PER_PAGE,
+    (safePage - 1) * POSTS_PER_PAGE,
+    safePage * POSTS_PER_PAGE,
   );
 
+  /** 当前列表状态对应的完整 URL，喂给 PostCard 当返回来源 */
+  const listUrl = buildListUrl({
+    category: selectedCategory,
+    tech: selectedTech,
+    page: safePage,
+  });
+
   const handleCategoryChange = (category: string | null) => {
-    setSelectedCategory(category);
-    setCurrentPage(1);
-    // 同步 URL：筛选状态可以直接分享 / 刷新不丢。
-    // 技术标签也要保留，否则换一个分类会把已选的技术标签从地址栏里抹掉。
-    const next = new URLSearchParams(searchParams);
-    if (category) next.set("tag", category);
-    else next.delete("tag");
-    setSearchParams(next, { replace: true });
+    // 技术标签保留：换分类不应该把已选的技术标签从地址栏里抹掉
+    applyState({ category });
   };
 
   const handleTechChange = (tags: string[]) => {
-    setSelectedTech(tags);
-    setCurrentPage(1);
-    const next = new URLSearchParams(searchParams);
-    // URL 里只保留一个 tag；选了多个技术标签时以第一个为准
-    if (tags.length > 0) next.set("tag", tags[0]);
-    else next.delete("tag");
-    setSearchParams(next, { replace: true });
+    applyState({ tech: tags });
   };
 
   return (
@@ -266,7 +284,7 @@ export const BlogList = () => {
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 <AnimatePresence mode="popLayout">
                   {paginatedPosts.map((post) => (
-                    <PostCard key={post.slug} post={post} />
+                    <PostCard key={post.slug} post={post} from={listUrl} />
                   ))}
                 </AnimatePresence>
               </div>
@@ -275,8 +293,8 @@ export const BlogList = () => {
               {totalPages > 1 && (
                 <div className="flex justify-center items-center gap-2 mt-12">
                   <button
-                    onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
-                    disabled={currentPage === 1}
+                    onClick={() => applyState({ page: safePage - 1 })}
+                    disabled={safePage === 1}
                     className="px-4 py-2 rounded-lg bg-[var(--bg-card)] text-[var(--text-primary)] border border-[var(--border)] disabled:opacity-50 disabled:cursor-not-allowed hover:border-[var(--accent)] hover:text-[var(--accent)] transition-colors"
                   >
                     上一页
@@ -286,9 +304,9 @@ export const BlogList = () => {
                     {[...Array(totalPages)].map((_, i) => (
                       <button
                         key={i}
-                        onClick={() => setCurrentPage(i + 1)}
+                        onClick={() => applyState({ page: i + 1 })}
                         className={`w-10 h-10 rounded-lg transition-colors ${
-                          currentPage === i + 1
+                          safePage === i + 1
                             ? "bg-[var(--accent)] text-white shadow-lg shadow-[var(--accent)]/25"
                             : "bg-[var(--bg-card)] text-[var(--text-primary)] border border-[var(--border)] hover:border-[var(--accent)] hover:text-[var(--accent)]"
                         }`}
@@ -299,8 +317,8 @@ export const BlogList = () => {
                   </div>
 
                   <button
-                    onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
-                    disabled={currentPage === totalPages}
+                    onClick={() => applyState({ page: safePage + 1 })}
+                    disabled={safePage === totalPages}
                     className="px-4 py-2 rounded-lg bg-[var(--bg-card)] text-[var(--text-primary)] border border-[var(--border)] disabled:opacity-50 disabled:cursor-not-allowed hover:border-[var(--accent)] hover:text-[var(--accent)] transition-colors"
                   >
                     下一页
