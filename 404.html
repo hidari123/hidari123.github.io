@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>跳转中...</title>
+    <script>
+      // GitHub Pages 对未知路径返回 404.html，但 URL 保持原样。
+      // 这里把原始路径（含 query 和 hash）编码进 ?p=，重定向到站点根目录，
+      // 由 index.html 加载后还原地址栏并交给 React Router 处理。
+      (function () {
+        var l = window.location;
+
+        // 已经还原过一次了，别再套一层，否则会死循环
+        if (l.search.indexOf("p=") === 1) return;
+
+        // target 必须是相对站点根的路径，否则 React Router 匹配不到路由
+        var target = l.pathname;
+        var root = "/";
+        if (root !== "/" && target.indexOf(root) === 0) {
+          target = target.slice(root.length) || "/";
+        }
+
+        l.replace(root + "?p=" + encodeURIComponent(target + l.search + l.hash));
+      })();
+    </script>
+  </head>
+  <body>
+    <p style="font-family:system-ui,sans-serif;text-align:center;padding:3rem;color:#666">
+      正在打开文章...
+    </p>
+  </body>
+</html>

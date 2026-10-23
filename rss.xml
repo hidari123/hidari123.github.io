@@ -1,0 +1,432 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Hitari's Blog</title>
+    <link>https://hidari123.github.io</link>
+    <description>前端工程实践与 LLM 应用探索</description>
+    <language>zh-cn</language>
+    <atom:link href="https://hidari123.github.io/rss.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>聊天流的滚动锚定：流式回复期间为什么不能跟着滚</title>
+      <link>https://hidari123.github.io/blog/%E8%81%8A%E5%A4%A9%E6%B5%81%E6%BB%9A%E5%8A%A8%E9%94%9A%E5%AE%9A</link>
+      <guid isPermaLink="true">https://hidari123.github.io/blog/%E8%81%8A%E5%A4%A9%E6%B5%81%E6%BB%9A%E5%8A%A8%E9%94%9A%E5%AE%9A</guid>
+      <pubDate>Thu, 22 Oct 2026 00:00:00 GMT</pubDate>
+      <description>流式回复期间，时间线底部在不断生长。用户往上翻阅时，自动滚动会把人拽回底部——这个体验灾难的解法是一套手势判别 + 平滑滚动的自身事件识别。本文拆解 AtomOS 的滚动锚定实现，包括 smooth scrollTo 的自我污染问题和会话切换时的 scrollCache。</description>
+      <category>React</category>
+    <category>滚动行为</category>
+    <category>UX</category>
+    <category>前端工程</category>
+    <category>流式 UI</category>
+    </item>
+    <item>
+      <title>Mol* 集成实录：在 React 抽屉里嵌入分子可视化</title>
+      <link>https://hidari123.github.io/blog/Molstar%E9%9B%86%E6%88%90%E5%AE%9E%E5%BD%95</link>
+      <guid isPermaLink="true">https://hidari123.github.io/blog/Molstar%E9%9B%86%E6%88%90%E5%AE%9E%E5%BD%95</guid>
+      <pubDate>Wed, 21 Oct 2026 00:00:00 GMT</pubDate>
+      <description>在聊天抽屉里嵌入 Mol* 分子查看器，要处理布局裁剪、动态导入减负、残基选择语义转换、失焦降级四类问题。本文是 AtomOS 集成 Mol* 4.18 的实录，包括 sequence viewer 的布局改造、selection 事件的 Loci 遍历、以及为什么残基匹配要写成宽松分层判定。</description>
+      <category>Mol*</category>
+    <category>React</category>
+    <category>WebGL</category>
+    <category>科学可视化</category>
+    <category>前端工程</category>
+    </item>
+    <item>
+      <title>Agent 的记忆系统：分层记忆、阈值队列与独立 Curator</title>
+      <link>https://hidari123.github.io/blog/Agent%E8%AE%B0%E5%BF%86%E7%B3%BB%E7%BB%9F-%E5%88%86%E5%B1%82%E4%B8%8ECurator</link>
+      <guid isPermaLink="true">https://hidari123.github.io/blog/Agent%E8%AE%B0%E5%BF%86%E7%B3%BB%E7%BB%9F-%E5%88%86%E5%B1%82%E4%B8%8ECurator</guid>
+      <pubDate>Tue, 20 Oct 2026 00:00:00 GMT</pubDate>
+      <description>Agent 该记住什么、忘什么、谁来整理？AtomOS 的答案是三层记忆（User/Project/Session）加一个事件驱动的独立 Curator：新增记忆攒够 10 条才触发整理，用 PostgreSQL advisory lock 抢租约、全文检索找关联、乐观锁防并发编辑。本文逐层拆解。</description>
+      <category>AI Agent</category>
+    <category>记忆系统</category>
+    <category>PostgreSQL</category>
+    <category>架构设计</category>
+    <category>RAG</category>
+    </item>
+    <item>
+      <title>Lexical 自定义节点：把分子残基做成编辑器里的原子引用</title>
+      <link>https://hidari123.github.io/blog/Lexical%E8%87%AA%E5%AE%9A%E4%B9%89%E8%8A%82%E7%82%B9-%E6%AE%8B%E5%9F%BA%E5%BC%95%E7%94%A8</link>
+      <guid isPermaLink="true">https://hidari123.github.io/blog/Lexical%E8%87%AA%E5%AE%9A%E4%B9%89%E8%8A%82%E7%82%B9-%E6%AE%8B%E5%9F%BA%E5%BC%95%E7%94%A8</guid>
+      <pubDate>Mon, 19 Oct 2026 00:00:00 GMT</pubDate>
+      <description>让用户在聊天输入框里插入一个&apos;指向蛋白质第 47 号残基&apos;的不可分割引用芯片，点击即跳转 3D 视图定位。本文讲解 Lexical 自定义节点的实现：atomos:// URI 协议、clone 递归陷阱、token 模式与 contentEditable=false、以及 Markdown 序列化的兼容设计。</description>
+      <category>Lexical</category>
+    <category>富文本编辑器</category>
+    <category>React</category>
+    <category>前端工程</category>
+    <category>Mol*</category>
+    </item>
+    <item>
+      <title>双租户隔离：一个用户的 Kubernetes namespace 是什么体验</title>
+      <link>https://hidari123.github.io/blog/%E5%8F%8C%E7%A7%9F%E6%88%B7%E9%9A%94%E7%A6%BB-Kubernetes-namespace</link>
+      <guid isPermaLink="true">https://hidari123.github.io/blog/%E5%8F%8C%E7%A7%9F%E6%88%B7%E9%9A%94%E7%A6%BB-Kubernetes-namespace</guid>
+      <pubDate>Sun, 18 Oct 2026 00:00:00 GMT</pubDate>
+      <description>AtomOS 给每个用户分配真实的 Kubernetes namespace、每个 Project 独立 PVC，数据库用 RLS 和复合外键兜底。本文讲解为什么本地开发也用真隔离、可信身份如何在 Go 网关注入、以及为什么 Agent 永远不接收客户端传来的身份参数。</description>
+      <category>Kubernetes</category>
+    <category>多租户</category>
+    <category>安全隔离</category>
+    <category>架构设计</category>
+    <category>RLS</category>
+    </item>
+    <item>
+      <title>人类审批流：把 Agent 的&apos;请求确认&apos;做成产品</title>
+      <link>https://hidari123.github.io/blog/%E4%BA%BA%E7%B1%BB%E5%AE%A1%E6%89%B9%E6%B5%81-Agent%E7%A1%AE%E8%AE%A4%E4%BA%A7%E5%93%81%E8%AE%BE%E8%AE%A1</link>
+      <guid isPermaLink="true">https://hidari123.github.io/blog/%E4%BA%BA%E7%B1%BB%E5%AE%A1%E6%89%B9%E6%B5%81-Agent%E7%A1%AE%E8%AE%A4%E4%BA%A7%E5%93%81%E8%AE%BE%E8%AE%A1</guid>
+      <pubDate>Sat, 17 Oct 2026 00:00:00 GMT</pubDate>
+      <description>Agent 要提交 GPU 任务时暂停等人类点头，这个&apos;暂停&apos;在工程上是三件事：运行时的挂起语义、事件流里的审批协议、前端的状态机渲染。本文讲解 AtomOS 的 ApprovalContract 设计、审批期间的 composer 锁定、以及 Normal/Auto 两档策略的边界。</description>
+      <category>AI Agent</category>
+    <category>Human-in-the-loop</category>
+    <category>React</category>
+    <category>状态机</category>
+    <category>产品设计</category>
+    </item>
+    <item>
+      <title>33 个领域技能包：把科学知识做成可替换的数据，不是代码</title>
+      <link>https://hidari123.github.io/blog/%E6%8A%80%E8%83%BD%E5%8C%85%E7%B3%BB%E7%BB%9F-%E5%8F%AF%E6%9B%BF%E6%8D%A2%E7%9A%84%E9%A2%86%E5%9F%9F%E7%9F%A5%E8%AF%86</link>
+      <guid isPermaLink="true">https://hidari123.github.io/blog/%E6%8A%80%E8%83%BD%E5%8C%85%E7%B3%BB%E7%BB%9F-%E5%8F%AF%E6%9B%BF%E6%8D%A2%E7%9A%84%E9%A2%86%E5%9F%9F%E7%9F%A5%E8%AF%86</guid>
+      <pubDate>Fri, 16 Oct 2026 00:00:00 GMT</pubDate>
+      <description>Boltz-2、RFdiffusion、ESM2、mRNA 疫苗设计……这些科学软件的使用知识，AtomOS 没有写死在 Agent 循环里，而是做成 33 个可替换的 managed skill 包。本文讲解 skill 的发现、加载与文件读取工具、64KB 截断的上下文经济学、以及为什么&apos;知识是数据、循环是引擎&apos;是正确分层。</description>
+      <category>AI Agent</category>
+    <category>技能系统</category>
+    <category>架构设计</category>
+    <category>提示工程</category>
+    <category>知识管理</category>
+    </item>
+    <item>
+      <title>事件溯源的 Agent 会话：append-only 事件日志 + 双写投影</title>
+      <link>https://hidari123.github.io/blog/%E4%BA%8B%E4%BB%B6%E6%BA%AF%E6%BA%90%E7%9A%84Agent%E4%BC%9A%E8%AF%9D</link>
+      <guid isPermaLink="true">https://hidari123.github.io/blog/%E4%BA%8B%E4%BB%B6%E6%BA%AF%E6%BA%90%E7%9A%84Agent%E4%BC%9A%E8%AF%9D</guid>
+      <pubDate>Thu, 15 Oct 2026 00:00:00 GMT</pubDate>
+      <description>Agent 会话的每一次模型调用、工具执行、状态变更都写成一条不可变事件，UI 状态是事件流的投影。本文讲解 append-only 事件日志、按会话单调递增的 seq 如何分配、投影表的双写与重建，以及为什么日志是事实源而投影只是缓存。</description>
+      <category>事件溯源</category>
+    <category>PostgreSQL</category>
+    <category>架构设计</category>
+    <category>Agent</category>
+    <category>后端</category>
+    </item>
+    <item>
+      <title>大文件工作台：5 GiB 上传、Range 下载与流式校验</title>
+      <link>https://hidari123.github.io/blog/%E5%A4%A7%E6%96%87%E4%BB%B6%E5%B7%A5%E4%BD%9C%E5%8F%B0-%E4%B8%8A%E4%BC%A0%E4%B8%8ERange%E4%B8%8B%E8%BD%BD</link>
+      <guid isPermaLink="true">https://hidari123.github.io/blog/%E5%A4%A7%E6%96%87%E4%BB%B6%E5%B7%A5%E4%BD%9C%E5%8F%B0-%E4%B8%8A%E4%BC%A0%E4%B8%8ERange%E4%B8%8B%E8%BD%BD</guid>
+      <pubDate>Wed, 14 Oct 2026 00:00:00 GMT</pubDate>
+      <description>科研文件动辄几百 MB 到几 GiB，普通表单上传和整文件下载都会崩。本文讲解 AtomOS Workspace 的文件链路：为什么上传是原始字节流 PUT 而不是 multipart、Range 下载如何支持断点续看、以及 5 GiB 上限和路径校验的安全设计。</description>
+      <category>文件上传</category>
+    <category>Range 请求</category>
+    <category>流式处理</category>
+    <category>Go</category>
+    <category>前端工程</category>
+    </item>
+    <item>
+      <title>多协议 LLM 网关：Chat Completions、Responses 与不守规矩的模型</title>
+      <link>https://hidari123.github.io/blog/%E5%A4%9A%E5%8D%8F%E8%AE%AELLM%E7%BD%91%E5%85%B3</link>
+      <guid isPermaLink="true">https://hidari123.github.io/blog/%E5%A4%9A%E5%8D%8F%E8%AE%AELLM%E7%BD%91%E5%85%B3</guid>
+      <pubDate>Tue, 13 Oct 2026 00:00:00 GMT</pubDate>
+      <description>同一个 Agent 循环要接 OpenAI Responses、Chat Completions 和 MiniMax，而真实世界里的模型连 tool calling 的输出格式都不统一。本文讲解 AtomOS 的多协议适配层：状态模式的双轨设计、XML 风格 tool call 的兜底解析、以及流式事件如何归一成统一形状。</description>
+      <category>LLM</category>
+    <category>网关</category>
+    <category>API 设计</category>
+    <category>Python</category>
+    <category>AI 工程</category>
+    </item>
+    <item>
+      <title>反向代理的 FlushInterval：流式响应在网关层被吞掉的坑</title>
+      <link>https://hidari123.github.io/blog/%E5%8F%8D%E5%90%91%E4%BB%A3%E7%90%86FlushInterval%E6%B5%81%E5%BC%8F%E4%BC%A0%E8%BE%93</link>
+      <guid isPermaLink="true">https://hidari123.github.io/blog/%E5%8F%8D%E5%90%91%E4%BB%A3%E7%90%86FlushInterval%E6%B5%81%E5%BC%8F%E4%BC%A0%E8%BE%93</guid>
+      <pubDate>Mon, 12 Oct 2026 00:00:00 GMT</pubDate>
+      <description>SSE 流式输出在开发环境好好的，上了网关就变成一次性吐完？问题多半不在你的代码，在代理的响应缓冲。本文从 Go httputil.ReverseProxy 的 FlushInterval 说起，讲清流式传输、大文件上传、Range 下载为什么共享同一个坑，以及 WebSocket 升级为什么是例外。</description>
+      <category>Go</category>
+    <category>反向代理</category>
+    <category>SSE</category>
+    <category>流式传输</category>
+    <category>网络</category>
+    <category>后端架构</category>
+    </item>
+    <item>
+      <title>对话式 UI 的&quot;最小惊讶&quot;：从 Auto 模式选择到 Thinking 折叠</title>
+      <link>https://hidari123.github.io/blog/%E5%AF%B9%E8%AF%9D%E5%BC%8FUI%E5%BE%AE%E8%AE%BE%E8%AE%A1</link>
+      <guid isPermaLink="true">https://hidari123.github.io/blog/%E5%AF%B9%E8%AF%9D%E5%BC%8FUI%E5%BE%AE%E8%AE%BE%E8%AE%A1</guid>
+      <pubDate>Sun, 11 Oct 2026 00:00:00 GMT</pubDate>
+      <description>Agent 对话界面的信息密度极高：思考过程、工具调用、审批请求、流式回复同时发生。本文拆解 AtomOS 聊天 UI 的几个微决策：活动条目的动词化标签、Thinking 状态的语义、自动模式的 UI 明示、以及为什么错误卡片和成功卡片要有不同的视觉重量。</description>
+      <category>AI Agent</category>
+    <category>UX 设计</category>
+    <category>React</category>
+    <category>产品设计</category>
+    <category>前端工程</category>
+    </item>
+    <item>
+      <title>可见性感知轮询：一个 hook 省下整个后台标签页的请求</title>
+      <link>https://hidari123.github.io/blog/%E5%8F%AF%E8%A7%81%E6%80%A7%E6%84%9F%E7%9F%A5%E8%BD%AE%E8%AF%A2-hook</link>
+      <guid isPermaLink="true">https://hidari123.github.io/blog/%E5%8F%AF%E8%A7%81%E6%80%A7%E6%84%9F%E7%9F%A5%E8%BD%AE%E8%AF%A2-hook</guid>
+      <pubDate>Sat, 10 Oct 2026 00:00:00 GMT</pubDate>
+      <description>轮询任务列表、作业状态——这些后台请求在标签页不可见时纯属浪费。AtomOS 用一个 28 行的 hook 解决：visibilitychange 时清除/恢复定时器，回到可见立刻补一发。讲解 ref 保存 fetcher 避免 interval 重置、以及为什么比 setInterval + 条件判断更稳。</description>
+      <category>React</category>
+    <category>自定义 Hook</category>
+    <category>性能优化</category>
+    <category>浏览器 API</category>
+    <category>前端工程</category>
+    </item>
+    <item>
+      <title>前端首页动画的自我修养：性能、可访问性与克制</title>
+      <link>https://hidari123.github.io/blog/%E9%A6%96%E9%A1%B5%E5%8A%A8%E7%94%BB%E7%9A%84%E8%87%AA%E6%88%91%E4%BF%AE%E5%85%BB</link>
+      <guid isPermaLink="true">https://hidari123.github.io/blog/%E9%A6%96%E9%A1%B5%E5%8A%A8%E7%94%BB%E7%9A%84%E8%87%AA%E6%88%91%E4%BF%AE%E5%85%BB</guid>
+      <pubDate>Fri, 09 Oct 2026 00:00:00 GMT</pubDate>
+      <description>分子网络粒子背景做了 5 个版本迭代：从全量动画到离屏暂停、从 reduced-motion 全冻结到保留慢速漂移。本文讲 useMoleculeCanvas 的实现取舍：为什么 30fps 而不是 60、pointer-events 的代理方案、以及 v3.5f 那次&apos;过度纠正&apos;的反思。</description>
+      <category>Canvas</category>
+    <category>动画</category>
+    <category>性能优化</category>
+    <category>可访问性</category>
+    <category>prefers-reduced-motion</category>
+    </item>
+    <item>
+      <title>Agent 上下文压缩：跨厂商可移植的 checkpoint 设计</title>
+      <link>https://hidari123.github.io/blog/Agent%E4%B8%8A%E4%B8%8B%E6%96%87%E5%8E%8B%E7%BC%A9-checkpoint%E8%AE%BE%E8%AE%A1</link>
+      <guid isPermaLink="true">https://hidari123.github.io/blog/Agent%E4%B8%8A%E4%B8%8B%E6%96%87%E5%8E%8B%E7%BC%A9-checkpoint%E8%AE%BE%E8%AE%A1</guid>
+      <pubDate>Thu, 08 Oct 2026 00:00:00 GMT</pubDate>
+      <description>长对话必然撞上下文窗口。厂商原生的 compact 接口各不相同且不可迁移，本文讲解 AtomOS 的替代方案：用固定 schema 的 JSON checkpoint 做可移植摘要，按闭合回合分组切分历史，以及如何防止摘要本身丢掉关键事实。</description>
+      <category>LLM</category>
+    <category>Agent</category>
+    <category>上下文管理</category>
+    <category>架构设计</category>
+    <category>AI 工程</category>
+    </item>
+    <item>
+      <title>上传队列的状态机：一个 hook 管好并发、取消、重试和冲突</title>
+      <link>https://hidari123.github.io/blog/%E4%B8%8A%E4%BC%A0%E9%98%9F%E5%88%97%E7%9A%84%E7%8A%B6%E6%80%81%E6%9C%BA</link>
+      <guid isPermaLink="true">https://hidari123.github.io/blog/%E4%B8%8A%E4%BC%A0%E9%98%9F%E5%88%97%E7%9A%84%E7%8A%B6%E6%80%81%E6%9C%BA</guid>
+      <pubDate>Wed, 07 Oct 2026 00:00:00 GMT</pubDate>
+      <description>5 GiB 文件上传，用户可能一次拖 20 个进去，中途取消、单个失败要重试、服务端返回 409 冲突要单独处理。本文拆解 useWorkspaceUpload 的 ref 双轨设计：React state 管 UI 可见态，ref 管控制器身份，串行队列 + 身份校验杜绝竞态。</description>
+      <category>React</category>
+    <category>自定义 Hook</category>
+    <category>状态机</category>
+    <category>文件上传</category>
+    <category>前端工程</category>
+    </item>
+    <item>
+      <title>文件类型分派的四层兜底：为什么 mime 永远排在扩展名前面</title>
+      <link>https://hidari123.github.io/blog/%E6%96%87%E4%BB%B6%E7%B1%BB%E5%9E%8B%E5%88%86%E6%B4%BE%E7%9A%84%E5%9B%9B%E5%B1%82%E5%85%9C%E5%BA%95</link>
+      <guid isPermaLink="true">https://hidari123.github.io/blog/%E6%96%87%E4%BB%B6%E7%B1%BB%E5%9E%8B%E5%88%86%E6%B4%BE%E7%9A%84%E5%9B%9B%E5%B1%82%E5%85%9C%E5%BA%95</guid>
+      <pubDate>Tue, 06 Oct 2026 00:00:00 GMT</pubDate>
+      <description>同一个扩展名可能是十种东西，一个没有扩展名的文件可能是标准 PDB 结构。本文拆解 AtomOS 的 rendererRegistry：mime 优先、扩展名其次、内容嗅探兜底的判定顺序，以及 uniqueMap 式的&apos;匹配到就不信&apos;原则。</description>
+      <category>前端工程</category>
+    <category>类型分派</category>
+    <category>文件预览</category>
+    <category>数据嗅探</category>
+    <category>React</category>
+    </item>
+    <item>
+      <title>Kubernetes Lease 做并发槽位：为什么数 Running Job 是竞态</title>
+      <link>https://hidari123.github.io/blog/Kubernetes-Lease%E5%B9%B6%E5%8F%91%E6%A7%BD%E4%BD%8D</link>
+      <guid isPermaLink="true">https://hidari123.github.io/blog/Kubernetes-Lease%E5%B9%B6%E5%8F%91%E6%A7%BD%E4%BD%8D</guid>
+      <pubDate>Mon, 05 Oct 2026 00:00:00 GMT</pubDate>
+      <description>限制每用户在途任务数，最直觉的写法是数一数 Running 状态的任务再决定放不放行——但这在并发下是错的。本文讲解 AtomOS 如何用一组固定 Lease 加 CAS 抢占实现构造性有界的并发槽，以及为什么泄漏自愈比完美释放更重要。</description>
+      <category>Kubernetes</category>
+    <category>分布式系统</category>
+    <category>Go</category>
+    <category>调度</category>
+    <category>后端架构</category>
+    </item>
+    <item>
+      <title>序列解析器的诊断能力：一个 fasta 解析器为什么要报告 12 种警告</title>
+      <link>https://hidari123.github.io/blog/%E5%BA%8F%E5%88%97%E8%A7%A3%E6%9E%90%E5%99%A8%E7%9A%84%E8%AF%8A%E6%96%AD%E8%83%BD%E5%8A%9B</link>
+      <guid isPermaLink="true">https://hidari123.github.io/blog/%E5%BA%8F%E5%88%97%E8%A7%A3%E6%9E%90%E5%99%A8%E7%9A%84%E8%AF%8A%E6%96%AD%E8%83%BD%E5%8A%9B</guid>
+      <pubDate>Sun, 04 Oct 2026 00:00:00 GMT</pubDate>
+      <description>科研数据文件的格式错误是常态而非异常：MSA 里序列长度不一致、残基里有非法字符、空记录直接跳过。本文讲解 AtomOS 的 SequenceParser 如何把每一次解析疑点变成结构化警告，以及 alphabet 判定的 DNA/RNA/protein 三分支逻辑。</description>
+      <category>生物信息学</category>
+    <category>解析器</category>
+    <category>TypeScript</category>
+    <category>数据质量</category>
+    <category>前端工程</category>
+    </item>
+    <item>
+      <title>缓存优先的 Hook：先渲染缓存再后台刷新，而不是转圈</title>
+      <link>https://hidari123.github.io/blog/%E7%BC%93%E5%AD%98%E4%BC%98%E5%85%88%E7%9A%84Hook</link>
+      <guid isPermaLink="true">https://hidari123.github.io/blog/%E7%BC%93%E5%AD%98%E4%BC%98%E5%85%88%E7%9A%84Hook</guid>
+      <pubDate>Sat, 03 Oct 2026 00:00:00 GMT</pubDate>
+      <description>每次路由切换都转圈等接口，用户体验极差。AtomOS 的 usePersistentCache 先从 localStorage 同步读出缓存渲染，再后台刷新拉最新。讲解 stale-while-revalidate 模式、fetch-through 的取舍、以及为什么 localStorage 写入要吞异常。</description>
+      <category>React</category>
+    <category>自定义 Hook</category>
+    <category>缓存策略</category>
+    <category>localStorage</category>
+    <category>前端工程</category>
+    </item>
+    <item>
+      <title>残基索引的五张表：把 mmCIF 的双编号体系折叠成一个查找结构</title>
+      <link>https://hidari123.github.io/blog/%E6%AE%8B%E5%9F%BA%E7%B4%A2%E5%BC%95-mmCIF%E5%8F%8C%E7%BC%96%E5%8F%B7%E4%BD%93%E7%B3%BB</link>
+      <guid isPermaLink="true">https://hidari123.github.io/blog/%E6%AE%8B%E5%9F%BA%E7%B4%A2%E5%BC%95-mmCIF%E5%8F%8C%E7%BC%96%E5%8F%B7%E4%BD%93%E7%B3%BB</guid>
+      <pubDate>Fri, 02 Oct 2026 00:00:00 GMT</pubDate>
+      <description>3D 视图点一个原子，聊天里发一条引用，URL 里带几个键——这三件事要指向同一个残基，就得在一堆行式数据上建索引。本文拆解 AtomOS 的 StructureResidueIndex：五路合并、歧义键的显式废弃、以及为什么非聚合物的锚点逻辑要单独处理。</description>
+      <category>结构生物学</category>
+    <category>mmCIF</category>
+    <category>索引设计</category>
+    <category>数据建模</category>
+    <category>TypeScript</category>
+    </item>
+    <item>
+      <title>顶部崩溃页的最后一道防线：一个 ErrorBoundary 的自我约束</title>
+      <link>https://hidari123.github.io/blog/ErrorBoundary%E7%9A%84%E6%9C%80%E5%90%8E%E4%B8%80%E9%81%93%E9%98%B2%E7%BA%BF</link>
+      <guid isPermaLink="true">https://hidari123.github.io/blog/ErrorBoundary%E7%9A%84%E6%9C%80%E5%90%8E%E4%B8%80%E9%81%93%E9%98%B2%E7%BA%BF</guid>
+      <pubDate>Thu, 01 Oct 2026 00:00:00 GMT</pubDate>
+      <description>一个 40 行的 ErrorBoundary 为什么值得单独讲？因为它是应用里唯一一个&apos;所有依赖都可能已经失效&apos;的组件。AtomOS 的实现里藏着一条关键决策：这个组件禁止使用 i18n。</description>
+      <category>React</category>
+    <category>错误边界</category>
+    <category>容错设计</category>
+    <category>i18n</category>
+    <category>前端工程</category>
+    </item>
+    <item>
+      <title>给 LLM 的工具参数加围栏：模型会幻觉出越权参数</title>
+      <link>https://hidari123.github.io/blog/%E7%BB%99LLM%E5%B7%A5%E5%85%B7%E5%8F%82%E6%95%B0%E5%8A%A0%E5%9B%B4%E6%A0%8F</link>
+      <guid isPermaLink="true">https://hidari123.github.io/blog/%E7%BB%99LLM%E5%B7%A5%E5%85%B7%E5%8F%82%E6%95%B0%E5%8A%A0%E5%9B%B4%E6%A0%8F</guid>
+      <pubDate>Mon, 28 Sep 2026 00:00:00 GMT</pubDate>
+      <description>LLM 完全可能在工具参数里编出 namespace、serviceAccount 这类根本不在 schema 里的字段。本文讲解 AtomOS 如何用服务端保留字拦截模型幻觉参数、用 JSON Schema 预编译校验堵住畸形参数，以及审批策略为什么用 Decimal 而不是 float 比较资源阈值。</description>
+      <category>AI Agent</category>
+    <category>工具调用</category>
+    <category>安全设计</category>
+    <category>后端架构</category>
+    <category>LLM</category>
+    </item>
+    <item>
+      <title>wasClean 陷阱：一次滚动重启让聊天永久卡死</title>
+      <link>https://hidari123.github.io/blog/wasClean%E9%99%B7%E9%98%B1-WebSocket%E9%87%8D%E8%BF%9E%E4%BA%8B%E6%95%85%E5%A4%8D%E7%9B%98</link>
+      <guid isPermaLink="true">https://hidari123.github.io/blog/wasClean%E9%99%B7%E9%98%B1-WebSocket%E9%87%8D%E8%BF%9E%E4%BA%8B%E6%95%85%E5%A4%8D%E7%9B%98</guid>
+      <pubDate>Fri, 25 Sep 2026 00:00:00 GMT</pubDate>
+      <description>e.wasClean 为 true 就不重连——这个看似合理的判断，让聊天界面在服务端滚动重启后永久卡死，而且没有任何报错。本文完整复盘这次事故的根因、修复原则，以及重连链条上三个反直觉的坑。</description>
+      <category>WebSocket</category>
+    <category>React</category>
+    <category>故障排查</category>
+    <category>前端工程</category>
+    <category>Agent UI</category>
+    </item>
+    <item>
+      <title>Agent 时间线的幂等归约：REST 与 WebSocket 走同一条路</title>
+      <link>https://hidari123.github.io/blog/Agent%E6%97%B6%E9%97%B4%E7%BA%BF%E7%9A%84%E5%B9%82%E7%AD%89%E5%BD%92%E7%BA%A6</link>
+      <guid isPermaLink="true">https://hidari123.github.io/blog/Agent%E6%97%B6%E9%97%B4%E7%BA%BF%E7%9A%84%E5%B9%82%E7%AD%89%E5%BD%92%E7%BA%A6</guid>
+      <pubDate>Tue, 22 Sep 2026 00:00:00 GMT</pubDate>
+      <description>Agent 对话的时间线有两个数据源：WebSocket 实时事件和 REST 历史记录。断线重连后两者必然重叠，本文讲解如何用一个纯函数 reducer 加双层去重，让任意顺序到达的事件流收敛到同一个 UI 状态。</description>
+      <category>WebSocket</category>
+    <category>React</category>
+    <category>状态管理</category>
+    <category>Agent UI</category>
+    <category>前端架构</category>
+    </item>
+    <item>
+      <title>前端性能优化实战：从 FPS 监控到首屏瘦身</title>
+      <link>https://hidari123.github.io/blog/%E5%89%8D%E7%AB%AF%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96%E5%AE%9E%E6%88%98%E6%8C%87%E5%8D%97</link>
+      <guid isPermaLink="true">https://hidari123.github.io/blog/%E5%89%8D%E7%AB%AF%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96%E5%AE%9E%E6%88%98%E6%8C%87%E5%8D%97</guid>
+      <pubDate>Tue, 08 Sep 2026 00:00:00 GMT</pubDate>
+      <description>性能优化不能靠感觉。本文以一个真实 AI 博客项目为例，先自建 FPS / 内存 / 重绘监控面板定位瓶颈，再处理首屏 JS 瘦身、动态导入与 WASM 资源治理，每一步都给出可验证的数据。</description>
+      <category>性能优化</category>
+    <category>React</category>
+    <category>JavaScript</category>
+    <category>工程化</category>
+    <category>前端</category>
+    </item>
+    <item>
+      <title>把 SSE 塞进 Web Worker：流式对话不掉帧的完整方案</title>
+      <link>https://hidari123.github.io/blog/SSE-Web-Worker-%E6%B5%81%E5%BC%8F%E5%AF%B9%E8%AF%9D%E4%B8%8D%E6%8E%89%E5%B8%A7</link>
+      <guid isPermaLink="true">https://hidari123.github.io/blog/SSE-Web-Worker-%E6%B5%81%E5%BC%8F%E5%AF%B9%E8%AF%9D%E4%B8%8D%E6%8E%89%E5%B8%A7</guid>
+      <pubDate>Tue, 11 Aug 2026 00:00:00 GMT</pubDate>
+      <description>AI Agent 时代，流式 token 增量渲染会持续压迫主线程。本文从真实项目出发，把 SSE 连接搬进 Web Worker，附带事件协议设计、取消机制与错误处理的完整实现。</description>
+      <category>Web Worker</category>
+    <category>SSE</category>
+    <category>流式渲染</category>
+    <category>性能优化</category>
+    <category>AI</category>
+    <category>架构设计</category>
+    </item>
+    <item>
+      <title>前端缓存三件套：IndexedDB + LRU 撑起多模态资料缓存</title>
+      <link>https://hidari123.github.io/blog/IndexedDB-LRU-%E5%A4%9A%E6%A8%A1%E6%80%81%E8%B5%84%E6%96%99%E7%BC%93%E5%AD%98</link>
+      <guid isPermaLink="true">https://hidari123.github.io/blog/IndexedDB-LRU-%E5%A4%9A%E6%A8%A1%E6%80%81%E8%B5%84%E6%96%99%E7%BC%93%E5%AD%98</guid>
+      <pubDate>Tue, 14 Jul 2026 00:00:00 GMT</pubDate>
+      <description>多模态 AI 产品要处理大量几十 MB 的 PDF 和模型素材，localStorage 完全不够用。本文以 ScholarClub 为例，讲解 IndexedDB 的事务模型、一个手写的 LRU 淘汰实现，以及大文件缓存的工程约束。</description>
+      <category>IndexedDB</category>
+    <category>缓存策略</category>
+    <category>LRU</category>
+    <category>离线优先</category>
+    <category>性能优化</category>
+    <category>AI</category>
+    </item>
+    <item>
+      <title>绕开 APA 模板的版权问题：前端动态生成五种引用格式</title>
+      <link>https://hidari123.github.io/blog/%E5%89%8D%E7%AB%AF%E5%8A%A8%E6%80%81%E7%94%9F%E6%88%90%E5%AD%A6%E6%9C%AF%E5%BC%95%E7%94%A8%E6%A0%BC%E5%BC%8F</link>
+      <guid isPermaLink="true">https://hidari123.github.io/blog/%E5%89%8D%E7%AB%AF%E5%8A%A8%E6%80%81%E7%94%9F%E6%88%90%E5%AD%A6%E6%9C%AF%E5%BC%95%E7%94%A8%E6%A0%BC%E5%BC%8F</guid>
+      <pubDate>Tue, 23 Jun 2026 00:00:00 GMT</pubDate>
+      <description>论文引用导出是学术产品的刚需，但官方 CSL 模板按许可证分发，APA 不能随便打包。本文讲解如何用 citation-js 配合自带模板，动态生成 BibTeX/APA/MLA/Harvard/Chicago 五种格式，以及字段缺失时的降级策略。</description>
+      <category>Citation.js</category>
+    <category>CSL</category>
+    <category>学术规范</category>
+    <category>工程取舍</category>
+    <category>前端</category>
+    </item>
+    <item>
+      <title>PDF 高亮有多难：从 getClientRects 到干净选区的几何合并算法</title>
+      <link>https://hidari123.github.io/blog/PDF%E9%80%89%E5%8C%BA%E5%87%A0%E4%BD%95%E5%90%88%E5%B9%B6%E7%AE%97%E6%B3%95</link>
+      <guid isPermaLink="true">https://hidari123.github.io/blog/PDF%E9%80%89%E5%8C%BA%E5%87%A0%E4%BD%95%E5%90%88%E5%B9%B6%E7%AE%97%E6%B3%95</guid>
+      <pubDate>Tue, 09 Jun 2026 00:00:00 GMT</pubDate>
+      <description>PDF 页面渲染在 Canvas 上，没有真实 DOM 文本节点，所以 DOM Selection 那套用不了。本文从 Range.getClientRects() 出发，逐步推导矩形排序、去包含与同行合并算法，并解释容差为什么必须随缩放比联动。</description>
+      <category>PDF.js</category>
+    <category>几何算法</category>
+    <category>文本选区</category>
+    <category>前端进阶</category>
+    <category>AI</category>
+    <category>RAG</category>
+    </item>
+    <item>
+      <title>TypeScript 高级技巧与设计模式实战</title>
+      <link>https://hidari123.github.io/blog/TypeScript%E9%AB%98%E7%BA%A7%E6%8A%80%E5%B7%A7%E4%B8%8E%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F</link>
+      <guid isPermaLink="true">https://hidari123.github.io/blog/TypeScript%E9%AB%98%E7%BA%A7%E6%8A%80%E5%B7%A7%E4%B8%8E%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F</guid>
+      <pubDate>Mon, 18 May 2026 00:00:00 GMT</pubDate>
+      <description>深入讲解 TypeScript 高级类型系统、装饰器、声明文件编写，以及常见设计模式的 TypeScript 实现</description>
+      <category>TypeScript</category>
+    <category>设计模式</category>
+    <category>类型编程</category>
+    <category>最佳实践</category>
+    </item>
+    <item>
+      <title>AI Agents 实战：从零构建智能助手应用</title>
+      <link>https://hidari123.github.io/blog/AI-Agents-%E6%9E%84%E5%BB%BA%E6%99%BA%E8%83%BD%E5%8A%A9%E6%89%8B%E5%AE%9E%E6%88%98</link>
+      <guid isPermaLink="true">https://hidari123.github.io/blog/AI-Agents-%E6%9E%84%E5%BB%BA%E6%99%BA%E8%83%BD%E5%8A%A9%E6%89%8B%E5%AE%9E%E6%88%98</guid>
+      <pubDate>Sat, 16 May 2026 00:00:00 GMT</pubDate>
+      <description>深入讲解 AI Agent 的核心概念、架构设计，以及如何使用 LangChain 和 AutoGPT 构建智能助手</description>
+      <category>AI</category>
+    <category>Agent</category>
+    <category>大语言模型</category>
+    <category>LangChain</category>
+    <category>实战</category>
+    </item>
+    <item>
+      <title>深入理解 RAG：检索增强生成技术从原理到实战</title>
+      <link>https://hidari123.github.io/blog/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3RAG%E6%A3%80%E7%B4%A2%E5%A2%9E%E5%BC%BA%E7%94%9F%E6%88%90%E6%8A%80%E6%9C%AF</link>
+      <guid isPermaLink="true">https://hidari123.github.io/blog/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3RAG%E6%A3%80%E7%B4%A2%E5%A2%9E%E5%BC%BA%E7%94%9F%E6%88%90%E6%8A%80%E6%9C%AF</guid>
+      <pubDate>Fri, 15 May 2026 00:00:00 GMT</pubDate>
+      <description>详细介绍 RAG 技术的核心原理、架构设计、检索策略，以及如何构建企业级 RAG 应用系统</description>
+      <category>AI</category>
+    <category>RAG</category>
+    <category>大语言模型</category>
+    <category>向量数据库</category>
+    <category>实战</category>
+    </item>
+    <item>
+      <title>2026年前端面试题完全指南：高频考点深度解析</title>
+      <link>https://hidari123.github.io/blog/%E5%89%8D%E7%AB%AF%E9%9D%A2%E8%AF%95%E9%A2%98%E5%AE%8C%E5%85%A8%E6%8C%87%E5%8D%97</link>
+      <guid isPermaLink="true">https://hidari123.github.io/blog/%E5%89%8D%E7%AB%AF%E9%9D%A2%E8%AF%95%E9%A2%98%E5%AE%8C%E5%85%A8%E6%8C%87%E5%8D%97</guid>
+      <pubDate>Thu, 14 May 2026 00:00:00 GMT</pubDate>
+      <description>涵盖 JavaScript 核心原理、TypeScript 进阶用法、React 源码解读等高频面试题，助你拿下心仪的 Offer</description>
+      <category>前端</category>
+    <category>面试</category>
+    <category>JavaScript</category>
+    <category>TypeScript</category>
+    <category>React</category>
+    </item>
+    <item>
+      <title>大语言模型入门指南：从原理到实践</title>
+      <link>https://hidari123.github.io/blog/%E5%A4%A7%E8%AF%AD%E8%A8%80%E6%A8%A1%E5%9E%8B%E5%85%A5%E9%97%A8%E6%8C%87%E5%8D%97</link>
+      <guid isPermaLink="true">https://hidari123.github.io/blog/%E5%A4%A7%E8%AF%AD%E8%A8%80%E6%A8%A1%E5%9E%8B%E5%85%A5%E9%97%A8%E6%8C%87%E5%8D%97</guid>
+      <pubDate>Wed, 13 May 2026 00:00:00 GMT</pubDate>
+      <description>全面介绍大语言模型的基本原理、架构设计和实际应用，带你从零开始理解 LLM 的奥秘</description>
+      <category>AI</category>
+    <category>LLM</category>
+    <category>深度学习</category>
+    <category>教程</category>
+    </item>
+  </channel>
+</rss>

@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+
+# 大文件资源对爬虫没有价值，排除掉能省带宽
+Disallow: /models/
+Disallow: /assets/*.wasm
+
+Sitemap: https://hidari123.github.io/sitemap.xml
