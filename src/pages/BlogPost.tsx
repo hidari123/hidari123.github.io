@@ -27,6 +27,7 @@ import { AISummary } from "@/components/AI/AISummary";
 import { AudioReader } from "@/components/Blog/AudioReader";
 import { ReadingCat } from "@/components/Blog/ReadingCat";
 import { TocSidebar, TocCollapsible } from "@/components/Blog/Toc";
+import { RelatedPosts } from "@/components/Blog/RelatedPosts";
 import { MarkdownCode } from "@/components/Blog/MarkdownCode";
 import { PostCover } from "@/components/Blog/PostCover";
 import { useAIContext } from "@/context/AIContext";
@@ -377,6 +378,10 @@ export const BlogPost = () => {
               )}
             </div>
           </motion.article>
+
+          {/* 相关推荐：用向量索引算余弦相似度，零新增成本。
+              索引未就绪或相似度太低时整块不渲染。 */}
+          <RelatedPosts slug={post.slug} />
 
           {/* 桌面端悬浮目录：fixed 到视口右侧，不占文档流 */}
           <TocSidebar items={toc} />

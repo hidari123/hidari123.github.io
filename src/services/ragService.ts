@@ -13,6 +13,8 @@
  * 不进 AI 页的用户一次都不会碰到它。
  */
 import type * as Ort from "onnxruntime-web";
+import { loadCachedIndex, saveCachedIndex } from "./ragCache";
+import type { PostIndex } from "./blogService";
 
 // 仅在真正需要推理时加载的 ort 实例
 let ortModule: typeof Ort | null = null;
@@ -381,6 +383,9 @@ export async function indexBlogPosts(
     },
   );
 
+  // 均值向量必须在 chunkVectors 填好之后算，相关推荐和语义搜索都依赖它
+  buildDocVectors();
+
   console.log(`✅ 索引完成，共 ${chunks.length} 个向量`);
   onProgress?.(totalSteps, totalSteps, "索引完成！");
 }
@@ -640,4 +645,149 @@ export function getRAGStats(): { chunkCount: number; vectorCount: number; dimens
 export function clearIndex(): void {
   chunks = [];
   chunkVectors = [];
+  docVectors = {};
+}
+
+/**
+ * 每篇文章的向量均值。
+ *
+ * 相关推荐用它而不是重新推理：把一篇文章所有块的向量平均一下，
+ * 得到一个「这篇文章讲什么」的粗粒度表征。和另一篇的平均向量算余弦，
+ * 就得到了相似度。零额外推理成本。
+ */
+let docVectors: Record<string, number[]> = {};
+
+/** 计算每篇文章的均值向量。必须在 chunkVectors 填充后调用 */
+function buildDocVectors(): void {
+  if (chunks.length === 0 || chunkVectors.length === 0) return;
+
+  const dim = chunkVectors[0].length;
+  const acc = new Map<string, number[]>();
+  const counts = new Map<string, number>();
+
+  for (let i = 0; i < chunks.length; i++) {
+    const src = chunks[i].source;
+    const sum = acc.get(src) ?? new Array<number>(dim).fill(0);
+    const v = chunkVectors[i];
+    for (let d = 0; d < dim; d++) sum[d] += v[d];
+    acc.set(src, sum);
+    counts.set(src, (counts.get(src) ?? 0) + 1);
+  }
+
+  docVectors = {};
+  for (const [src, sum] of acc) {
+    const n = counts.get(src) ?? 1;
+    docVectors[src] = sum.map((x) => x / n);
+  }
+}
+
+/**
+ * 相关推荐：根据已建好的索引，推出与 source 最相近的几篇文章。
+ *
+ * 需要索引已就绪（点过「索引博客」或命中缓存）。没就绪时返回空数组，
+ * 调用方直接不渲染这个区块——不显示比显示一个空的「相关阅读」好。
+ *
+ * excludeSelf 传 true 时会排除自己那篇。相似度低于阈值的结果直接丢掉：
+ * 余弦相似 0.5 的两篇文章，硬凑成「相关推荐」不如不给。
+ */
+export async function findRelatedPosts(
+  source: string,
+  topK = 3,
+  minSimilarity = 0.35,
+): Promise<{ source: string; title?: string; similarity: number }[]> {
+  if (!isReady || chunks.length === 0) return [];
+
+  const query = docVectors[source];
+  if (!query) return [];
+
+  const scored = Object.entries(docVectors)
+    .filter(([src]) => src !== source)
+    .map(([src, vec]) => ({
+      source: src,
+      title: chunks.find((c) => c.source === src)?.title,
+      similarity: cosineSimilarity(query, vec),
+    }))
+    .filter((r) => r.similarity >= minSimilarity)
+    .sort((a, b) => b.similarity - a.similarity);
+
+  return scored.slice(0, topK);
+}
+
+/**
+ * 站内语义搜索：不是关键词匹配，是向量检索。
+ *
+ * 关键词匹配搜「缓存」就只出带「缓存」两个字的文章；向量检索能出
+ * 「快取失效」「memcached」「stale-while-revalidate」这类写法不同但意思一样的。
+ * 代价是需要模型和索引，所以关键词搜索保留作为降级路径。
+ *
+ * topK 里会带上相似度，交给调用方决定要不要展示。
+ */
+export async function semanticSearch(
+  query: string,
+  topK = 8,
+  minSimilarity = 0.25,
+): Promise<{ source: string; title?: string; similarity: number }[]> {
+  if (!isReady || chunks.length === 0) return [];
+
+  const queryVector = await getEmbedding(query);
+  if (!queryVector) return [];
+
+  const scored = Object.entries(docVectors)
+    .map(([src, vec]) => ({
+      source: src,
+      title: chunks.find((c) => c.source === src)?.title,
+      similarity: cosineSimilarity(queryVector, vec),
+    }))
+    .filter((r) => r.similarity >= minSimilarity)
+    .sort((a, b) => b.similarity - a.similarity);
+
+  return scored.slice(0, topK);
+}
+
+/** 把内部索引恢复到内存。用于命中缓存的快路径 */
+export function restoreIndex(data: {
+  chunks: { text: string; source: string; title?: string; index: number }[];
+  chunkVectors: number[][];
+  docVectors: Record<string, number[]>;
+}): void {
+  chunks = data.chunks;
+  chunkVectors = data.chunkVectors;
+  docVectors = data.docVectors;
+  isReady = true;
+}
+
+/**
+ * 建索引的统一入口：先查缓存，命中直接返回，miss 才真算。
+ *
+ * 之前每次都要重新推理 300 多个块（浏览器 CPU 上几秒到几十秒），
+ * 而文章没变、模型没变时结果完全一样。缓存命中直接反序列化，毫秒级。
+ *
+ * 返回是否命中缓存，供 UI 区分「索引完成（缓存）」和「索引完成（重新计算）」。
+ */
+export async function ensureIndex(
+  posts: PostIndex[],
+  contents: { path: string; title?: string; content: string }[],
+  onProgress?: (current: number, total: number, status: string) => void,
+): Promise<{ fromCache: boolean }> {
+  const cached = loadCachedIndex(posts);
+  if (cached) {
+    restoreIndex(cached);
+    onProgress?.(1, 1, "索引缓存命中");
+    return { fromCache: true };
+  }
+
+  await indexBlogPosts(contents, onProgress);
+
+  // 算完就存。只存文章索引的描述信息，不存正文（正文已经在 blogs/ 目录里了）
+  try {
+    saveCachedIndex(
+      posts,
+      chunks,
+      chunkVectors,
+    );
+  } catch {
+    // 缓存写失败不影响功能
+  }
+
+  return { fromCache: false };
 }

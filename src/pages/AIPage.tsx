@@ -40,8 +40,9 @@ import {
   type Usage,
   DEFAULT_PARAMS,
 } from "@/services/llmService";
-import { indexBlogPosts, askWithRAGStream, isRAGReady, getRAGStats } from "@/services/ragService";
+import { indexBlogPosts, askWithRAGStream, isRAGReady, getRAGStats, ensureIndex } from "@/services/ragService";
 import { getAllBlogContents } from "@/services/blogContentService";
+import { getPostIndex } from "@/services/blogService";
 import { ModelParams } from "@/components/AI/ModelParams";
 import { UsageMeter } from "@/components/AI/UsageMeter";
 import { PromptTemplates, type PromptTemplate } from "@/components/AI/PromptTemplates";
@@ -180,7 +181,12 @@ export const AIPage = () => {
       if (blogs.length === 0) throw new Error("没有找到博客文章");
 
       setIndexStatus("加载博客文章...");
-      await indexBlogPosts(
+      const index = await getPostIndex();
+
+      // 先查缓存，命中就不重算。35 篇文章 ≈ 300 个块，
+      // 在浏览器 CPU 上重新推理要几秒到几十秒，而文章没变时结果完全一样。
+      const { fromCache } = await ensureIndex(
+        index,
         blogs.map((b) => ({ path: b.path, title: b.title, content: b.content })),
         (current: number, total: number, status: string) => {
           setIndexProgress({ current, total });
@@ -194,7 +200,9 @@ export const AIPage = () => {
       const successMessage: Message = {
         id: Date.now().toString(),
         role: "assistant",
-        content: `✅ 索引完成！已加载 ${blogs.length} 篇文章，生成了 ${stats.chunkCount} 个文本块。\n\n现在你可以问我关于博客内容的问题了，我会基于文章内容给出准确的回答！`,
+        content: fromCache
+          ? `✅ 索引已就绪（命中缓存，${stats.chunkCount} 个文本块）。\n\n可以直接提问了。`
+          : `✅ 索引完成！已加载 ${blogs.length} 篇文章，生成了 ${stats.chunkCount} 个文本块。\n\n现在你可以问我关于博客内容的问题了，我会基于文章内容给出准确的回答！`,
         timestamp: Date.now(),
       };
       setMessages((prev) => [...prev.slice(-19), successMessage]);
