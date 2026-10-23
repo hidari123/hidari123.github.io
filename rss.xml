@@ -335,7 +335,7 @@
       <link>https://hidari123.github.io/blog/TypeScript%E9%AB%98%E7%BA%A7%E6%8A%80%E5%B7%A7%E4%B8%8E%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F</link>
       <guid isPermaLink="true">https://hidari123.github.io/blog/TypeScript%E9%AB%98%E7%BA%A7%E6%8A%80%E5%B7%A7%E4%B8%8E%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F</guid>
       <pubDate>Mon, 18 May 2026 00:00:00 GMT</pubDate>
-      <description>深入讲解 TypeScript 高级类型系统、装饰器、声明文件编写，以及常见设计模式的 TypeScript 实现</description>
+      <description>条件类型什么时候该用什么时候别用——包括为什么我在一个项目里花两天写的类型体操最后全部删掉，换成了一个 20 行的运行时校验。</description>
       <category>前端工程</category>
     <category>工程实践</category>
     <category>TypeScript</category>
@@ -345,7 +345,7 @@
       <link>https://hidari123.github.io/blog/AI-Agents-%E6%9E%84%E5%BB%BA%E6%99%BA%E8%83%BD%E5%8A%A9%E6%89%8B%E5%AE%9E%E6%88%98</link>
       <guid isPermaLink="true">https://hidari123.github.io/blog/AI-Agents-%E6%9E%84%E5%BB%BA%E6%99%BA%E8%83%BD%E5%8A%A9%E6%89%8B%E5%AE%9E%E6%88%98</guid>
       <pubDate>Sat, 16 May 2026 00:00:00 GMT</pubDate>
-      <description>深入讲解 AI Agent 的核心概念、架构设计，以及如何使用 LangChain 和 AutoGPT 构建智能助手</description>
+      <description>Agent 循环的核心难点不是「让模型自己想」，而是工具参数会编、上下文会爆、中断了不知道怎么恢复——三个问题加一份可运行的实现。</description>
       <category>AI Agent</category>
     <category>大模型应用</category>
     <category>工程实践</category>
@@ -355,7 +355,7 @@
       <link>https://hidari123.github.io/blog/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3RAG%E6%A3%80%E7%B4%A2%E5%A2%9E%E5%BC%BA%E7%94%9F%E6%88%90%E6%8A%80%E6%9C%AF</link>
       <guid isPermaLink="true">https://hidari123.github.io/blog/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3RAG%E6%A3%80%E7%B4%A2%E5%A2%9E%E5%BC%BA%E7%94%9F%E6%88%90%E6%8A%80%E6%9C%AF</guid>
       <pubDate>Fri, 15 May 2026 00:00:00 GMT</pubDate>
-      <description>详细介绍 RAG 技术的核心原理、架构设计、检索策略，以及如何构建企业级 RAG 应用系统</description>
+      <description>分块大小、召回数量、混合检索要不要做——用我自己这个博客的向量索引踩出来的阈值，以及纯向量检索在技术内容上为什么会召回一堆噪音。</description>
       <category>大模型应用</category>
     <category>工程实践</category>
     <category>RAG</category>
@@ -365,7 +365,7 @@
       <link>https://hidari123.github.io/blog/%E5%89%8D%E7%AB%AF%E9%9D%A2%E8%AF%95%E9%A2%98%E5%AE%8C%E5%85%A8%E6%8C%87%E5%8D%97</link>
       <guid isPermaLink="true">https://hidari123.github.io/blog/%E5%89%8D%E7%AB%AF%E9%9D%A2%E8%AF%95%E9%A2%98%E5%AE%8C%E5%85%A8%E6%8C%87%E5%8D%97</guid>
       <pubDate>Thu, 14 May 2026 00:00:00 GMT</pubDate>
-      <description>涵盖 JavaScript 核心原理、TypeScript 进阶用法、React 源码解读等高频面试题，助你拿下心仪的 Offer</description>
+      <description>事件循环、闭包、原型链、React 重渲染——这六个我被问过多次的题目的真实回答，以及面试官真正在看什么。</description>
       <category>前端工程</category>
     <category>工程实践</category>
     <category>React</category>
@@ -377,7 +377,7 @@
       <link>https://hidari123.github.io/blog/%E5%A4%A7%E8%AF%AD%E8%A8%80%E6%A8%A1%E5%9E%8B%E5%85%A5%E9%97%A8%E6%8C%87%E5%8D%97</link>
       <guid isPermaLink="true">https://hidari123.github.io/blog/%E5%A4%A7%E8%AF%AD%E8%A8%80%E6%A8%A1%E5%9E%8B%E5%85%A5%E9%97%A8%E6%8C%87%E5%8D%97</guid>
       <pubDate>Wed, 13 May 2026 00:00:00 GMT</pubDate>
-      <description>全面介绍大语言模型的基本原理、架构设计和实际应用，带你从零开始理解 LLM 的奥秘</description>
+      <description>LLM 到底在学什么、中文分词为什么会吃掉整个上下文预算、以及 temperature 调到 0 也不保证同一问题问两次给同一个答案。</description>
       <category>大模型应用</category>
     <category>工程实践</category>
     </item>
